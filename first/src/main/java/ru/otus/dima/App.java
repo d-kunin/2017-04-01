@@ -11,10 +11,13 @@ import java.util.Collections;
  */
 public class App 
 {
+    /*
+    run with: java -cp target/first-1.0-SNAPSHOT.jar ru.otus.dima.App
+     */
     public static void main( String[] args )
     {
         System.out.println( "Hello World!" );
-        System.out.println("Referencing classes" +
+        System.out.println("Referencing classes:\n" +
                 LotteryMachine.class + "\n" +
                 LotteryMachineOneMoreTime.class + "\n");
     }
