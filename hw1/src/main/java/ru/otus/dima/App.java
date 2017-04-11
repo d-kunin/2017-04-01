@@ -1,5 +1,6 @@
 package ru.otus.dima;
 
+import au.com.bytecode.opencsv.CSVParser;
 import ru.otus.dima.obfuscate.me.LotteryMachine;
 import ru.otus.dima.obfuscate.me.LotteryMachineOneMoreTime;
 
@@ -18,6 +19,7 @@ public class App
     {
         System.out.println( "Hello World!" );
         System.out.println("Referencing classes:\n" +
+                CSVParser.class + "\n" +
                 LotteryMachine.class + "\n" +
                 LotteryMachineOneMoreTime.class + "\n");
     }
