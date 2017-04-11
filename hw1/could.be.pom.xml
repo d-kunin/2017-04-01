@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ru.otus</groupId>
+    <artifactId>java-2017-04-L1</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <name>L1.2</name>
+    <description>Code examples for the first lecture for 2017-04 group</description>
+
+    <developers>
+        <developer>
+            <name>tully</name>
+        </developer>
+    </developers>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+        <net.sf.opencsv.version>2.3</net.sf.opencsv.version>
+
+        <fatjar.name>L1.2-fat</fatjar.name>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.sf.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${net.sf.opencsv.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.name}-simple</finalName>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>maven-assembly-plugin</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <finalName>${fatjar.name}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>ru.otus.lottery.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <executions>
+                    <execution>
+                        <id>maven-jar-plugin</id>
+                        <phase>prepare-package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>ru.otus.lottery.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!--java -jar proguard-5.3.2.jar @L1.2.pro -->
+
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <version>2.0.14</version>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sf.proguard</groupId>
+                        <artifactId>proguard-base</artifactId>
+                        <version>5.3.1</version>
+                    </dependency>
+                </dependencies>
+
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>proguard</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <obfuscate>true</obfuscate>
+
+                    <!--proguardInclude>${basedir}/L1.2.pro</proguardInclude-->
+
+                    <injar>${project.name}-simple.jar</injar>
+
+                    <!--injar>${project.build.finalName}.jar</injar-->
+
+                    <includeDependency>true</includeDependency>
+                    <includeDependencyInjar>true</includeDependencyInjar>
+
+                    <outjar>L1.2-release.jar</outjar>
+
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+
+                    <options>
+                        <option>-keep,includedescriptorclasses class javax.** { *; }</option>
+                        <option>-keep,includedescriptorclasses class org.** { *; }</option>
+                        <option>-allowaccessmodification</option>
+                        <option>-keep public class ru.otus.lottery.Main {public static void main(java.lang.String[]);}</option>
+                        <option>-keepclassmembers class * implements java.io.Serializable</option>
+                        <option>-keepattributes *Annotation*</option>
+                        <option>-keepattributes Signature</option>
+                        <option>-dontwarn</option>
+                    </options>
+
+                    <libs>
+                        <lib>${java.home}/lib/rt.jar</lib>
+                    </libs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
