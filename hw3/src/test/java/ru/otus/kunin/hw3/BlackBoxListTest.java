@@ -14,6 +14,84 @@ public class BlackBoxListTest {
             new ArrayList<>(1),
             new LinkedList<>());
 
+    /*
+        Otus tests for addAll(), copy(), sort()
+     */
+
+    @Test
+    public void otusAddAll() throws Exception {
+        blackBoxOfLists.forEach(list -> {
+            addRange(1, 3, list);
+            Collections.addAll(list, 4l, 5l, 6l);
+
+            assertEquals(6, list.size());
+            for (int i = 1; i <= 6; i++) {
+                assertEquals(i, (long) list.get(i - 1));
+            }
+        });
+    }
+
+    @Test
+    public void otusCopyTo() throws Exception {
+        blackBoxOfLists.forEach(list -> {
+            addRange(1, 3, list);
+            Collections.copy(list, Lists.newArrayList(100l, 200l));
+
+            assertEquals(3, list.size());
+            assertEquals(100l, (long)list.get(0));
+            assertEquals(200l, (long)list.get(1));
+            assertEquals(3l, (long)list.get(2));
+        });
+    }
+
+    @Test
+    public void otusCopyFrom() throws Exception {
+        blackBoxOfLists.forEach(list -> {
+            addRange(1, 3, list);
+            final ArrayList<Long> dest = Lists.newArrayList(100l, 200l, 300l, 400l);
+            Collections.copy(dest, list);
+
+            assertEquals(4, dest.size());
+            assertEquals(1l, (long)dest.get(0));
+            assertEquals(2l, (long)dest.get(1));
+            assertEquals(3l, (long)dest.get(2));
+            assertEquals(400l, (long)dest.get(3));
+        });
+    }
+
+    @Test
+    public void otusSort() throws Exception {
+        final Random random = new Random(100);
+        for (int arraySize = 1; arraySize < 100; arraySize += 10) {
+            final long[] randomArray = new long[arraySize];
+            for (int i = 0; i < randomArray.length; i++) {
+                randomArray[i] = random.nextLong();
+            }
+            final long[] sortedArray = Arrays.copyOf(randomArray, randomArray.length);
+            Arrays.sort(sortedArray);
+
+            blackBoxOfLists.forEach(list -> {
+                list.clear();
+                for (long l : randomArray) {
+                    list.add(l);
+                }
+                for (int i = 0; i < randomArray.length; i++) {
+                    assertEquals(randomArray[i], (long)list.get(i));
+                }
+
+                Collections.sort(list);
+
+                for (int i = 0; i < sortedArray.length; i++) {
+                    assertEquals(sortedArray[i], (long)list.get(i));
+                }
+            });
+        }
+    }
+
+    /*
+        General List tests
+     */
+
     @Test
     public void size() {
         blackBoxOfLists.forEach(list -> {
@@ -173,8 +251,8 @@ public class BlackBoxListTest {
             list.retainAll(Lists.newArrayList(2l, 3l, 4l));
 
             assertEquals(2, list.size());
-            assertEquals(2l, (long)list.get(0));
-            assertEquals(3l, (long)list.get(1));
+            assertEquals(2l, (long) list.get(0));
+            assertEquals(3l, (long) list.get(1));
         });
     }
 
