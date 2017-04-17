@@ -12,7 +12,9 @@ public class BlackBoxListTest {
 
     private List<List<Long>> blackBoxOfLists = Arrays.asList(
             new ArrayList<>(1),
-            new LinkedList<>());
+            new LinkedList<>(),
+            new OtusArrayList<>(1)
+    );
 
     /*
         Otus tests for addAll(), copy(), sort()
