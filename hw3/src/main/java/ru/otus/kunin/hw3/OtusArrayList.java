@@ -67,6 +67,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
     public boolean add(T t) {
         grow(size + 1);
         data[size++] = t;
+        revision++;
         return true;
     }
 
@@ -77,6 +78,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
             return false;
         }
         remove(index);
+        revision++;
         return true;
     }
 
@@ -101,6 +103,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
         final int newDataLength = newData.length;
         System.arraycopy(newData, 0, data, size, newDataLength);
         size += newDataLength;
+        revision++;
         return true;
     }
 
@@ -121,6 +124,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
         // Insert new data
         System.arraycopy(newData, 0, data, index, newDataLength);
         size += newDataLength;
+        revision++;
         return true;
     }
 
@@ -144,6 +148,9 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
         final int newSize = heaven;
         final boolean modified = size != newSize;
         size = newSize;
+        if (modified) {
+            revision++;
+        }
         return modified;
     }
 
@@ -172,6 +179,9 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
         final int newSize = heaven;
         final boolean modified = size != newSize;
         size = newSize;
+        if (modified) {
+            revision++;
+        }
         return modified;
     }
 
@@ -179,6 +189,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
     public void clear() {
         Arrays.fill(data, null);
         size = 0;
+        revision++;
     }
 
     @Override
@@ -192,6 +203,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
         indexCheck(index);
         final T tmp = (T) data[index];
         data[index] = element;
+        revision++;
         return tmp;
     }
 
@@ -205,6 +217,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
         // Insert new data
         System.arraycopy(new Object[]{element}, 0, data, index, 1);
         size++;
+        revision++;
     }
 
     @Override
@@ -215,6 +228,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
             data[i] = data[i + 1];
         }
         size--;
+        revision++;
         return tmp;
     }
 
@@ -335,6 +349,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
                 throw new IllegalStateException();
             }
             OtusArrayList.this.set(position - lastMove, t);
+            expectedRevision = revision;
         }
 
         @Override
@@ -346,7 +361,8 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
 
         private void checkRevision() {
             if (expectedRevision != revision) {
-                throw new ConcurrentModificationException();
+                throw new ConcurrentModificationException("Expected " + expectedRevision
+                        + " was " + revision);
             }
         }
 
