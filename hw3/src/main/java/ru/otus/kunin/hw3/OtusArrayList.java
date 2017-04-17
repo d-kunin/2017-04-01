@@ -1,5 +1,6 @@
 package ru.otus.kunin.hw3;
 
+import com.google.common.base.Preconditions;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
@@ -59,8 +60,16 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
     }
 
     @Override
-    public <T1> T1[] toArray(T1[] a) {
-        throw new NotImplementedException();
+    public <T> T[] toArray(T[] a) {
+        Preconditions.checkNotNull(a);
+        if (a.length < size) {
+            return (T[]) Arrays.copyOf(data, size, a.getClass());
+        }
+        System.arraycopy(data, 0, a, 0, size);
+        for (int i = size; i < a.length; i++) {
+            a[i] = null;
+        }
+        return a;
     }
 
     @Override
@@ -277,11 +286,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
 
         int expectedRevision = revision;
         int position = 0;
-
-        // next +1
-        // prev -1
-        // else  0
-        int lastMove = 0;
+        int prevPosition = -1; // -1 invalid
 
         public OtusListIterator(int index) {
             this.position = index;
@@ -297,7 +302,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
         public T next() {
             checkRevision();
             checkHasNext();
-            lastMove = 1;
+            prevPosition = position;
             return (T) data[position++];
         }
 
@@ -311,7 +316,7 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
         public T previous() {
             checkRevision();
             checkHasPrev();
-            lastMove = -1;
+            prevPosition = position - 1;
             return (T) data[--position];
         }
 
@@ -332,31 +337,32 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
         @Override
         public void remove() {
             checkRevision();
-            if (lastMove == 0) {
+            if (prevPosition == -1) {
                 throw new IllegalStateException();
             }
 
-            OtusArrayList.this.remove(position - lastMove);
+            OtusArrayList.this.remove(prevPosition);
             position--;
             expectedRevision = revision;
-            lastMove = 0;
+            prevPosition = -1;
         }
 
         @Override
         public void set(T t) {
             checkRevision();
-            if (lastMove == 0) {
+            if (prevPosition == -1) {
                 throw new IllegalStateException();
             }
-            OtusArrayList.this.set(position - lastMove, t);
+            OtusArrayList.this.set(prevPosition, t);
             expectedRevision = revision;
         }
 
         @Override
         public void add(T t) {
             checkRevision();
-            lastMove = 0;
-            throw new NotImplementedException();
+            OtusArrayList.this.add(position, t);
+            position++;
+            expectedRevision = revision;
         }
 
         private void checkRevision() {
@@ -378,4 +384,9 @@ public class OtusArrayList<T> implements List<T>, RandomAccess {
             }
         }
      }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+ Arrays.toString(data);
+    }
 }

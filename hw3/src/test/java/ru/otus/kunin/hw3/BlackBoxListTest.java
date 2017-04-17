@@ -346,21 +346,56 @@ public class BlackBoxListTest {
     }
 
     @Test
-    @Ignore
     public void toArrayWithInputArray() {
-        fail("not implemented");
+        final Object[][] inputs = {
+                {},
+                {10l, 20l, 30l, 40l, 50l}
+        };
+        for (Object[] input : inputs) {
+            blackBoxOfLists.forEach(list -> {
+                addRange(1, 3, list);
+                final Object[] array = list.toArray(input);
+                assertEquals(Math.max(input.length, list.size()), array.length);
+                for (int i = 0; i < list.size(); i++) {
+                    assertEquals(list.get(i), array[i]);
+                }
+                for (int i = list.size(); i < array.length; i++) {
+                    assertEquals(null, array[i]);
+                }
+
+                // Verify array is a copy
+                array[0] = 99l;
+                assertNotEquals(99l, (long) list.get(0));
+            });
+        }
     }
 
     @Test
-    @Ignore
     public void listIterator() {
-        fail("not implemented");
-    }
+        blackBoxOfLists.forEach(list -> {
+            addRange(1, 3, list);
+            final ListIterator<Long> it = list.listIterator();
+            assertTrue(it.hasNext());
+            assertFalse(it.hasPrevious());
 
-    @Test
-    @Ignore
-    public void listIterator1() {
-        fail("not implemented");
+            assertEquals(0, it.nextIndex());
+            assertEquals(1l, (long)it.next());
+            assertTrue(it.hasPrevious());
+            assertEquals(1l, (long)it.previous());
+
+            it.set(100l);
+            assertEquals(100l, (long)it.next());
+            assertTrue(list.contains(100l));
+
+            it.remove();
+            assertFalse(it.hasPrevious());
+
+            assertEquals(2, list.size());
+            assertFalse(list.contains(100l));
+
+            it.add(500l);
+            assertEquals(500l, (long)it.previous());
+        });
     }
 
     @Test
