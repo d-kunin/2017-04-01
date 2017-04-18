@@ -5,7 +5,6 @@ import static com.sun.management.GarbageCollectionNotificationInfo.GARBAGE_COLLE
 import com.sun.management.GarbageCollectionNotificationInfo;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import javax.management.ListenerNotFoundException;
@@ -17,18 +16,19 @@ import javax.management.openmbean.CompositeData;
 public class SynchronousGC {
 
   final static boolean logsEnabled = false;
-  static List leakingListeners = new ArrayList<>(1024);
 
   public static void collect() {
-    final List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
-    final int latchCount = garbageCollectorMXBeans.size();
-    final CountDownLatch latch = new CountDownLatch(latchCount);
-    for (GarbageCollectorMXBean mxBean : garbageCollectorMXBeans) {
-      final NotificationEmitter emitter = (NotificationEmitter) mxBean;
-      final NotificationListener listener = (notification, handbackListener)
-          -> handleNotification(latch, emitter, notification, handbackListener);
-      leakingListeners.add(listener);
-      emitter.addNotificationListener(listener, null, listener);
+    final CountDownLatch latch;
+    {
+      final List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
+      final int latchCount = garbageCollectorMXBeans.size();
+      latch = new CountDownLatch(latchCount);
+      for (GarbageCollectorMXBean mxBean : garbageCollectorMXBeans) {
+        final NotificationEmitter emitter = (NotificationEmitter) mxBean;
+        final NotificationListener listener = (notification, handbackListener)
+            -> handleNotification(latch, emitter, notification, handbackListener);
+        emitter.addNotificationListener(listener, null, listener);
+      }
     }
     System.gc();
     try {
