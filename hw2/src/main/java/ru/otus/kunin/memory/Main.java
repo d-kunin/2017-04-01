@@ -1,27 +1,31 @@
 package ru.otus.kunin.memory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class Main {
 
   public static void main(String[] args) {
     System.out.println("Memory adventures");
 
+    // Boolean does take 1 bit in array. Wow.
     SizeOf.measure(() -> new boolean[7]);
-    SynchronousGC.collect();
-
     SizeOf.measure(() -> new boolean[8]);
-    SynchronousGC.collect();
-
     SizeOf.measure(() -> new boolean[9]);
-    SynchronousGC.collect();
 
+    // Otus requirements
     SizeOf.measure(Object::new);
-    SynchronousGC.collect();
-
     SizeOf.measure(String::new);
-    SynchronousGC.collect();
-
     SizeOf.measure(() -> new String(new char[0]));
-    SynchronousGC.collect();
+
+    SizeOf.measure(() -> new ArrayList());
+    SizeOf.measure(() -> new LinkedList());
+    SizeOf.measure(() -> new HashMap());
+    SizeOf.measure(() -> new ConcurrentHashMap());
+    SizeOf.measure(() -> new LinkedHashSet());
   }
 
 }
