@@ -1,26 +1,14 @@
 package ru.otus.kunin.memory;
 
-import java.util.Arrays;
+import java.lang.reflect.Array;
 import java.util.function.Supplier;
 
 public class SizeOf {
 
   public static <T> long measure(Supplier<T> objectCreator) {
     final T obj = objectCreator.get();
-    final String stringValue;
-    // Not all types are here, but the ones we need
-    if (obj instanceof Object[]) {
-      stringValue = Arrays.toString((Object[]) obj);
-    } else if (obj instanceof int[]) {
-      stringValue = Arrays.toString((int[]) obj);
-    } else if (obj instanceof boolean[]) {
-      stringValue = Arrays.toString((boolean[]) obj);
-    } else {
-      stringValue = obj.toString();
-    }
-    return measure(objectCreator, obj.getClass().getSimpleName() + " " + stringValue);
+    return measure(objectCreator, createTag(obj));
   }
-
 
   public static <T> long measure(Supplier<T> objectCreator, String tag) {
     final long almostTakesThatMuchMemory = getAlmostTakesThatMuchMemory(objectCreator, tag);
@@ -29,6 +17,26 @@ public class SizeOf {
     SynchronousGC.collect();
     return almostTakesThatMuchMemory;
   }
+
+  private static <T> String createTag(T obj) {
+    final String stringValue;
+    if (obj.getClass().isArray()) {
+      final int length = Array.getLength(obj);
+      final StringBuilder sb = new StringBuilder("[");
+      for (int i = 0; i < length; i++) {
+        sb.append(Array.get(obj, i));
+        if (i != length - 1) {
+          sb.append(",");
+        }
+      }
+      sb.append("]");
+      stringValue = sb.toString();
+    } else {
+      stringValue = obj.toString();
+    }
+    return obj.getClass().getSimpleName() + " " + stringValue;
+  }
+
 
   private static <T> long getAlmostTakesThatMuchMemory(final Supplier<T> objectCreator, final String tag) {
     final Runtime runtime = Runtime.getRuntime();
