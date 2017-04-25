@@ -9,8 +9,8 @@ mkdir -p $GC_LOG_DIR $DUMP_DIR
 REMOTE_DEBUG="
     -agentlib:jdwp=transport=dt_socket,address=14025,server=y,suspend=n"
 MEMORY="
-    -Xms512m
-    -Xmx512m
+    -Xms1G
+    -Xmx1G
     -XX:MaxMetaspaceSize=256m"
 GC="
     -XX:+UseConcMarkSweepGC

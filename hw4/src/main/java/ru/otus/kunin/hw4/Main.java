@@ -9,7 +9,7 @@ public class Main {
  */
     public static void main(String[] args) throws Exception {
         System.out.println("hw4");
-        System.in.read();
+        MemoryLeak.leak();
     }
 
 }
