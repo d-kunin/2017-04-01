@@ -7,8 +7,9 @@ public class Main {
     время паузы в минуту). Написать скрипт, который проведет
     измерение активности GC для разных параметров GC.
  */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         System.out.println("hw4");
+        System.in.read();
     }
 
 }
