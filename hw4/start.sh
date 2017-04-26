@@ -21,11 +21,8 @@ GC_LOG="
 GC="-XX:+UseSerialGC"
 java $MEMORY $GC $GC_LOG -jar target/hw4.jar > SerialGC.out
 
-GC="-XX:+UseParallelGC"
+GC="-XX:+UseParallelGC -XX:+UseParallelOldGC"
 java $MEMORY $GC $GC_LOG -jar target/hw4.jar > ParallelGC.out
-
-GC="-XX:+UseParallelOldGC"
-java $MEMORY $GC $GC_LOG -jar target/hw4.jar > ParallelOldGC.out
 
 GC="-XX:+UseConcMarkSweepGC"
 java $MEMORY $GC $GC_LOG -jar target/hw4.jar > ConcMarkSweepGC.out
