@@ -25,7 +25,7 @@ public class MemoryLeak {
      * 0 - nothing leaks
      * 1 - everything leaks
      */
-    static final double ratioOfLeakedObjectsPerBatch = .33;
+    static final double ratioOfLeakedObjectsPerBatch = .07;
 
     /**
      *

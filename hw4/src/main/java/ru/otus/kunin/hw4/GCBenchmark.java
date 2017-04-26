@@ -59,7 +59,7 @@ public class GCBenchmark implements NotificationListener {
         final double gcPerMinute = (double) totalGcCount * TimeUnit.MINUTES.toMillis(1) / timeAlive;
         System.out.println("Collections per minute: " + gcPerMinute);
 
-        final double shareOfTimeCollecting = 100 * (double) totalGcDuration / timeAlive;
+        final long shareOfTimeCollecting = Math.round(100 * (double) totalGcDuration / timeAlive);
         System.out.println("Share of time spend collecting: " + shareOfTimeCollecting + "%");
     }
 
