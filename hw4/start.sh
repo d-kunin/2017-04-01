@@ -1,25 +1,14 @@
 #!/usr/bin/env bash
-
-set -eux
+set -ux
 
 GC_LOG_DIR="./gc_logs"
 DUMP_DIR="./dumps"
 mkdir -p $GC_LOG_DIR $DUMP_DIR
 
-REMOTE_DEBUG="
-    -agentlib:jdwp=transport=dt_socket,address=14025,server=y,suspend=n"
 MEMORY="
     -Xms1G
     -Xmx1G
     -XX:MaxMetaspaceSize=256m"
-GC="
-    -XX:+UseConcMarkSweepGC
-    -XX:+CMSParallelRemarkEnabled
-    -XX:+UseCMSInitiatingOccupancyOnly
-    -XX:CMSInitiatingOccupancyFraction=70
-    -XX:+ScavengeBeforeFullGC
-    -XX:+CMSScavengeBeforeRemark
-    -XX:+UseParNewGC"
 GC_LOG="
     -verbose:gc
     -Xloggc:$GC_LOG_DIR/gc_pid_%p.log
@@ -28,6 +17,34 @@ GC_LOG="
     -XX:+UseGCLogFileRotation
     -XX:NumberOfGCLogFiles=10
     -XX:GCLogFileSize=100M"
+
+GC="-XX:+UseSerialGC"
+java $MEMORY $GC $GC_LOG -jar target/hw4.jar > SerialGC.out
+
+GC="-XX:+UseParallelGC"
+java $MEMORY $GC $GC_LOG -jar target/hw4.jar > ParallelGC.out
+
+GC="-XX:+UseParallelOldGC"
+java $MEMORY $GC $GC_LOG -jar target/hw4.jar > ParallelOldGC.out
+
+GC="-XX:+UseConcMarkSweepGC"
+java $MEMORY $GC $GC_LOG -jar target/hw4.jar > ConcMarkSweepGC.out
+
+GC="-XX:+UseG1GC"
+java $MEMORY $GC $GC_LOG -jar target/hw4.jar > G1GC.out
+
+
+# for future reference
+REMOTE_DEBUG="
+    -agentlib:jdwp=transport=dt_socket,address=14025,server=y,suspend=n"
+GC="
+    -XX:+UseConcMarkSweepGC
+    -XX:+CMSParallelRemarkEnabled
+    -XX:+UseCMSInitiatingOccupancyOnly
+    -XX:CMSInitiatingOccupancyFraction=70
+    -XX:+ScavengeBeforeFullGC
+    -XX:+CMSScavengeBeforeRemark
+    -XX:+UseParNewGC"
 JMX="
     -Dcom.sun.management.jmxremote.port=15025
     -Dcom.sun.management.jmxremote.authenticate=false
@@ -35,5 +52,4 @@ JMX="
 DUMP="
     -XX:+HeapDumpOnOutOfMemoryError
     -XX:HeapDumpPath=$DUMP_DIR"
-
-java $REMOTE_DEBUG $MEMORY $GC $GC_LOG $JMX $DUMP -XX:OnOutOfMemoryError="kill -3 %p" -jar target/hw4.jar > jvm.out
+# java $REMOTE_DEBUG $MEMORY $GC $GC_LOG $JMX $DUMP -XX:OnOutOfMemoryError="kill -3 %p" -jar target/hw4.jar > jvm.out

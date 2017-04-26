@@ -8,7 +8,6 @@ public class Main {
     измерение активности GC для разных параметров GC.
  */
     public static void main(String[] args) throws Exception {
-        System.out.println("hw4");
         MemoryLeak.leak();
     }
 
