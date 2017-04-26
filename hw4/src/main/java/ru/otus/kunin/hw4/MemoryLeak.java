@@ -7,7 +7,7 @@ public class MemoryLeak {
     /**
      * Size of a single allocated byte[]
      */
-    static final int singleMemoryChunkSize = 256;
+    static final int singleMemoryChunkSize = 128;
 
     /**
      * How many objects to create per iteration

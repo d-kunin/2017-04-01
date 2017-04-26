@@ -30,7 +30,6 @@ java $MEMORY $GC $GC_LOG -jar target/hw4.jar > ConcMarkSweepGC.out
 GC="-XX:+UseG1GC"
 java $MEMORY $GC $GC_LOG -jar target/hw4.jar > G1GC.out
 
-
 # for future reference
 REMOTE_DEBUG="
     -agentlib:jdwp=transport=dt_socket,address=14025,server=y,suspend=n"

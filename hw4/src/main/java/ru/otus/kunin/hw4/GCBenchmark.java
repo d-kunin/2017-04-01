@@ -2,6 +2,7 @@ package ru.otus.kunin.hw4;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
 
+import javax.management.ListenerNotFoundException;
 import javax.management.Notification;
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
@@ -9,6 +10,7 @@ import javax.management.openmbean.CompositeData;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.sun.management.GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION;
@@ -28,19 +30,37 @@ public class GCBenchmark implements NotificationListener {
     public void start() {
         subscribeToGC();
         isActive = true;
+        final long startTime = System.currentTimeMillis();
         final boolean leakedUntilOOM = MemoryLeak.leak();
+        if (!leakedUntilOOM) {
+            throw new IllegalStateException("OOM didn't happen, try to tune params in MemoryLeak or/and Xmx");
+        }
         isActive = false;
-        System.out.println("Collectors: " + yName + " and " + oName);
-        System.out.println("Total GC runs: " + (yGenCount.get() + oGenCount.get()));
-        System.out.println("Total GC duration: " + (yGenDuration.get() + oGenDuration.get()) + "ms");
+        final long timeAlive = System.currentTimeMillis() - startTime;
+        unsubscribeFromGC();
+
+        report(timeAlive);
     }
 
-    private void subscribeToGC() {
-        final List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
-        for (GarbageCollectorMXBean mxBean : garbageCollectorMXBeans) {
-            final NotificationEmitter emitter = (NotificationEmitter) mxBean;
-            emitter.addNotificationListener(this, null, null);
-        }
+    private void report(long timeAlive) {
+        System.out.println("Time alive: " + timeAlive+ "ms (" + TimeUnit.MILLISECONDS.toMinutes(timeAlive) + " minutes)");
+        System.out.println("Collectors: " + yName + " and " + oName);
+        final long totalGcCount = yGenCount.get() + oGenCount.get();
+        System.out.println("Total GC runs: " + totalGcCount);
+        final long totalGcDuration = yGenDuration.get() + oGenDuration.get();
+        System.out.println("Total GC duration: " + totalGcDuration + "ms");
+
+        System.out.println("Young Gen GC runs: " + yGenCount.get());
+        System.out.println("Young Gen GC duration: " + yGenDuration.get() + "ms");
+
+        System.out.println("Old Gen GC runs: " + oGenCount.get());
+        System.out.println("Old Gen GC duration: " + oGenDuration.get() + "ms");
+
+        final double gcPerMinute = (double) totalGcCount * TimeUnit.MINUTES.toMillis(1) / timeAlive;
+        System.out.println("Collections per minute: " + gcPerMinute);
+
+        final double shareOfTimeCollecting = 100 * (double) totalGcDuration / timeAlive;
+        System.out.println("Share of time spend collecting: " + shareOfTimeCollecting + "%");
     }
 
     @Override
@@ -61,6 +81,26 @@ public class GCBenchmark implements NotificationListener {
                 oGenCount.incrementAndGet();
                 oGenDuration.addAndGet(notificationInfo.getGcInfo().getDuration());
             }
+        }
+    }
+
+    private void unsubscribeFromGC() {
+        final List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
+        for (GarbageCollectorMXBean mxBean : garbageCollectorMXBeans) {
+            final NotificationEmitter emitter = (NotificationEmitter) mxBean;
+            try {
+                emitter.removeNotificationListener(this);
+            } catch (ListenerNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void subscribeToGC() {
+        final List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
+        for (GarbageCollectorMXBean mxBean : garbageCollectorMXBeans) {
+            final NotificationEmitter emitter = (NotificationEmitter) mxBean;
+            emitter.addNotificationListener(this, null, null);
         }
     }
 }
