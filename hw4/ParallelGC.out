@@ -1,0 +1,10 @@
+Time alive: 194573ms (3 minutes)
+Collectors: PS Scavenge and PS MarkSweep
+Total GC runs: 111
+Total GC duration: 19659ms
+Young Gen GC runs: 34
+Young Gen GC duration: 854ms
+Old Gen GC runs: 77
+Old Gen GC duration: 18805ms
+Collections per minute: 34.22879844582753
+Share of time spend collecting: 10%

@@ -1,0 +1,10 @@
+Time alive: 232005ms (3 minutes)
+Collectors: G1 Young Generation and G1 Old Generation
+Total GC runs: 217
+Total GC duration: 38316ms
+Young Gen GC runs: 169
+Young Gen GC duration: 1074ms
+Old Gen GC runs: 48
+Old Gen GC duration: 37242ms
+Collections per minute: 56.11948018361673
+Share of time spend collecting: 17%

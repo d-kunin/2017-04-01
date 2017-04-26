@@ -1,0 +1,10 @@
+Time alive: 267031ms (4 minutes)
+Collectors: ParNew and ConcurrentMarkSweep
+Total GC runs: 175
+Total GC duration: 85840ms
+Young Gen GC runs: 48
+Young Gen GC duration: 749ms
+Old Gen GC runs: 127
+Old Gen GC duration: 85091ms
+Collections per minute: 39.3212773048822
+Share of time spend collecting: 32%

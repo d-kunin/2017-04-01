@@ -1,0 +1,10 @@
+Time alive: 252281ms (4 minutes)
+Collectors: Copy and MarkSweepCompact
+Total GC runs: 116
+Total GC duration: 55392ms
+Young Gen GC runs: 26
+Young Gen GC duration: 1003ms
+Old Gen GC runs: 90
+Old Gen GC duration: 54389ms
+Collections per minute: 27.588284492292324
+Share of time spend collecting: 22%
