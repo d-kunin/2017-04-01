@@ -7,7 +7,7 @@ public class MemoryLeak {
     /**
      * Size of a single allocated byte[]
      */
-    static final int singleMemoryChunkSize = 64;
+    static final int singleMemoryChunkSize = 256;
 
     /**
      * How many objects to create per iteration
@@ -56,9 +56,9 @@ public class MemoryLeak {
                 refs[iteration][indexToClean] = null;
             }
 
-            final long memoryLeftKb = Runtime.getRuntime().freeMemory() / 1024;
-            System.out.println("Memory left: " + memoryLeftKb+ "kB");
-            System.out.flush();
+//            final long memoryLeftKb = Runtime.getRuntime().freeMemory() / 1024;
+//            System.out.println("Memory left: " + memoryLeftKb+ "kB");
+//            System.out.flush();
             try {
                 // todo(dima) increase sleep
                 Thread.sleep(1);
