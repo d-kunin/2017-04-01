@@ -17,7 +17,7 @@ public class MemoryLeak {
     /**
      * How many iterations to do at max before OOM happens
      */
-    static final int maxNumberOfIterations = 1_000_000;
+    static final int maxNumberOfIterations = 10_000_000;
 
     /**
      * What ratio of objects from a single batch should leak
@@ -25,9 +25,22 @@ public class MemoryLeak {
      * 0 - nothing leaks
      * 1 - everything leaks
      */
-    static final double ratioOfLeakedObjectsPerBatch = .5;
+    static final double ratioOfLeakedObjectsPerBatch = .33;
 
-    public static void leak() {
+    /**
+     *
+     * @return true if OOM happens, false otherwise
+     */
+    public static boolean leak() {
+        try {
+            leakLoop();
+            return false;
+        } catch (OutOfMemoryError outOfMemoryError) {
+            return true;
+        }
+    }
+
+    private static void leakLoop() {
         Object[][] refs = new Object[maxNumberOfIterations][];
         for (int iteration = 0; iteration < maxNumberOfIterations; ++iteration) {
             refs[iteration] = new Object[numberOfObjectsToAllocatePerIteration];
@@ -46,6 +59,11 @@ public class MemoryLeak {
             final long memoryLeftKb = Runtime.getRuntime().freeMemory() / 1024;
             System.out.println("Memory left: " + memoryLeftKb+ "kB");
             System.out.flush();
+            try {
+                // todo(dima) increase sleep
+                Thread.sleep(1);
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 
