@@ -18,10 +18,13 @@ public class TestRunner {
             testClass.testMethods().forEach(testMethod -> {
                 try {
                     final Object testClassInstance = testClass.newInstance();
-                    // TODO before
-                    System.out.println("calling:" + testMethod);
+                    testClass.runBefore(testClassInstance);
+
+                    System.out.println("running test:" + testMethod);
                     testMethod.invoke(testClassInstance);
-                    // TODO after
+
+                    testClass.runAfter(testClassInstance);
+
                 } catch (AssertionError assertionError) {
 
                 } catch (Throwable throwable) {

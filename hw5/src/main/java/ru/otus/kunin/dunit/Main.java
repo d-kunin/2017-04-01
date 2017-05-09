@@ -1,7 +1,6 @@
 package ru.otus.kunin.dunit;
 
 import com.google.common.collect.Lists;
-import com.sun.source.tree.AssertTree;
 import ru.otus.kunin.dunit.annotation.After;
 import ru.otus.kunin.dunit.annotation.Before;
 import ru.otus.kunin.dunit.annotation.Test;
@@ -16,6 +15,7 @@ public class Main {
         @Before
         void setUp() {
             resource = "The string";
+            System.out.println("setting up");
         }
 
         @Test
@@ -48,6 +48,7 @@ public class Main {
             // To make sure set up was called
             resource.length();
             resource = null;
+            System.out.println("tearing down");
         }
     }
 
