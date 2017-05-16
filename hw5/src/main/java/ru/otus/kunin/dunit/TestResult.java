@@ -31,10 +31,10 @@ public class TestResult {
         private Throwable throwable;
 
         public Builder() {
-            status = Status.DID_NOT_RUN;
-            durationMs = 0;
-            testMethod = null;
-            throwable = null;
+            setStatus(Status.DID_NOT_RUN)
+                    .setDurationMs(0)
+                    .setTestMethod(null)
+                    .setThrowable(null);
         }
 
         public Builder setStatus(Status status) {
@@ -68,7 +68,7 @@ public class TestResult {
         sb.append("status=").append(status);
         sb.append(", durationMs=").append(durationMs);
         sb.append(", testMethod=").append(testMethod);
-        sb.append(", throwable=").append(Optional.ofNullable(throwable).map(t -> t.getMessage()).orElse("null"));
+        sb.append(", throwable=").append(Optional.ofNullable(throwable).map(Throwable::getMessage).orElse("null"));
         sb.append('}');
         return sb.toString();
     }
