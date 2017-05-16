@@ -13,11 +13,14 @@ import ru.otus.kunin.dunit.assertion.Assert;
 public class SampleTestClass {
 
     boolean objectIsSetUp = false;
+    static int numberOfSetUps;
+    static int numberOfTearDowns;
 
     @Before
     void setUp() {
         Preconditions.checkArgument(!objectIsSetUp);
         objectIsSetUp = true;
+        numberOfSetUps++;
     }
 
     @Test
@@ -35,7 +38,7 @@ public class SampleTestClass {
 
     @Test
     void failingTest() {
-        Assert.fail();
+        Assert.fail("A failing test");
     }
 
     @Test
@@ -57,5 +60,6 @@ public class SampleTestClass {
     void tearDown() {
         Preconditions.checkArgument(objectIsSetUp);
         objectIsSetUp = false;
+        numberOfTearDowns++;
     }
 }

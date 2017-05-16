@@ -8,19 +8,19 @@ public class Report {
 
     public final TestResult.Status status;
 
-    public final long success;
-    public final long failed;
-    public final long error;
-    public final long total;
+    public final int success;
+    public final int failed;
+    public final int error;
+    public final int total;
 
     public final List<TestResult> testResults;
 
     public Report(List<TestResult> testResults) {
         this.testResults = testResults;
         total = testResults.size();
-        success = testResults.stream().filter(testResult -> testResult.status == TestResult.Status.OK).count();
-        failed = testResults.stream().filter(testResult -> testResult.status == TestResult.Status.FAILED).count();
-        error = testResults.stream().filter(testResult -> testResult.status == TestResult.Status.ERROR).count();
+        success = (int) testResults.stream().filter(testResult -> testResult.status == TestResult.Status.OK).count();
+        failed = (int) testResults.stream().filter(testResult -> testResult.status == TestResult.Status.FAILED).count();
+        error = (int) testResults.stream().filter(testResult -> testResult.status == TestResult.Status.ERROR).count();
         status = success == total ? TestResult.Status.OK : TestResult.Status.FAILED;
     }
 

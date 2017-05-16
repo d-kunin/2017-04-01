@@ -25,6 +25,10 @@ public class TestMethod {
 
     @Override
     public String toString() {
+        return getName();
+    }
+
+    public String getName() {
         return method.getName();
     }
 }

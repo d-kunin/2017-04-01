@@ -26,16 +26,16 @@ public class TestRunner {
                         .setTestMethod(testMethod);
                 try {
                     final Object testClassInstance = testClass.newInstance();
-                    testClass.runBefore(testClassInstance);
-
                     final long startTimeNs = System.nanoTime();
-                    testMethod.invoke(testClassInstance);
-                    final long durationNs = System.nanoTime() - startTimeNs;
-                    resultBuilder.setDurationMs(TimeUnit.NANOSECONDS.toMillis(durationNs));
-                    resultBuilder.setStatus(TestResult.Status.OK);
-
-                    testClass.runAfter(testClassInstance);
-
+                    try {
+                        testClass.runBefore(testClassInstance);
+                        testMethod.invoke(testClassInstance);
+                        resultBuilder.setStatus(TestResult.Status.OK);
+                    } finally {
+                        testClass.runAfter(testClassInstance);
+                        final long durationNs = System.nanoTime() - startTimeNs;
+                        resultBuilder.setDurationMs(TimeUnit.NANOSECONDS.toMillis(durationNs));
+                    }
                 } catch (AssertionError assertionError) {
                     resultBuilder.setStatus(TestResult.Status.FAILED);
                     resultBuilder.setThrowable(assertionError);

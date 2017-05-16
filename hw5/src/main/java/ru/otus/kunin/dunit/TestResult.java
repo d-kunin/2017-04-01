@@ -1,5 +1,7 @@
 package ru.otus.kunin.dunit;
 
+import java.util.Optional;
+
 public class TestResult {
 
     public enum Status {
@@ -66,7 +68,7 @@ public class TestResult {
         sb.append("status=").append(status);
         sb.append(", durationMs=").append(durationMs);
         sb.append(", testMethod=").append(testMethod);
-        sb.append(", throwable=").append(throwable);
+        sb.append(", throwable=").append(Optional.ofNullable(throwable).map(t -> t.getMessage()).orElse("null"));
         sb.append('}');
         return sb.toString();
     }
