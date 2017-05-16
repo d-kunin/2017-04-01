@@ -1,8 +1,10 @@
 package ru.otus.kunin.dunit;
 
-import ru.otus.kunin.dunit.assertion.AssertionError;
+import com.google.common.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.toList;
 
@@ -14,26 +16,38 @@ public class TestRunner {
                 .map(TestClass::new)
                 .collect(toList());
 
+        final ArrayList<TestResult> testResults = Lists.newArrayList();
+
         testClasses.forEach(testClass -> {
             testClass.testMethods().forEach(testMethod -> {
+                final TestResult.Builder resultBuilder = new TestResult.Builder();
+                resultBuilder
+                        .setStatus(TestResult.Status.DID_NOT_RUN)
+                        .setTestMethod(testMethod);
                 try {
                     final Object testClassInstance = testClass.newInstance();
                     testClass.runBefore(testClassInstance);
 
-                    System.out.println("running test:" + testMethod);
+                    final long startTimeNs = System.nanoTime();
                     testMethod.invoke(testClassInstance);
+                    final long durationNs = System.nanoTime() - startTimeNs;
+                    resultBuilder.setDurationMs(TimeUnit.NANOSECONDS.toMillis(durationNs));
+                    resultBuilder.setStatus(TestResult.Status.OK);
 
                     testClass.runAfter(testClassInstance);
 
                 } catch (AssertionError assertionError) {
-
+                    resultBuilder.setStatus(TestResult.Status.FAILED);
+                    resultBuilder.setThrowable(assertionError);
                 } catch (Throwable throwable) {
-
+                    resultBuilder.setStatus(TestResult.Status.ERROR);
+                    resultBuilder.setThrowable(throwable);
                 }
+                testResults.add(resultBuilder.build());
             });
         });
 
-        return new Report();
+        return new Report(testResults);
     }
 
 }

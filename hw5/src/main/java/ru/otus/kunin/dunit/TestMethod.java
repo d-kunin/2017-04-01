@@ -13,12 +13,18 @@ public class TestMethod {
         this.method = Preconditions.checkNotNull(method);
     }
 
-    public void invoke(Object instance) {
+    public void invoke(Object instance) throws Throwable {
         try {
             method.invoke(instance);
-        } catch (IllegalAccessException|InvocationTargetException e) {
+        } catch (IllegalAccessException e) {
             throw new RuntimeException("Cant call test method", e);
+        } catch (InvocationTargetException e) {
+            throw e.getTargetException();
         }
     }
 
+    @Override
+    public String toString() {
+        return method.getName();
+    }
 }

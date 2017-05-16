@@ -24,6 +24,14 @@ public class Main {
         }
 
         @Test
+        void slowTest() {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
+        }
+
+        @Test
         void failingTest() {
             Assert.fail();
         }
