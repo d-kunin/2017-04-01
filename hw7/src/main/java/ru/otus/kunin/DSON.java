@@ -49,7 +49,7 @@ public class DSON {
       return PRIMITIVE_ARRAYS_CONVERTERS.get(o.getClass()).apply(o);
     }
 
-    if (o.getClass().isArray() || o instanceof Collection) {
+    if (o.getClass() == Object[].class || o instanceof Collection) {
       return arrayToJsonObject(o);
     }
 
@@ -57,8 +57,7 @@ public class DSON {
       return Json.createValue(o.toString());
     }
 
-    // TODO
-    return JsonValue.EMPTY_JSON_OBJECT;
+    throw new UnsupportedOperationException("Type not supported: " + o.getClass());
   }
 
   private static JsonArray arrayToJsonObject(final Object o) {
