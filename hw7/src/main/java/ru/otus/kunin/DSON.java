@@ -4,8 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonValue;
 
 public class DSON {
@@ -21,6 +23,10 @@ public class DSON {
       .build();
 
   public static JsonValue toJsonObject(Object o) {
+    if (null == o) {
+      return JsonValue.NULL;
+    }
+
     if (PRIMITIVE_CONVERTERS.containsKey(o.getClass())) {
       return primitiveToJsonObject(o);
     }
@@ -38,7 +44,12 @@ public class DSON {
   }
 
   private static JsonArray arrayToJsonObject(final Object o) {
-    return JsonValue.EMPTY_JSON_ARRAY;
+    final Object[] asArray = o instanceof Collection<?> ? ((Collection<?>)o).toArray() : (Object[])o;
+    JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+    Stream.of(asArray).forEach(element -> {
+      jsonArrayBuilder.add(toJsonObject(element));
+    });
+    return jsonArrayBuilder.build();
   }
 
   @FunctionalInterface
