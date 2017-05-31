@@ -12,6 +12,10 @@ import javax.json.JsonValue;
 
 public class DSON {
 
+  @FunctionalInterface
+  interface Converter extends Function<Object, JsonValue> {
+  }
+
   private final static Map<Class<?>, Converter> PRIMITIVE_CONVERTERS = ImmutableMap.<Class<?>, Converter>builder()
       .put(Double.class,  v -> Json.createValue((double) v))
       .put(Float.class,   v -> Json.createValue((double) v))
@@ -46,15 +50,8 @@ public class DSON {
   private static JsonArray arrayToJsonObject(final Object o) {
     final Object[] asArray = o instanceof Collection<?> ? ((Collection<?>)o).toArray() : (Object[])o;
     JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
-    Stream.of(asArray).forEach(element -> {
-      jsonArrayBuilder.add(toJsonObject(element));
-    });
+    Stream.of(asArray).forEach(element -> jsonArrayBuilder.add(toJsonObject(element)));
     return jsonArrayBuilder.build();
-  }
-
-  @FunctionalInterface
-  interface Converter extends Function<Object, JsonValue> {
-
   }
 
   private static JsonValue primitiveToJsonObject(final Object o) {
