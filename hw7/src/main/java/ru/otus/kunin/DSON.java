@@ -26,13 +26,27 @@ public class DSON {
       .put(Boolean.class, v -> (Boolean)v ? JsonValue.TRUE : JsonValue.FALSE)
       .build();
 
+  private final static Map<Class<?>, Converter> PRIMITIVE_ARRAYS_CONVERTERS = ImmutableMap.<Class<?>, Converter>builder()
+      .put(byte[].class, o -> JsonPrimitiveArrays.toJsonArray((byte[]) o))
+      .put(short[].class, o -> JsonPrimitiveArrays.toJsonArray((short[]) o))
+      .put(int[].class, o -> JsonPrimitiveArrays.toJsonArray((int[]) o))
+      .put(long[].class, o -> JsonPrimitiveArrays.toJsonArray((long[]) o))
+      .put(boolean[].class, o -> JsonPrimitiveArrays.toJsonArray((boolean[]) o))
+      .put(float[].class, o -> JsonPrimitiveArrays.toJsonArray((float[]) o))
+      .put(double[].class, o -> JsonPrimitiveArrays.toJsonArray((double[]) o))
+      .build();
+
   public static JsonValue toJsonObject(Object o) {
     if (null == o) {
       return JsonValue.NULL;
     }
 
     if (PRIMITIVE_CONVERTERS.containsKey(o.getClass())) {
-      return primitiveToJsonObject(o);
+      return PRIMITIVE_CONVERTERS.get(o.getClass()).apply(o);
+    }
+
+    if (PRIMITIVE_ARRAYS_CONVERTERS.containsKey(o.getClass())) {
+      return PRIMITIVE_ARRAYS_CONVERTERS.get(o.getClass()).apply(o);
     }
 
     if (o.getClass().isArray() || o instanceof Collection) {
@@ -53,9 +67,4 @@ public class DSON {
     Stream.of(asArray).forEach(element -> jsonArrayBuilder.add(toJsonObject(element)));
     return jsonArrayBuilder.build();
   }
-
-  private static JsonValue primitiveToJsonObject(final Object o) {
-    return PRIMITIVE_CONVERTERS.get(o.getClass()).apply(o);
-  }
-
 }
