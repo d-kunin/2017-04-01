@@ -1,14 +1,17 @@
 package ru.otus.kunin;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonValue;
+import javax.json.*;
 
 public class DSON {
 
@@ -41,6 +44,10 @@ public class DSON {
       return JsonValue.NULL;
     }
 
+    if (o instanceof CharSequence) {
+      return Json.createValue(o.toString());
+    }
+
     if (PRIMITIVE_CONVERTERS.containsKey(o.getClass())) {
       return PRIMITIVE_CONVERTERS.get(o.getClass()).apply(o);
     }
@@ -53,11 +60,48 @@ public class DSON {
       return arrayToJsonObject(o);
     }
 
-    if (o instanceof CharSequence) {
-      return Json.createValue(o.toString());
+    if (o instanceof Map) {
+      return mapToJsonObject((Map<?,?>)o);
     }
 
-    throw new UnsupportedOperationException("Type not supported: " + o.getClass());
+    return objectToJsonObject(o);
+  }
+
+  private static JsonObject objectToJsonObject(Object o) {
+
+    final Field[] fields = o.getClass().getFields();
+    final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+    Arrays.stream(fields)
+      .filter(field -> !Modifier.isStatic(field.getModifiers()))
+      .filter(field -> !Modifier.isTransient(field.getModifiers()))
+      .forEach(field -> {
+        final String name = fieldToName(field);
+        final JsonValue value = filedValue(field, o);
+        objectBuilder.add(name, value);
+      });
+    return objectBuilder.build();
+  }
+
+  private static JsonValue filedValue(Field field, Object o) {
+    try {
+      field.setAccessible(true);
+      final Object value = field.get(o);
+      return toJsonObject(value);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static String fieldToName(Field field) {
+    return Preconditions.checkNotNull(field).getName();
+  }
+
+  private static JsonObject mapToJsonObject(Map<?, ?> o) {
+    final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+    o.entrySet().forEach(entry -> {
+      objectBuilder.add(String.valueOf(entry.getKey()), toJsonObject(entry.getValue()));
+    });
+    return objectBuilder.build();
   }
 
   private static JsonArray arrayToJsonObject(final Object o) {

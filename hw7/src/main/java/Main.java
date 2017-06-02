@@ -1,5 +1,8 @@
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Optional;
+
 import ru.otus.kunin.DSON;
 
 public class Main {
@@ -38,7 +41,7 @@ public class Main {
       }
 
       Cat build() {
-        return new Cat(name, age, friends);
+        return new Cat(name, age, Optional.ofNullable(friends).orElse(Lists.newArrayList()));
       }
 
     }
@@ -53,13 +56,30 @@ public class Main {
     System.out.println(DSON.toJsonObject(1).toString());
     System.out.println(DSON.toJsonObject(1.1).toString());
     System.out.println(DSON.toJsonObject(false).toString());
+    final ImmutableMap<Integer, String> int2StrMap = ImmutableMap.<Integer, String>builder()
+            .put(1, "cat")
+            .put(2, "dog")
+            .build();
+    System.out.println(DSON.toJsonObject(int2StrMap));
+    final ImmutableMap<String, List<String>> str2ListMap = ImmutableMap.<String, List<String>>builder()
+            .put("cat_breeds", Lists.newArrayList("scottish fold", "siberian"))
+            .put("dog_breeds", Lists.newArrayList("german shepard", "border collie"))
+            .build();
+    System.out.println(DSON.toJsonObject(str2ListMap));
 
-    final Cat aLonelyCat = new Cat.Builder()
-        .setName("Fluffy")
-        .setAge(3)
-        .setFriends(Lists.newArrayList())
-        .build();
-    System.out.println(DSON.toJsonObject(aLonelyCat));
+    final Cat cat = new Cat.Builder().setName("Saffran").setAge(1).build();
+    final Cat aCat = new Cat.Builder()
+            .setName("Fluffy")
+            .setAge(3)
+            .setFriends(Lists.newArrayList(
+                    new Cat.Builder()
+                            .setName("Stanford")
+                            .setAge(3)
+                            .setFriends(Lists.newArrayList(cat))
+                            .build(),
+                    cat))
+            .build();
+    System.out.println(DSON.toJsonObject(aCat));
   }
 
 }
