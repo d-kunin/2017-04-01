@@ -40,8 +40,8 @@ public class DSON {
 
     @AutoValue.Builder
     public abstract static class Builder {
-      abstract Builder setMaxDepth(int maxDepth);
-      abstract Builder setCustomConverters(Map<Class<?>, ConvertToJsonValue> converters);
+      public abstract Builder setMaxDepth(int maxDepth);
+      public abstract Builder setCustomConverters(Map<Class<?>, ConvertToJsonValue> converters);
 
       abstract Config autoBuild();
 

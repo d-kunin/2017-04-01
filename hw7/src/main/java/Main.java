@@ -1,57 +1,25 @@
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Optional;
-
+import ru.otus.kunin.ConvertToJsonValue;
 import ru.otus.kunin.DSON;
-import ru.otus.kunin.JsonName;
+
+import javax.json.Json;
+import java.util.List;
 
 public class Main {
 
-  private static class Cat {
-
-    @JsonName("name_in_json")
-    public final String name;
-    public final int age;
-    public final List<Cat> friends;
-
-    private Cat(final String name, final int age, final List<Cat> friends) {
-      this.name = name;
-      this.age = age;
-      this.friends = friends;
-    }
-
-    static class Builder {
-
-      private String name;
-      private int age;
-      private List<Cat> friends;
-
-      Builder setName(String name) {
-        this.name = name;
-        return this;
-      }
-
-      Builder setAge(int age) {
-        this.age = age;
-        return this;
-      }
-
-      Builder setFriends(List<Cat> friends) {
-        this.friends = friends;
-        return this;
-      }
-
-      Cat build() {
-        return new Cat(name, age, Optional.ofNullable(friends).orElse(Lists.newArrayList()));
-      }
-
-    }
-  }
-
   public static void main(String[] args) {
     System.out.println("<json>");
-    final DSON dson = DSON.create(DSON.Config.builder().build());
+
+    final ConvertToJsonValue reverseStringConverter = o -> {
+      final String reversString = new StringBuilder(o.toString()).reverse().toString();
+      return Json.createValue(reversString);
+    };
+    final ImmutableMap<Class<?>, ConvertToJsonValue> customConverters =
+            ImmutableMap.of(String.class, reverseStringConverter);
+    final DSON.Config config = DSON.Config.builder().setCustomConverters(customConverters).build();
+    final DSON dson = DSON.create(config);
+
     Object[] objects = {1, false, 2.3f, "hello", null};
     System.out.println(dson.toJsonObject(new byte[]{1, 2, 3}).toString());
     System.out.println(dson.toJsonObject(objects).toString());
@@ -70,12 +38,12 @@ public class Main {
             .build();
     System.out.println(dson.toJsonObject(str2ListMap));
 
-    final Cat cat = new Cat.Builder().setName("Saffran").setAge(1).build();
-    final Cat aCat = new Cat.Builder()
+    final CatPOJO cat = new CatPOJO.Builder().setName("Saffran").setAge(1).build();
+    final CatPOJO aCat = new CatPOJO.Builder()
             .setName("Fluffy")
             .setAge(3)
             .setFriends(Lists.newArrayList(
-                    new Cat.Builder()
+                    new CatPOJO.Builder()
                             .setName("Stanford")
                             .setAge(3)
                             .setFriends(Lists.newArrayList(cat))
