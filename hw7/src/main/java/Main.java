@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import ru.otus.kunin.DSON;
+import ru.otus.kunin.JsonName;
 
 public class Main {
 
   private static class Cat {
 
+    @JsonName("name_in_json")
     public final String name;
     public final int age;
     public final List<Cat> friends;
@@ -49,7 +51,7 @@ public class Main {
 
   public static void main(String[] args) {
     System.out.println("<json>");
-    Object[] objects = {1, false, 2.3, "hello", null};
+    Object[] objects = {1, false, 2.3f, "hello", null};
     System.out.println(DSON.toJsonObject(new byte[]{1, 2, 3}).toString());
     System.out.println(DSON.toJsonObject(objects).toString());
     System.out.println(DSON.toJsonObject("mew").toString());
