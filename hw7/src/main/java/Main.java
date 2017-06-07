@@ -51,23 +51,24 @@ public class Main {
 
   public static void main(String[] args) {
     System.out.println("<json>");
+    final DSON dson = DSON.create(DSON.Config.builder().build());
     Object[] objects = {1, false, 2.3f, "hello", null};
-    System.out.println(DSON.toJsonObject(new byte[]{1, 2, 3}).toString());
-    System.out.println(DSON.toJsonObject(objects).toString());
-    System.out.println(DSON.toJsonObject("mew").toString());
-    System.out.println(DSON.toJsonObject(1).toString());
-    System.out.println(DSON.toJsonObject(1.1).toString());
-    System.out.println(DSON.toJsonObject(false).toString());
+    System.out.println(dson.toJsonObject(new byte[]{1, 2, 3}).toString());
+    System.out.println(dson.toJsonObject(objects).toString());
+    System.out.println(dson.toJsonObject("mew").toString());
+    System.out.println(dson.toJsonObject(1).toString());
+    System.out.println(dson.toJsonObject(1.1).toString());
+    System.out.println(dson.toJsonObject(false).toString());
     final ImmutableMap<Integer, String> int2StrMap = ImmutableMap.<Integer, String>builder()
             .put(1, "cat")
             .put(2, "dog")
             .build();
-    System.out.println(DSON.toJsonObject(int2StrMap));
+    System.out.println(dson.toJsonObject(int2StrMap));
     final ImmutableMap<String, List<String>> str2ListMap = ImmutableMap.<String, List<String>>builder()
             .put("cat_breeds", Lists.newArrayList("scottish fold", "siberian"))
             .put("dog_breeds", Lists.newArrayList("german shepard", "border collie"))
             .build();
-    System.out.println(DSON.toJsonObject(str2ListMap));
+    System.out.println(dson.toJsonObject(str2ListMap));
 
     final Cat cat = new Cat.Builder().setName("Saffran").setAge(1).build();
     final Cat aCat = new Cat.Builder()
@@ -81,7 +82,7 @@ public class Main {
                             .build(),
                     cat))
             .build();
-    System.out.println(DSON.toJsonObject(aCat));
+    System.out.println(dson.toJsonObject(aCat));
   }
 
 }

@@ -1,5 +1,6 @@
 package ru.otus.kunin;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
@@ -7,13 +8,55 @@ import javax.json.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 public class DSON {
 
-  private final static int MAX_DEPTH = 32;
+  private final int maxDepth;
+  private final Map<Class<?>, ConvertToJsonValue> customConverters;
+
+  private DSON(int maxDepth, Map<Class<?>, ConvertToJsonValue> converters) {
+    this.maxDepth = maxDepth;
+    this.customConverters = converters;
+  }
+
+  public static DSON create(Config config) {
+    return new DSON(
+            config.maxDepth(),
+            ImmutableMap.copyOf(Optional.ofNullable(config.customConverters()).orElse(Collections.EMPTY_MAP)));
+  }
+
+  @AutoValue
+  public abstract static class Config {
+
+    public abstract int maxDepth();
+    public abstract Map<Class<?>, ConvertToJsonValue> customConverters();
+
+    public static Builder builder() {
+      return new AutoValue_DSON_Config.Builder()
+              .setMaxDepth(DEFAULT_MAX_JSON_DEPTH)
+              .setCustomConverters(ImmutableMap.of());
+    }
+
+    @AutoValue.Builder
+    public abstract static class Builder {
+      abstract Builder setMaxDepth(int maxDepth);
+      abstract Builder setCustomConverters(Map<Class<?>, ConvertToJsonValue> converters);
+
+      abstract Config autoBuild();
+
+      public Config build() {
+        final Config config = autoBuild();
+        Preconditions.checkArgument(config.maxDepth() >= MIN_MAX_JSON_DEPTH,
+                "maxDepth should at least be " + MIN_MAX_JSON_DEPTH);
+        return config;
+      }
+    }
+  }
+
+  private final static int MIN_MAX_JSON_DEPTH = 1;
+
+  private final static int DEFAULT_MAX_JSON_DEPTH = 32;
 
   private final static Map<Class<?>, ConvertToJsonValue> PRIMITIVE_CONVERTERS = ImmutableMap.<Class<?>, ConvertToJsonValue>builder()
       .put(Float.class,   v -> Json.createValue(((Float) v).doubleValue()))
@@ -25,45 +68,50 @@ public class DSON {
       .put(Boolean.class, v -> (Boolean)v ? JsonValue.TRUE : JsonValue.FALSE)
       .build();
 
-  public static JsonValue toJsonObject(Object o) {
+  public JsonValue toJsonObject(Object o) {
     return _toJsonObject(o, 0);
   }
 
-  private static JsonValue _toJsonObject(final Object o, int depth) {
-    if (depth > MAX_DEPTH) {
+  private JsonValue _toJsonObject(final Object value, int depth) {
+    if (depth > maxDepth) {
       //TODO(dima) custom strategies
       return JsonValue.NULL;
     }
     depth++;
 
-    if (null == o) {
+    if (null == value) {
       return JsonValue.NULL;
     }
 
-    if (o instanceof CharSequence) {
-      return Json.createValue(o.toString());
+    final Class<?> valueClass = value.getClass();
+    if (customConverters.containsKey(valueClass)) {
+      return customConverters.get(valueClass).apply(value);
     }
 
-    if (PRIMITIVE_CONVERTERS.containsKey(o.getClass())) {
-      return PRIMITIVE_CONVERTERS.get(o.getClass()).apply(o);
+    if (value instanceof CharSequence) {
+      return Json.createValue(value.toString());
     }
 
-    if (o.getClass().isArray()) {
-      return arrayToJsonArray(o, depth);
+    if (PRIMITIVE_CONVERTERS.containsKey(valueClass)) {
+      return PRIMITIVE_CONVERTERS.get(valueClass).apply(value);
     }
 
-    if (o instanceof Collection) {
-      return collectionToJsonArray((Collection<Object>) o, depth);
+    if (valueClass.isArray()) {
+      return arrayToJsonArray(value, depth);
     }
 
-    if (o instanceof Map) {
-      return mapToJsonObject((Map<?,?>)o, depth);
+    if (value instanceof Collection) {
+      return collectionToJsonArray((Collection<Object>) value, depth);
     }
 
-    return objectToJsonObject(o, depth);
+    if (value instanceof Map) {
+      return mapToJsonObject((Map<?,?>)value, depth);
+    }
+
+    return objectToJsonObject(value, depth);
   }
 
-  private static JsonArray arrayToJsonArray(Object o, int depth) {
+  private JsonArray arrayToJsonArray(Object o, int depth) {
     Preconditions.checkArgument(o.getClass().isArray());
     final int length = Array.getLength(o);
     final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
@@ -73,7 +121,7 @@ public class DSON {
     return arrayBuilder.build();
   }
 
-  private static JsonObject objectToJsonObject(Object o, int currentDepth) {
+  private JsonObject objectToJsonObject(Object o, int currentDepth) {
     final Field[] fields = o.getClass().getFields();
     final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
     Arrays.stream(fields)
@@ -87,7 +135,7 @@ public class DSON {
     return objectBuilder.build();
   }
 
-  private static JsonValue filedValue(Field field, Object o, int currentDepth) {
+  private JsonValue filedValue(Field field, Object o, int currentDepth) {
     try {
       field.setAccessible(true);
       final Object value = field.get(o);
@@ -97,13 +145,13 @@ public class DSON {
     }
   }
 
-  private static String fieldToName(Field field) {
+  private String fieldToName(Field field) {
     Preconditions.checkNotNull(field);
     return Annotations.getJsonNameValueIfAnnotated(field)
             .orElse(field.getName());
   }
 
-  private static JsonObject mapToJsonObject(Map<?, ?> o, int currentDepth) {
+  private JsonObject mapToJsonObject(Map<?, ?> o, int currentDepth) {
     final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
     o.entrySet().forEach(entry -> {
       final String key = String.valueOf(entry.getKey());
@@ -113,7 +161,7 @@ public class DSON {
     return objectBuilder.build();
   }
 
-  private static JsonArray collectionToJsonArray(final Collection<Object> collection, final int currentDepth) {
+  private JsonArray collectionToJsonArray(final Collection<Object> collection, final int currentDepth) {
     JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
     collection.stream()
             .forEach(element -> jsonArrayBuilder.add(_toJsonObject(element, currentDepth)));
