@@ -1,4 +1,4 @@
-package ru.otus.kunin;
+package ru.otus.kunin.dson;
 
 import javax.json.JsonValue;
 import java.util.function.Function;

@@ -1,4 +1,4 @@
-package ru.otus.kunin;
+package ru.otus.kunin.dson;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

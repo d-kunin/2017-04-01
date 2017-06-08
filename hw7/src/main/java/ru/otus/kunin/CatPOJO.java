@@ -1,12 +1,16 @@
+package ru.otus.kunin;
+
 import com.google.common.collect.Lists;
-import ru.otus.kunin.JsonName;
+import com.google.gson.annotations.SerializedName;
+import ru.otus.kunin.dson.JsonName;
 
 import java.util.List;
 import java.util.Optional;
 
 class CatPOJO {
 
-  @JsonName("name_in_json")
+  @JsonName("name_in_json") // my custom annotation
+  @SerializedName("name_in_json") // annotation from GSON for test
   public final String name;
   public final int age;
   public final List<CatPOJO> friends;

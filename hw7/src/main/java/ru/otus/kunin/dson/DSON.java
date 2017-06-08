@@ -1,4 +1,4 @@
-package ru.otus.kunin;
+package ru.otus.kunin.dson;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
@@ -74,7 +74,7 @@ public class DSON {
 
   private JsonValue _toJsonObject(final Object value, int depth) {
     if (depth > maxDepth) {
-      //TODO(dima) custom strategies
+      //TODO(dima) custom strategies maybe? throw or ignore
       return JsonValue.NULL;
     }
     depth++;
