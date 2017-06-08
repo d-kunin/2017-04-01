@@ -17,22 +17,22 @@ public class Main {
       return Json.createValue(reversString);
     };
     final DSON dson = new DSON.Builder()
-            .addCustomConverter(String.class, reverseStringConverter)
-            .setMaxDepth(42)
-            .build();
+        .addCustomConverter(String.class, reverseStringConverter)
+        .setMaxDepth(42)
+        .build();
 
     final CatPOJO cat = new CatPOJO.Builder().setName("Saffran").setAge(1).build();
     final CatPOJO aCat = new CatPOJO.Builder()
-            .setName("Fluffy")
-            .setAge(3)
-            .setFriends(Lists.newArrayList(
-                    new CatPOJO.Builder()
-                            .setName("Stanford")
-                            .setAge(3)
-                            .setFriends(Lists.newArrayList(cat))
-                            .build(),
-                    cat))
-            .build();
+        .setName("Fluffy")
+        .setAge(3)
+        .setFriends(Lists.newArrayList(
+            new CatPOJO.Builder()
+                .setName("Stanford")
+                .setAge(3)
+                .setFriends(Lists.newArrayList(cat))
+                .build(),
+            cat))
+        .build();
     System.out.println(dson.toJsonObject(aCat));
   }
 

@@ -51,13 +51,13 @@ public class DSON {
   private final static int DEFAULT_MAX_JSON_DEPTH = 32;
 
   private final static Map<Class<?>, ConvertToJsonValue> PRIMITIVE_CONVERTERS = ImmutableMap.<Class<?>, ConvertToJsonValue>builder()
-      .put(Float.class,   v -> Json.createValue(((Float) v).doubleValue()))
-      .put(Double.class,  v -> Json.createValue((double) v))
-      .put(Byte.class,    v -> Json.createValue(((Byte)v).intValue()))
-      .put(Short.class,   v -> Json.createValue(((Short)v).intValue()))
+      .put(Float.class, v -> Json.createValue(((Float) v).doubleValue()))
+      .put(Double.class, v -> Json.createValue((double) v))
+      .put(Byte.class, v -> Json.createValue(((Byte) v).intValue()))
+      .put(Short.class, v -> Json.createValue(((Short) v).intValue()))
       .put(Integer.class, v -> Json.createValue((int) v))
-      .put(Long.class,    v -> Json.createValue((long) v))
-      .put(Boolean.class, v -> (Boolean)v ? JsonValue.TRUE : JsonValue.FALSE)
+      .put(Long.class, v -> Json.createValue((long) v))
+      .put(Boolean.class, v -> (Boolean) v ? JsonValue.TRUE : JsonValue.FALSE)
       .build();
 
   public JsonValue toJsonObject(Object o) {
@@ -101,7 +101,7 @@ public class DSON {
     }
 
     if (value instanceof Map) {
-      return mapToJsonObject((Map<?,?>)value, depth);
+      return mapToJsonObject((Map<?, ?>) value, depth);
     }
 
     return objectToJsonObject(value, depth);
@@ -121,13 +121,13 @@ public class DSON {
     final Field[] fields = o.getClass().getFields();
     final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
     Arrays.stream(fields)
-      .filter(field -> !Modifier.isStatic(field.getModifiers()))
-      .filter(field -> !Modifier.isTransient(field.getModifiers()))
-      .forEach(field -> {
-        final String name = fieldToName(field);
-        final JsonValue value = filedValue(field, o, currentDepth);
-        objectBuilder.add(name, value);
-      });
+        .filter(field -> !Modifier.isStatic(field.getModifiers()))
+        .filter(field -> !Modifier.isTransient(field.getModifiers()))
+        .forEach(field -> {
+          final String name = fieldToName(field);
+          final JsonValue value = filedValue(field, o, currentDepth);
+          objectBuilder.add(name, value);
+        });
     return objectBuilder.build();
   }
 
@@ -144,7 +144,7 @@ public class DSON {
   private String fieldToName(Field field) {
     Preconditions.checkNotNull(field);
     return DSONAnnotationsUtil.getJsonNameValueIfAnnotated(field)
-            .orElse(field.getName());
+        .orElse(field.getName());
   }
 
   private JsonObject mapToJsonObject(Map<?, ?> o, int currentDepth) {
@@ -160,7 +160,7 @@ public class DSON {
   private JsonArray collectionToJsonArray(final Collection<Object> collection, final int currentDepth) {
     JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
     collection.stream()
-            .forEach(element -> jsonArrayBuilder.add(_toJsonObject(element, currentDepth)));
+        .forEach(element -> jsonArrayBuilder.add(_toJsonObject(element, currentDepth)));
     return jsonArrayBuilder.build();
   }
 }

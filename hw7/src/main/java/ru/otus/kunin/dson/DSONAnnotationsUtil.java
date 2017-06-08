@@ -5,10 +5,11 @@ import java.util.Optional;
 
 class DSONAnnotationsUtil {
 
-    private DSONAnnotationsUtil() {}
+  private DSONAnnotationsUtil() {
+  }
 
-    static Optional<String> getJsonNameValueIfAnnotated(final Field field) {
-        final JsonName annotation = field.getAnnotation(JsonName.class);
-        return Optional.ofNullable(annotation).map(JsonName::value);
-    }
+  static Optional<String> getJsonNameValueIfAnnotated(final Field field) {
+    final JsonName annotation = field.getAnnotation(JsonName.class);
+    return Optional.ofNullable(annotation).map(JsonName::value);
+  }
 }
