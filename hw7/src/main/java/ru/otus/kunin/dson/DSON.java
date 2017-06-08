@@ -50,15 +50,16 @@ public class DSON {
   private final static int MIN_MAX_JSON_DEPTH = 1;
   private final static int DEFAULT_MAX_JSON_DEPTH = 32;
 
-  private final static Map<Class<?>, ConvertToJsonValue> PRIMITIVE_CONVERTERS = ImmutableMap.<Class<?>, ConvertToJsonValue>builder()
-      .put(Float.class, v -> Json.createValue(((Float) v).doubleValue()))
-      .put(Double.class, v -> Json.createValue((double) v))
-      .put(Byte.class, v -> Json.createValue(((Byte) v).intValue()))
-      .put(Short.class, v -> Json.createValue(((Short) v).intValue()))
-      .put(Integer.class, v -> Json.createValue((int) v))
-      .put(Long.class, v -> Json.createValue((long) v))
-      .put(Boolean.class, v -> (Boolean) v ? JsonValue.TRUE : JsonValue.FALSE)
-      .build();
+  private final static Map<Class<?>, ConvertToJsonValue> PRIMITIVE_CONVERTERS =
+      ImmutableMap.<Class<?>, ConvertToJsonValue>builder()
+          .put(Float.class, v -> Json.createValue(((Float) v).doubleValue()))
+          .put(Double.class, v -> Json.createValue((double) v))
+          .put(Byte.class, v -> Json.createValue(((Byte) v).intValue()))
+          .put(Short.class, v -> Json.createValue(((Short) v).intValue()))
+          .put(Integer.class, v -> Json.createValue((int) v))
+          .put(Long.class, v -> Json.createValue((long) v))
+          .put(Boolean.class, v -> (Boolean) v ? JsonValue.TRUE : JsonValue.FALSE)
+          .build();
 
   public JsonValue toJsonObject(Object o) {
     return _toJsonObject(o, 0);
@@ -124,14 +125,14 @@ public class DSON {
         .filter(field -> !Modifier.isStatic(field.getModifiers()))
         .filter(field -> !Modifier.isTransient(field.getModifiers()))
         .forEach(field -> {
-          final String name = fieldToName(field);
-          final JsonValue value = filedValue(field, o, currentDepth);
+          final String name = fieldName(field);
+          final JsonValue value = fieldValue(field, o, currentDepth);
           objectBuilder.add(name, value);
         });
     return objectBuilder.build();
   }
 
-  private JsonValue filedValue(Field field, Object o, int currentDepth) {
+  private JsonValue fieldValue(Field field, Object o, int currentDepth) {
     try {
       field.setAccessible(true);
       final Object value = field.get(o);
@@ -141,7 +142,7 @@ public class DSON {
     }
   }
 
-  private String fieldToName(Field field) {
+  private String fieldName(Field field) {
     Preconditions.checkNotNull(field);
     return DSONAnnotationsUtil.getJsonNameValueIfAnnotated(field)
         .orElse(field.getName());
