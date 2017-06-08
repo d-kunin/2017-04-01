@@ -1,6 +1,5 @@
 package ru.otus.kunin;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import ru.otus.kunin.dson.ConvertToJsonValue;
 import ru.otus.kunin.dson.DSON;
@@ -17,10 +16,10 @@ public class Main {
       final String reversString = new StringBuilder(o.toString()).reverse().toString();
       return Json.createValue(reversString);
     };
-    final ImmutableMap<Class<?>, ConvertToJsonValue> customConverters =
-            ImmutableMap.of(String.class, reverseStringConverter);
-    final DSON.Config config = DSON.Config.builder().setCustomConverters(customConverters).build();
-    final DSON dson = DSON.create(config);
+    final DSON dson = new DSON.Builder()
+            .addCustomConverter(String.class, reverseStringConverter)
+            .setMaxDepth(42)
+            .build();
 
     final CatPOJO cat = new CatPOJO.Builder().setName("Saffran").setAge(1).build();
     final CatPOJO aCat = new CatPOJO.Builder()

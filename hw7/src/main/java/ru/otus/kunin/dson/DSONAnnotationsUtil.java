@@ -3,11 +3,11 @@ package ru.otus.kunin.dson;
 import java.lang.reflect.Field;
 import java.util.Optional;
 
-public class Annotations {
+class DSONAnnotationsUtil {
 
-    private Annotations () {}
+    private DSONAnnotationsUtil() {}
 
-    public static Optional<String> getJsonNameValueIfAnnotated(final Field field) {
+    static Optional<String> getJsonNameValueIfAnnotated(final Field field) {
         final JsonName annotation = field.getAnnotation(JsonName.class);
         return Optional.ofNullable(annotation).map(JsonName::value);
     }

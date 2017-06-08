@@ -69,7 +69,7 @@ public class DSONTest {
 
     static <T> void verifySameJson(T value) {
         final Gson gson = new GsonBuilder().create();
-        final DSON dson = DSON.create(DSON.Config.builder().build());
+        final DSON dson = new DSON.Builder().build();
         final String dsonJson = dson.toJsonObject(value).toString();
         final String gsonJson = gson.toJson(value);
         final String normalizedDson = dsonJson.replaceAll("\\s+", "");

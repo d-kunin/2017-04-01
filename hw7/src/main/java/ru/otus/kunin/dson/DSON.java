@@ -1,61 +1,53 @@
 package ru.otus.kunin.dson;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import javax.json.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 public class DSON {
 
   private final int maxDepth;
-  private final Map<Class<?>, ConvertToJsonValue> customConverters;
+  private final ImmutableMap<Class<?>, ConvertToJsonValue> customConverters;
 
-  private DSON(int maxDepth, Map<Class<?>, ConvertToJsonValue> converters) {
+  private DSON(int maxDepth, ImmutableMap<Class<?>, ConvertToJsonValue> converters) {
     this.maxDepth = maxDepth;
     this.customConverters = converters;
   }
 
-  public static DSON create(Config config) {
-    return new DSON(
-            config.maxDepth(),
-            ImmutableMap.copyOf(Optional.ofNullable(config.customConverters()).orElse(Collections.EMPTY_MAP)));
-  }
+  public static class Builder {
+    private int maxDepth;
+    private Map<Class<?>, ConvertToJsonValue> customConverters;
 
-  @AutoValue
-  public abstract static class Config {
-
-    public abstract int maxDepth();
-    public abstract Map<Class<?>, ConvertToJsonValue> customConverters();
-
-    public static Builder builder() {
-      return new AutoValue_DSON_Config.Builder()
-              .setMaxDepth(DEFAULT_MAX_JSON_DEPTH)
-              .setCustomConverters(ImmutableMap.of());
+    public Builder() {
+      this.maxDepth = DEFAULT_MAX_JSON_DEPTH;
+      this.customConverters = Maps.newHashMap();
     }
 
-    @AutoValue.Builder
-    public abstract static class Builder {
-      public abstract Builder setMaxDepth(int maxDepth);
-      public abstract Builder setCustomConverters(Map<Class<?>, ConvertToJsonValue> converters);
+    public Builder setMaxDepth(int maxDepth) {
+      Preconditions.checkArgument(maxDepth >= MIN_MAX_JSON_DEPTH);
+      this.maxDepth = maxDepth;
+      return this;
+    }
 
-      abstract Config autoBuild();
+    public Builder addCustomConverter(Class<?> type, ConvertToJsonValue converter) {
+      this.customConverters.put(type, converter);
+      return this;
+    }
 
-      public Config build() {
-        final Config config = autoBuild();
-        Preconditions.checkArgument(config.maxDepth() >= MIN_MAX_JSON_DEPTH,
-                "maxDepth should at least be " + MIN_MAX_JSON_DEPTH);
-        return config;
-      }
+    public DSON build() {
+      return new DSON(maxDepth, ImmutableMap.copyOf(customConverters));
     }
   }
 
   private final static int MIN_MAX_JSON_DEPTH = 1;
-
   private final static int DEFAULT_MAX_JSON_DEPTH = 32;
 
   private final static Map<Class<?>, ConvertToJsonValue> PRIMITIVE_CONVERTERS = ImmutableMap.<Class<?>, ConvertToJsonValue>builder()
@@ -72,6 +64,10 @@ public class DSON {
     return _toJsonObject(o, 0);
   }
 
+  /**
+   * The function is called recursively at most {@link #maxDepth} times
+   * to prevent a stack overflow in case of cyclic dependencies.
+   */
   private JsonValue _toJsonObject(final Object value, int depth) {
     if (depth > maxDepth) {
       //TODO(dima) custom strategies maybe? throw or ignore
@@ -147,7 +143,7 @@ public class DSON {
 
   private String fieldToName(Field field) {
     Preconditions.checkNotNull(field);
-    return Annotations.getJsonNameValueIfAnnotated(field)
+    return DSONAnnotationsUtil.getJsonNameValueIfAnnotated(field)
             .orElse(field.getName());
   }
 
