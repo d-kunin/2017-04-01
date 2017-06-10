@@ -11,6 +11,8 @@ public class Main {
   public static void main(String[] args) throws SQLException {
     // NOTE: There is not need to register driver since jdbc 4.0
     // see http://docs.oracle.com/javase/tutorial/jdbc/basics/connecting.html
+
+    // TODO(dima) read on on the SQL exceptions http://docs.oracle.com/javase/tutorial/jdbc/basics/sqlexception.html
     System.out.println("<dorm>");
     try (Connection connection = Connector.createDataSource().getConnection()) {
       final DatabaseMetaData metaData = connection.getMetaData();
