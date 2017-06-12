@@ -9,14 +9,14 @@ public class TypeMapping {
 
   private final Field idField;
 
-  private final String table;
+  private final String sqlTable;
 
   private final List<FieldMapping> fieldMappings;
 
-  public TypeMapping(Class<? extends DormEntity> type, Field idField, String table, List<FieldMapping> fieldMappings) {
+  public TypeMapping(Class<? extends DormEntity> type, Field idField, String sqlTable, List<FieldMapping> fieldMappings) {
     this.type = type;
     this.idField = idField;
-    this.table = table;
+    this.sqlTable = sqlTable;
     this.fieldMappings = fieldMappings;
   }
 }
