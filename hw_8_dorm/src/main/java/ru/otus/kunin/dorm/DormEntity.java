@@ -13,4 +13,8 @@ public abstract class DormEntity {
     return id;
   }
 
+  public boolean isNew() {
+    return null == id;
+  }
+
 }

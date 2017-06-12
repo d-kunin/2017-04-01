@@ -11,17 +11,16 @@ import javax.persistence.Table;
 public class User extends DormEntity {
 
   public String getName() {
-    return name;
+    return aNameField;
   }
 
   public int getAge() {
     return age;
   }
 
-  @Column(columnDefinition = "varchar(255)")
-  private String name;
+  @Column(columnDefinition = "varchar(255)", name = "name")
+  private String aNameField;
 
   @Column(columnDefinition = "int(3) not null default 0")
   private int age;
-
 }
