@@ -5,10 +5,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import javax.json.JsonValue;
 import org.junit.Test;
 import ru.otus.kunin.dson.DSON;
 
 import java.util.List;
+import ru.otus.kunin.dson.DsonException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -65,6 +67,14 @@ public class DSONTest {
                         simpleCat))
                 .build();
         verifySameJson(complexCat);
+    }
+
+    @Test(expected = DsonException.class)
+    public void throwOnCyclicDependency() throws Exception {
+        Object[] array0 = {1, null};
+        Object[] array1 = {2, array0};
+        array0[1] = array1;
+        new DSON.Builder().build().toJsonObject(array0);
     }
 
     static <T> void verifySameJson(T value) {

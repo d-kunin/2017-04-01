@@ -3,38 +3,34 @@ package ru.otus.kunin.dson;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-
-import javax.json.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import ru.otus.kunin.dson.tools.IdentitySetImpl;
 
 public class DSON {
 
-  private final int maxDepth;
   private final ImmutableMap<Class<?>, ConvertToJsonValue> customConverters;
 
-  private DSON(int maxDepth, ImmutableMap<Class<?>, ConvertToJsonValue> converters) {
-    this.maxDepth = maxDepth;
+  private DSON(ImmutableMap<Class<?>, ConvertToJsonValue> converters) {
     this.customConverters = converters;
   }
 
   public static class Builder {
-    private int maxDepth;
+
     private Map<Class<?>, ConvertToJsonValue> customConverters;
 
     public Builder() {
-      this.maxDepth = DEFAULT_MAX_JSON_DEPTH;
       this.customConverters = Maps.newHashMap();
-    }
-
-    public Builder setMaxDepth(int maxDepth) {
-      Preconditions.checkArgument(maxDepth >= MIN_MAX_JSON_DEPTH);
-      this.maxDepth = maxDepth;
-      return this;
     }
 
     public Builder addCustomConverter(Class<?> type, ConvertToJsonValue converter) {
@@ -43,12 +39,9 @@ public class DSON {
     }
 
     public DSON build() {
-      return new DSON(maxDepth, ImmutableMap.copyOf(customConverters));
+      return new DSON(ImmutableMap.copyOf(customConverters));
     }
   }
-
-  private final static int MIN_MAX_JSON_DEPTH = 1;
-  private final static int DEFAULT_MAX_JSON_DEPTH = 32;
 
   private final static Map<Class<?>, ConvertToJsonValue> PRIMITIVE_CONVERTERS =
       ImmutableMap.<Class<?>, ConvertToJsonValue>builder()
@@ -62,19 +55,14 @@ public class DSON {
           .build();
 
   public JsonValue toJsonObject(Object o) {
-    return _toJsonObject(o, 0);
+    return _toJsonObject(o, new IdentitySetImpl());
   }
 
-  /**
-   * The function is called recursively at most {@link #maxDepth} times
-   * to prevent a stack overflow in case of cyclic dependencies.
-   */
-  private JsonValue _toJsonObject(final Object value, int depth) {
-    if (depth > maxDepth) {
-      //TODO(dima) custom strategies maybe? throw or ignore
-      return JsonValue.NULL;
+  private JsonValue _toJsonObject(final Object value, IdentitySet processedObjects) {
+    if (processedObjects.contains(value)) {
+      throw new DsonException("Found cyclic dependency for object: " + value);
     }
-    depth++;
+    processedObjects.add(value);
 
     if (null == value) {
       return JsonValue.NULL;
@@ -94,21 +82,21 @@ public class DSON {
     }
 
     if (valueClass.isArray()) {
-      return arrayToJsonArray(value, depth);
+      return arrayToJsonArray(value, processedObjects.copy());
     }
 
     if (value instanceof Collection) {
-      return collectionToJsonArray((Collection<Object>) value, depth);
+      return collectionToJsonArray((Collection<Object>) value, processedObjects.copy());
     }
 
     if (value instanceof Map) {
-      return mapToJsonObject((Map<?, ?>) value, depth);
+      return mapToJsonObject((Map<?, ?>) value, processedObjects.copy());
     }
 
-    return objectToJsonObject(value, depth);
+    return objectToJsonObject(value, processedObjects.copy());
   }
 
-  private JsonArray arrayToJsonArray(Object o, int depth) {
+  private JsonArray arrayToJsonArray(Object o, IdentitySet depth) {
     Preconditions.checkArgument(o.getClass().isArray());
     final int length = Array.getLength(o);
     final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
@@ -118,7 +106,7 @@ public class DSON {
     return arrayBuilder.build();
   }
 
-  private JsonObject objectToJsonObject(Object o, int currentDepth) {
+  private JsonObject objectToJsonObject(Object o, IdentitySet currentDepth) {
     final Field[] fields = o.getClass().getFields();
     final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
     Arrays.stream(fields)
@@ -132,11 +120,11 @@ public class DSON {
     return objectBuilder.build();
   }
 
-  private JsonValue fieldValue(Field field, Object o, int currentDepth) {
+  private JsonValue fieldValue(Field field, Object o, IdentitySet processedObjects) {
     try {
       field.setAccessible(true);
       final Object value = field.get(o);
-      return _toJsonObject(value, currentDepth);
+      return _toJsonObject(value, processedObjects);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }
@@ -148,7 +136,7 @@ public class DSON {
         .orElse(field.getName());
   }
 
-  private JsonObject mapToJsonObject(Map<?, ?> o, int currentDepth) {
+  private JsonObject mapToJsonObject(Map<?, ?> o, IdentitySet currentDepth) {
     final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
     o.entrySet().forEach(entry -> {
       final String key = String.valueOf(entry.getKey());
@@ -158,7 +146,7 @@ public class DSON {
     return objectBuilder.build();
   }
 
-  private JsonArray collectionToJsonArray(final Collection<Object> collection, final int currentDepth) {
+  private JsonArray collectionToJsonArray(final Collection<Object> collection, final IdentitySet currentDepth) {
     JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
     collection.stream()
         .forEach(element -> jsonArrayBuilder.add(_toJsonObject(element, currentDepth)));

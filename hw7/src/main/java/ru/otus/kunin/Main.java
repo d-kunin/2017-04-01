@@ -1,10 +1,9 @@
 package ru.otus.kunin;
 
 import com.google.common.collect.Lists;
+import javax.json.Json;
 import ru.otus.kunin.dson.ConvertToJsonValue;
 import ru.otus.kunin.dson.DSON;
-
-import javax.json.Json;
 
 public class Main {
 
@@ -18,7 +17,6 @@ public class Main {
     };
     final DSON dson = new DSON.Builder()
         .addCustomConverter(String.class, reverseStringConverter)
-        .setMaxDepth(42)
         .build();
 
     final CatPOJO cat = new CatPOJO.Builder().setName("Saffran").setAge(1).build();

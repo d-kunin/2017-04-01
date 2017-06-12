@@ -1,8 +1,9 @@
 package ru.otus.kunin.dson;
 
-import javax.json.JsonValue;
 import java.util.function.Function;
+import javax.json.JsonValue;
 
 @FunctionalInterface
 public interface ConvertToJsonValue extends Function<Object, JsonValue> {
+
 }

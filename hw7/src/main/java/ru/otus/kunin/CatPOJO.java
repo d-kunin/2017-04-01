@@ -2,10 +2,9 @@ package ru.otus.kunin;
 
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.SerializedName;
-import ru.otus.kunin.dson.JsonName;
-
 import java.util.List;
 import java.util.Optional;
+import ru.otus.kunin.dson.JsonName;
 
 class CatPOJO {
 
