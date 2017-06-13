@@ -1,22 +1,37 @@
 package ru.otus.kunin.dorm;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 public class TypeMapping {
 
   private final Class<? extends DormEntity> type;
 
-  private final Field idField;
+  private final FieldMapping idField;
 
   private final String sqlTable;
 
-  private final List<FieldMapping> fieldMappings;
+  private final List<FieldMapping> nonIdFieldMappings;
 
-  public TypeMapping(Class<? extends DormEntity> type, Field idField, String sqlTable, List<FieldMapping> fieldMappings) {
+  TypeMapping(Class<? extends DormEntity> type, FieldMapping idField, String sqlTable, List<FieldMapping> nonIdFieldMappings) {
     this.type = type;
     this.idField = idField;
     this.sqlTable = sqlTable;
-    this.fieldMappings = fieldMappings;
+    this.nonIdFieldMappings = nonIdFieldMappings;
+  }
+
+  public Class<? extends DormEntity> getType() {
+    return type;
+  }
+
+  public FieldMapping getIdField() {
+    return idField;
+  }
+
+  public String getSqlTable() {
+    return sqlTable;
+  }
+
+  public List<FieldMapping> getNonIdFieldMappings() {
+    return nonIdFieldMappings;
   }
 }

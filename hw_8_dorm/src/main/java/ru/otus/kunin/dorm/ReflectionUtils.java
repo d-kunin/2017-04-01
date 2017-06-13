@@ -1,12 +1,12 @@
 package ru.otus.kunin.dorm;
 
-import static java.util.stream.Collectors.toList;
-
 import com.google.common.collect.Lists;
+
 import java.lang.reflect.Field;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 public class ReflectionUtils {
 

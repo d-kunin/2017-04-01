@@ -10,7 +10,7 @@ public class FieldMapping {
   private final boolean isId;
 
 
-  public FieldMapping(Field field, final String sqlName, String sqlDefinition, final boolean isId) {
+  FieldMapping(Field field, final String sqlName, String sqlDefinition, final boolean isId) {
     this.field = field;
     this.sqlName = sqlName;
     this.sqlDefinition = sqlDefinition;
