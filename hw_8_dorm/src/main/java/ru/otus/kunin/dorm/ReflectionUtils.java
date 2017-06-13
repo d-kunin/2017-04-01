@@ -29,16 +29,33 @@ public class ReflectionUtils {
   }
 
   public static List<Field> getAllFields(Class<?> clazz) {
-    LinkedList<Class<?>> allClasses = Lists.newLinkedList();
+    List<Class<?>> allClasses = getClassHierarchy(clazz);
+    List<Field> allFields = allClasses.stream()
+        .flatMap(c -> Stream.of(c.getDeclaredFields()))
+        .collect(toList());
+    return allFields;
+  }
+
+  private static List<Class<?>> getClassHierarchy(Class<?> clazz) {
+    List<Class<?>> allClasses = Lists.newArrayList();
     Class<?> currentClass = clazz;
     while (currentClass != null) {
       allClasses.add(currentClass);
       currentClass = currentClass.getSuperclass();
     }
-    List<Field> allFields = allClasses.stream()
-        .flatMap(c -> Stream.of(c.getDeclaredFields()))
-        .collect(toList());
-    return allFields;
+    return allClasses;
+  }
+
+  public static Field getFieldByName(final String name, final Class<?> clazz) {
+    final List<Class<?>> classHierarchy = getClassHierarchy(clazz);
+    for (Class<?> aClass : classHierarchy) {
+      try {
+        return aClass.getDeclaredField(name);
+      } catch (NoSuchFieldException e) {
+        continue;
+      }
+    }
+    throw new RuntimeException(new NoSuchFieldException("Field '" + name + "' does not exist"));
   }
 
 }

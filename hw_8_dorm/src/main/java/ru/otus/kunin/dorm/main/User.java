@@ -18,9 +18,15 @@ public class User extends DormEntity {
     return age;
   }
 
+  public String getDisplayName() {
+    return displayName;
+  }
+
   @Column(columnDefinition = "varchar(255)", name = "name")
   private String aNameField;
 
   @Column(columnDefinition = "int(3) not null default 0")
   private int age;
+
+  private String displayName;
 }

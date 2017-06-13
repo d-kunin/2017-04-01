@@ -24,4 +24,20 @@ public class FieldMapping {
   public void set(Object instance, Object value) {
     ReflectionUtils.setFieldValue(field, instance, value);
   }
+
+  public Field getField() {
+    return field;
+  }
+
+  public String getSqlName() {
+    return sqlName;
+  }
+
+  public String getSqlDefinition() {
+    return sqlDefinition;
+  }
+
+  public boolean isId() {
+    return isId;
+  }
 }

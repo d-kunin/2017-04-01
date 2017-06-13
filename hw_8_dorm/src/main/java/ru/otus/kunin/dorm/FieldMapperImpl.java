@@ -1,39 +1,54 @@
 package ru.otus.kunin.dorm;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import java.lang.reflect.Field;
-import java.util.Optional;
+
 import javax.persistence.Column;
 import javax.persistence.Id;
+import java.lang.reflect.Field;
+import java.util.Optional;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 public class FieldMapperImpl implements FieldMapper {
+
+  private final static ImmutableMap<Class<?>, String> DEFAULT_TYPE_MAPPING = ImmutableMap.<Class<?>, String>builder()
+      // TODO(dima) add more mappings
+      .put(long.class, "bigint not nullable")
+      .put(Long.class, "bigint")
+      .put(int.class, "int not nullable")
+      .put(Integer.class, "int")
+      .put(String.class, "text")
+      .build();
+
+  @VisibleForTesting final static String ID_FIELD_NAME = "id";
+  @VisibleForTesting final static String ID_FIELD_DEFINITION = "bigint auto_increment primary key";
 
   @Override
   public FieldMapping mapField(final Field field) {
     boolean isId = field.getAnnotation(Id.class) != null;
-    // TODO(dima) if isId then column definition must be disallowed
-    Optional<Column> columnAnnotation = Optional.ofNullable(field.getAnnotation(Column.class));
-    String sqlName = columnAnnotation.map(ca -> isNullOrEmpty(ca.name()) ? defaultName(field) : ca.name())
-        .orElse(defaultName(field));
-    String sqlDefinition = columnAnnotation.map(ca -> isNullOrEmpty(ca.columnDefinition()) ? defaultDefinition(field) : ca.columnDefinition())
-        .orElse(defaultDefinition(field));
+    String sqlName = isId ? ID_FIELD_NAME : nameFor(field);
+    String sqlDefinition = isId ? ID_FIELD_DEFINITION : columnDefinitionFor(field);
     return new FieldMapping(field, sqlName, sqlDefinition, isId);
   }
 
-  private String defaultDefinition(final Field field) {
-    ImmutableMap<Class<?>, String> defaultMapping = ImmutableMap.<Class<?>, String>builder()
-        .put(long.class, "bigint not nullable")
-        .put(Long.class, "bigint")
-        .put(int.class, "int not nullable")
-        .put(Integer.class, "int")
-        .put(String.class, "text")
-        .build();
-    return defaultMapping.get(field.getType());
+  @VisibleForTesting
+  String columnDefinitionFor(final Field field) {
+    Optional<Column> columnAnnotation = Optional.ofNullable(field.getAnnotation(Column.class));
+    final Optional<String> definition = columnAnnotation
+        .filter(ca -> !isNullOrEmpty(ca.columnDefinition())).map(Column::columnDefinition);
+    return definition.orElse(defaultMappingForType(field.getType()));
   }
 
-  private String defaultName(final Field field) {
-    return field.getName();
+  @VisibleForTesting
+  String defaultMappingForType(final Class<?> type) {
+    return DEFAULT_TYPE_MAPPING.get(type);
+  }
+
+  @VisibleForTesting
+  String nameFor(final Field field) {
+    Optional<Column> columnAnnotation = Optional.ofNullable(field.getAnnotation(Column.class));
+    final Optional<String> name = columnAnnotation.filter(ca -> !isNullOrEmpty(ca.name())).map(Column::name);
+    return name.orElse(field.getName());
   }
 }
