@@ -44,10 +44,20 @@ public class SqlGeneratorImplTest {
 
   @Test
   public void testSelectOne() throws Exception {
+    String selectOne = sqlGenerator.selectOne(typeMapping);
+    assertEquals(
+        "select * from dima_users where id=?;",
+        selectOne
+    );
   }
 
   @Test
   public void testSelectAll() throws Exception {
+    String selectAll = sqlGenerator.selectAll(typeMapping);
+    assertEquals(
+        "select * from dima_users;",
+        selectAll
+    );
   }
 
 }

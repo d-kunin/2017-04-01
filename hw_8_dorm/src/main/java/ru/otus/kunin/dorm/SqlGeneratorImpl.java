@@ -15,8 +15,10 @@ public class SqlGeneratorImpl implements SqlGenerator {
     ArrayList<FieldMapping> fieldMappings = Lists.newArrayList(type.getIdField());
     fieldMappings.addAll(type.getNonIdFieldMappings());
     List<String> columns = fieldMappings.stream()
-        .map(fm -> fm.getSqlName() + " " + fm.getSqlDefinition()).collect(toList());
-    return "create table " + type.getSqlTable() + " (" + Joiner.on(", ").join(columns) + ");";
+        .map(fm -> fm.getSqlName() + " " + fm.getSqlDefinition())
+        .collect(toList());
+    return "create table " + type.getSqlTable() + " " +
+           "(" + Joiner.on(", ").join(columns) + ");";
   }
 
   @Override
@@ -27,7 +29,9 @@ public class SqlGeneratorImpl implements SqlGenerator {
   @Override
   public String insert(final TypeMapping type) {
     List<FieldMapping> nonIdFieldMappings = type.getNonIdFieldMappings();
-    List<String> columnNames = nonIdFieldMappings.stream().map(FieldMapping::getSqlName).collect(toList());
+    List<String> columnNames = nonIdFieldMappings.stream()
+        .map(FieldMapping::getSqlName)
+        .collect(toList());
     String[] valuesPlaceholders = new String[nonIdFieldMappings.size()];
     Arrays.fill(valuesPlaceholders, "?");
     return "insert into " + type.getSqlTable() + " " +
@@ -49,11 +53,12 @@ public class SqlGeneratorImpl implements SqlGenerator {
 
   @Override
   public String selectOne(final TypeMapping type) {
-    return null;
+    return "select * from " + type.getSqlTable() + " " +
+        "where " + type.getIdField().getSqlName() + "=?;";
   }
 
   @Override
   public String selectAll(final TypeMapping type) {
-    return null;
+    return "select * from " + type.getSqlTable() + ";";
   }
 }
