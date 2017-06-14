@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SqlGeneratorImpl implements SqlGenerator {
@@ -25,7 +26,13 @@ public class SqlGeneratorImpl implements SqlGenerator {
 
   @Override
   public String insert(final TypeMapping type) {
-    return null;
+    List<FieldMapping> nonIdFieldMappings = type.getNonIdFieldMappings();
+    List<String> columnNames = nonIdFieldMappings.stream().map(FieldMapping::getSqlName).collect(toList());
+    String[] valuesPlaceholders = new String[nonIdFieldMappings.size()];
+    Arrays.fill(valuesPlaceholders, "?");
+    return "insert into " + type.getSqlTable() + " " +
+        "(" + Joiner.on(", ").join(columnNames) + ") " +
+        "values (" + Joiner.on(", ").join(valuesPlaceholders) + ");";
   }
 
   @Override

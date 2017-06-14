@@ -28,6 +28,10 @@ public class SqlGeneratorImplTest {
 
   @Test
   public void insert() throws Exception {
+    String insert = sqlGenerator.insert(typeMapping);
+    assertEquals(
+        "insert into dima_users (name, age, displayName) values (?, ?, ?);",
+        insert);
   }
 
   @Test
