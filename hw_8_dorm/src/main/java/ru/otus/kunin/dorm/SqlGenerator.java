@@ -12,6 +12,6 @@ public interface SqlGenerator {
 
   String selectOne(TypeMapping type);
 
-  String seleactAll(TypeMapping type);
+  String selectAll(TypeMapping type);
 
 }

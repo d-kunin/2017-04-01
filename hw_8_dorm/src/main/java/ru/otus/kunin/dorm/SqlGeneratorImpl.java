@@ -53,7 +53,7 @@ public class SqlGeneratorImpl implements SqlGenerator {
   }
 
   @Override
-  public String seleactAll(final TypeMapping type) {
+  public String selectAll(final TypeMapping type) {
     return null;
   }
 }

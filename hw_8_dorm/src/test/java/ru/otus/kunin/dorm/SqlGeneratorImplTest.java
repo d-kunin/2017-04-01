@@ -47,7 +47,7 @@ public class SqlGeneratorImplTest {
   }
 
   @Test
-  public void testSeleactAll() throws Exception {
+  public void testSelectAll() throws Exception {
   }
 
 }
