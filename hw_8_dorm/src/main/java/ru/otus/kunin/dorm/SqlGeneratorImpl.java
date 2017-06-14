@@ -37,7 +37,14 @@ public class SqlGeneratorImpl implements SqlGenerator {
 
   @Override
   public String update(final TypeMapping type) {
-    return null;
+    FieldMapping idField = type.getIdField();
+    String idPlusPlaceholder = idField.getSqlName() + "=?";
+    List<String> columnsPlusPlaceholders = type.getNonIdFieldMappings().stream()
+        .map(fm -> fm.getSqlName() + "=?")
+        .collect(toList());
+    return "update " + type.getSqlTable() + " " +
+        "set " + Joiner.on(", ").join(columnsPlusPlaceholders) + " " +
+        "where " + idPlusPlaceholder + ";";
   }
 
   @Override

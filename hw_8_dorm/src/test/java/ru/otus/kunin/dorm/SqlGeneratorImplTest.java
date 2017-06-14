@@ -36,6 +36,10 @@ public class SqlGeneratorImplTest {
 
   @Test
   public void testUpdate() throws Exception {
+    String update = sqlGenerator.update(typeMapping);
+    assertEquals(
+        "update dima_users set name=?, age=?, displayName=? where id=?;",
+        update);
   }
 
   @Test
