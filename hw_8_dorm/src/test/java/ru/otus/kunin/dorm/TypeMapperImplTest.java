@@ -1,20 +1,19 @@
 package ru.otus.kunin.dorm;
 
-import org.junit.Test;
-import ru.otus.kunin.dorm.main.User;
-
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+import org.junit.Test;
+import ru.otus.kunin.dorm.main.User;
 
 public class TypeMapperImplTest {
 
   TypeMapperImpl typeMapper = new TypeMapperImpl(new FieldMapperImpl());
 
   @Test
-  public void mappingForClass() throws Exception {
+  public void testMappingForClass() throws Exception {
     final TypeMapping typeMapping = typeMapper.mappingForClass(User.class);
 
     assertEquals(User.class, typeMapping.getType()

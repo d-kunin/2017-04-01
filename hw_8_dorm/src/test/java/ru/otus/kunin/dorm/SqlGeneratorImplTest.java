@@ -11,7 +11,7 @@ public class SqlGeneratorImplTest {
   SqlGeneratorImpl sqlGenerator = new SqlGeneratorImpl();
 
   @Test
-  public void createTable() throws Exception {
+  public void testCreateTable() throws Exception {
     String createTable = sqlGenerator.createTable(typeMapping);
     assertEquals(
         "create table dima_users (id bigint auto_increment primary key, name varchar(255), age int(3) not null default 0, displayName text);",
@@ -19,7 +19,7 @@ public class SqlGeneratorImplTest {
   }
 
   @Test
-  public void dropTable() throws Exception {
+  public void testDropTable() throws Exception {
     String dropTable = sqlGenerator.dropTable(typeMapping);
     assertEquals(
         "drop table dima_users;",
@@ -27,7 +27,7 @@ public class SqlGeneratorImplTest {
   }
 
   @Test
-  public void insert() throws Exception {
+  public void testInsert() throws Exception {
     String insert = sqlGenerator.insert(typeMapping);
     assertEquals(
         "insert into dima_users (name, age, displayName) values (?, ?, ?);",
@@ -35,15 +35,15 @@ public class SqlGeneratorImplTest {
   }
 
   @Test
-  public void update() throws Exception {
+  public void testUpdate() throws Exception {
   }
 
   @Test
-  public void selectOne() throws Exception {
+  public void testSelectOne() throws Exception {
   }
 
   @Test
-  public void seleactAll() throws Exception {
+  public void testSeleactAll() throws Exception {
   }
 
 }
