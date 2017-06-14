@@ -20,7 +20,7 @@ public class SqlGeneratorImpl implements SqlGenerator {
 
   @Override
   public String dropTable(final TypeMapping type) {
-    return null;
+    return "drop table " + type.getSqlTable() + ";";
   }
 
   @Override

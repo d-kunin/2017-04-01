@@ -20,6 +20,10 @@ public class SqlGeneratorImplTest {
 
   @Test
   public void dropTable() throws Exception {
+    String dropTable = sqlGenerator.dropTable(typeMapping);
+    assertEquals(
+        "drop table dima_users;",
+        dropTable);
   }
 
   @Test
