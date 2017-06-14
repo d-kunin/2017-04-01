@@ -1,10 +1,14 @@
 package ru.otus.kunin.dorm.main;
 
-import ru.otus.kunin.dorm.Connector;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import ru.otus.kunin.dorm.Connector;
+import ru.otus.kunin.dorm.Dorm;
+import ru.otus.kunin.dorm.DormImpl;
+import ru.otus.kunin.dorm.FieldMapperImpl;
+import ru.otus.kunin.dorm.SqlGeneratorImpl;
+import ru.otus.kunin.dorm.TypeMapperImpl;
 
 public class Main {
 
@@ -18,6 +22,16 @@ public class Main {
       final DatabaseMetaData metaData = connection.getMetaData();
       System.out.println("Connected to: " + metaData.getURL() + "\n" +
           "jdbc version: " + metaData.getJDBCMajorVersion() + "." + metaData.getJDBCMinorVersion());
+      Dorm dorm = new DormImpl(
+          connection,
+          new TypeMapperImpl(new FieldMapperImpl()),
+          new SqlGeneratorImpl()
+      );
+      try {
+        dorm.createTable(User.class);
+      } finally {
+        dorm.dropTable(User.class);
+      }
     }
   }
 

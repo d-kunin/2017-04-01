@@ -6,7 +6,7 @@ public interface Dorm {
 
   <T extends DormEntity> void createTable(Class<T> type) throws SQLException;
 
-  <T extends DormEntity> void dropTable(Class<T> type);
+  <T extends DormEntity> void dropTable(Class<T> type) throws SQLException;
 
   <T extends DormEntity> void save(T value);
 
