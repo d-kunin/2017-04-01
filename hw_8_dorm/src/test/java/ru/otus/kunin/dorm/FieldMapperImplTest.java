@@ -1,11 +1,13 @@
 package ru.otus.kunin.dorm;
 
-import org.junit.Test;
-import ru.otus.kunin.dorm.main.User;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
-
-import static org.junit.Assert.*;
+import org.junit.Test;
+import ru.otus.kunin.dorm.main.User;
 
 public class FieldMapperImplTest {
 
