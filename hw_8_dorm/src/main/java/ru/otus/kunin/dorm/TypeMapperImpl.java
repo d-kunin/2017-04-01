@@ -1,14 +1,13 @@
 package ru.otus.kunin.dorm;
 
-import com.google.common.annotations.VisibleForTesting;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.stream.Collectors.toList;
 
-import javax.persistence.Table;
+import com.google.common.annotations.VisibleForTesting;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.stream.Collectors.toList;
+import javax.persistence.Table;
 
 public class TypeMapperImpl implements TypeMapper {
   

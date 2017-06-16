@@ -1,10 +1,9 @@
 package ru.otus.kunin.dorm.main;
 
-import ru.otus.kunin.dorm.DormEntity;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import ru.otus.kunin.dorm.DormEntity;
 
 @Entity
 @Table(name = "dima_users")

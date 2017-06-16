@@ -2,16 +2,16 @@ package ru.otus.kunin.dorm;
 
 public interface SqlGenerator {
 
-  String createTable(TypeMapping type);
+  SqlStatement createTable(TypeMapping type);
 
-  String dropTable(TypeMapping type);
+  SqlStatement dropTable(TypeMapping type);
 
-  String insert(TypeMapping type);
+  SqlStatement insert(TypeMapping type);
 
-  String update(TypeMapping type);
+  SqlStatement update(TypeMapping type);
 
-  String selectOne(TypeMapping type);
+  SqlStatement selectOne(TypeMapping type);
 
-  String selectAll(TypeMapping type);
+  SqlStatement selectAll(TypeMapping type);
 
 }

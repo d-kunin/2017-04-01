@@ -12,51 +12,51 @@ public class SqlGeneratorImplTest {
 
   @Test
   public void testCreateTable() throws Exception {
-    String createTable = sqlGenerator.createTable(typeMapping);
+    SqlStatement createTable = sqlGenerator.createTable(typeMapping);
     assertEquals(
         "create table dima_users (id bigint auto_increment primary key, name varchar(255), age int(3) not null default 0, displayName text);",
-        createTable);
+        createTable.getQuery());
   }
 
   @Test
   public void testDropTable() throws Exception {
-    String dropTable = sqlGenerator.dropTable(typeMapping);
+    SqlStatement dropTable = sqlGenerator.dropTable(typeMapping);
     assertEquals(
         "drop table dima_users;",
-        dropTable);
+        dropTable.getQuery());
   }
 
   @Test
   public void testInsert() throws Exception {
-    String insert = sqlGenerator.insert(typeMapping);
+    SqlStatement insert = sqlGenerator.insert(typeMapping);
     assertEquals(
         "insert into dima_users (name, age, displayName) values (?, ?, ?);",
-        insert);
+        insert.getQuery());
   }
 
   @Test
   public void testUpdate() throws Exception {
-    String update = sqlGenerator.update(typeMapping);
+    SqlStatement update = sqlGenerator.update(typeMapping);
     assertEquals(
         "update dima_users set name=?, age=?, displayName=? where id=?;",
-        update);
+        update.getQuery());
   }
 
   @Test
   public void testSelectOne() throws Exception {
-    String selectOne = sqlGenerator.selectOne(typeMapping);
+    SqlStatement selectOne = sqlGenerator.selectOne(typeMapping);
     assertEquals(
         "select * from dima_users where id=?;",
-        selectOne
+        selectOne.getQuery()
     );
   }
 
   @Test
   public void testSelectAll() throws Exception {
-    String selectAll = sqlGenerator.selectAll(typeMapping);
+    SqlStatement selectAll = sqlGenerator.selectAll(typeMapping);
     assertEquals(
         "select * from dima_users;",
-        selectAll
+        selectAll.getQuery()
     );
   }
 

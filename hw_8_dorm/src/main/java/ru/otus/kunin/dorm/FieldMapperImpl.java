@@ -1,14 +1,13 @@
 package ru.otus.kunin.dorm;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-
-import javax.persistence.Column;
-import javax.persistence.Id;
 import java.lang.reflect.Field;
 import java.util.Optional;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
+import javax.persistence.Column;
+import javax.persistence.Id;
 
 public class FieldMapperImpl implements FieldMapper {
 

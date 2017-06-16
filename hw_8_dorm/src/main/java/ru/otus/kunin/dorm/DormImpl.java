@@ -24,16 +24,16 @@ public class DormImpl implements Dorm {
   @Override
   public <T extends DormEntity> void createTable(final Class<T> type) throws SQLException {
     TypeMapping typeMapping = mappingCache.getUnchecked(type);
-    String createTable = sqlGenerator.createTable(typeMapping);
-    PreparedStatement createStatement = connection.prepareStatement(createTable);
+    SqlStatement createTable = sqlGenerator.createTable(typeMapping);
+    PreparedStatement createStatement = connection.prepareStatement(createTable.getQuery());
     createStatement.execute();
   }
 
   @Override
   public <T extends DormEntity> void dropTable(final Class<T> type) throws SQLException {
     TypeMapping typeMapping = mappingCache.getUnchecked(type);
-    String dropTable = sqlGenerator.dropTable(typeMapping);
-    PreparedStatement dropStatement = connection.prepareStatement(dropTable);
+    SqlStatement dropTable = sqlGenerator.dropTable(typeMapping);
+    PreparedStatement dropStatement = connection.prepareStatement(dropTable.getQuery());
     dropStatement.execute();
   }
 
