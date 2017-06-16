@@ -29,6 +29,10 @@ public class Main {
       );
       try {
         dorm.createTable(User.class);
+        User user = new User("dima", 27, "Dzmitry");
+        dorm.save(user);
+        user.setDisplayName("Dimon");
+        dorm.save(user);
       } finally {
         dorm.dropTable(User.class);
       }

@@ -5,7 +5,10 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Map;
 
 public class DormImpl implements Dorm {
 
@@ -38,8 +41,24 @@ public class DormImpl implements Dorm {
   }
 
   @Override
-  public <T extends DormEntity> void save(final T value) {
-
+  public <T extends DormEntity> void save(final T value) throws SQLException {
+    TypeMapping typeMapping = mappingCache.getUnchecked(value.getClass());
+    SqlStatement statement = value.isNew() ? sqlGenerator.insert(typeMapping) : sqlGenerator.update(typeMapping);
+    try (PreparedStatement preparedStatement = connection.prepareStatement(statement.getQuery(), Statement.RETURN_GENERATED_KEYS)) {
+      Map<Integer, FieldMapping> parameterList = statement.getParameterList();
+      for (final Map.Entry<Integer, FieldMapping> entry : parameterList.entrySet()) {
+        FieldMapping fieldMapping = parameterList.get(entry.getKey());
+        preparedStatement.setObject(entry.getKey(), fieldMapping.get(value));
+      }
+      int numUpdates = preparedStatement.executeUpdate();
+      ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+      if (generatedKeys.next()) {
+        long id = generatedKeys.getLong(1);
+        typeMapping.getIdField().set(value, id);
+      }
+      // TODO(dima) remove logging
+      System.out.println("Updated: " + numUpdates + " value: " + value);
+    }
   }
 
   @Override
