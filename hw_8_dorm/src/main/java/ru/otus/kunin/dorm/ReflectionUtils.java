@@ -29,10 +29,9 @@ public class ReflectionUtils {
 
   public static List<Field> getAllFields(Class<?> clazz) {
     List<Class<?>> allClasses = getClassHierarchy(clazz);
-    List<Field> allFields = allClasses.stream()
+    return allClasses.stream()
         .flatMap(c -> Stream.of(c.getDeclaredFields()))
         .collect(toList());
-    return allFields;
   }
 
   private static List<Class<?>> getClassHierarchy(Class<?> clazz) {
@@ -51,7 +50,6 @@ public class ReflectionUtils {
       try {
         return aClass.getDeclaredField(name);
       } catch (NoSuchFieldException e) {
-        continue;
       }
     }
     throw new RuntimeException(new NoSuchFieldException("Field '" + name + "' does not exist"));

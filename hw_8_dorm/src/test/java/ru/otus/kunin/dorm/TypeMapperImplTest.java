@@ -10,7 +10,7 @@ import ru.otus.kunin.dorm.main.User;
 
 public class TypeMapperImplTest {
 
-  TypeMapperImpl typeMapper = new TypeMapperImpl(new FieldMapperImpl());
+  final TypeMapperImpl typeMapper = new TypeMapperImpl(new FieldMapperImpl());
 
   @Test
   public void testMappingForClass() throws Exception {

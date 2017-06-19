@@ -11,10 +11,10 @@ import ru.otus.kunin.dorm.main.User;
 
 public class FieldMapperImplTest {
 
-  FieldMapperImpl fieldMapper = new FieldMapperImpl();
+  final FieldMapperImpl fieldMapper = new FieldMapperImpl();
 
   @Test
-  public void teseMapsIdField() throws Exception {
+  public void testMapsIdField() throws Exception {
     final Field idField = ReflectionUtils.getFieldByName("id", User.class);
     assertNotNull(idField);
     final FieldMapping idFieldMapping = fieldMapper.mapField(idField);
@@ -25,7 +25,7 @@ public class FieldMapperImplTest {
   }
 
   @Test
-  public void teseMapsFieldWithCustomNameAndDefinition() throws Exception {
+  public void testMapsFieldWithCustomNameAndDefinition() throws Exception {
     final Field aNameField = ReflectionUtils.getFieldByName("aNameField", User.class);
     final FieldMapping aNameFieldMapping = fieldMapper.mapField(aNameField);
     assertFalse(aNameFieldMapping.isId());
@@ -34,7 +34,7 @@ public class FieldMapperImplTest {
   }
 
   @Test
-  public void teseMapsFieldWithCustomDefinition() throws Exception {
+  public void testMapsFieldWithCustomDefinition() throws Exception {
     final Field ageField = ReflectionUtils.getFieldByName("age", User.class);
     final FieldMapping ageFieldMapping = fieldMapper.mapField(ageField);
     assertFalse(ageFieldMapping.isId());
@@ -43,7 +43,7 @@ public class FieldMapperImplTest {
   }
 
   @Test
-  public void teseMapsSimpleField() throws Exception {
+  public void testMapsSimpleField() throws Exception {
     final Field displayNameField = ReflectionUtils.getFieldByName("displayName", User.class);
     final FieldMapping displayNameFieldMapping = fieldMapper.mapField(displayNameField);
     assertFalse(displayNameFieldMapping.isId());

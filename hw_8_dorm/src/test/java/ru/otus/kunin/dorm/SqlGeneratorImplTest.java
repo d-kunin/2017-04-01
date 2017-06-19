@@ -7,8 +7,8 @@ import ru.otus.kunin.dorm.main.User;
 
 public class SqlGeneratorImplTest {
 
-  TypeMapping typeMapping = new TypeMapperImpl(new FieldMapperImpl()).mappingForClass(User.class);
-  SqlGeneratorImpl sqlGenerator = new SqlGeneratorImpl();
+  final TypeMapping typeMapping = new TypeMapperImpl(new FieldMapperImpl()).mappingForClass(User.class);
+  final SqlGeneratorImpl sqlGenerator = new SqlGeneratorImpl();
 
   @Test
   public void testCreateTable() throws Exception {
