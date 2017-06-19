@@ -15,18 +15,18 @@ public class DormImpl implements Dorm {
   private final Connection connection;
   private final SqlGenerator sqlGenerator;
   private final TypeMapper typeMapper;
-  private final LoadingCache<Class<? extends DormEntity>, TypeMapping> mappingCache;
+  private final LoadingCache<Class<? extends DormEntity>, TypeMapping> typeMappingCache;
 
   public DormImpl(final Connection connection, final TypeMapper typeMapper, final SqlGenerator sqlGenerator) {
     this.connection = connection;
     this.typeMapper = typeMapper;
     this.sqlGenerator = sqlGenerator;
-    this.mappingCache = CacheBuilder.newBuilder().build(CacheLoader.from(typeMapper::mappingForClass));
+    this.typeMappingCache = CacheBuilder.newBuilder().build(CacheLoader.from(typeMapper::mappingForClass));
   }
 
   @Override
   public <T extends DormEntity> void createTable(final Class<T> type) throws SQLException {
-    TypeMapping typeMapping = mappingCache.getUnchecked(type);
+    TypeMapping typeMapping = typeMappingCache.getUnchecked(type);
     SqlStatement createTable = sqlGenerator.createTable(typeMapping);
     PreparedStatement createStatement = connection.prepareStatement(createTable.getQuery());
     createStatement.execute();
@@ -34,7 +34,7 @@ public class DormImpl implements Dorm {
 
   @Override
   public <T extends DormEntity> void dropTable(final Class<T> type) throws SQLException {
-    TypeMapping typeMapping = mappingCache.getUnchecked(type);
+    TypeMapping typeMapping = typeMappingCache.getUnchecked(type);
     SqlStatement dropTable = sqlGenerator.dropTable(typeMapping);
     PreparedStatement dropStatement = connection.prepareStatement(dropTable.getQuery());
     dropStatement.execute();
@@ -42,7 +42,7 @@ public class DormImpl implements Dorm {
 
   @Override
   public <T extends DormEntity> void save(final T value) throws SQLException {
-    TypeMapping typeMapping = mappingCache.getUnchecked(value.getClass());
+    TypeMapping typeMapping = typeMappingCache.getUnchecked(value.getClass());
     SqlStatement statement = value.isNew() ? sqlGenerator.insert(typeMapping) : sqlGenerator.update(typeMapping);
     try (PreparedStatement preparedStatement = connection.prepareStatement(statement.getQuery(), Statement.RETURN_GENERATED_KEYS)) {
       Map<Integer, FieldMapping> parameterList = statement.getParameterList();
