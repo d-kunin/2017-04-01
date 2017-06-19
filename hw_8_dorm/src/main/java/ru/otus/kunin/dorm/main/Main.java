@@ -14,10 +14,6 @@ import ru.otus.kunin.dorm.TypeMapperImpl;
 public class Main {
 
   public static void main(String[] args) throws SQLException {
-    // NOTE: There is not need to register driver since jdbc 4.0
-    // see http://docs.oracle.com/javase/tutorial/jdbc/basics/connecting.html
-
-    // TODO(dima) read on on the SQL exceptions http://docs.oracle.com/javase/tutorial/jdbc/basics/sqlexception.html
     System.out.println("<dorm>");
     try (Connection connection = Connector.createDataSource().getConnection()) {
       final DatabaseMetaData metaData = connection.getMetaData();
@@ -33,6 +29,8 @@ public class Main {
         User user = new User("dima", 27, "Dzmitry");
         dorm.save(user);
         user.setDisplayName("Dimon");
+        user.setAge(39);
+        user.setName("Updated Name");
         dorm.save(user);
         System.out.println(dorm.load(-1, User.class));
         System.out.println(dorm.load(user.getId(), User.class).get().equals(user));
