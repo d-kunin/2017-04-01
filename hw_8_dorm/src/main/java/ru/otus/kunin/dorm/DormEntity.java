@@ -7,7 +7,7 @@ import javax.persistence.Id;
 public abstract class DormEntity {
 
   @Id
-  private Long id;
+  protected Long id;
 
   public long getId() {
     return id;

@@ -1,5 +1,6 @@
 package ru.otus.kunin.dorm.main;
 
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -59,5 +60,25 @@ public class User extends DormEntity {
     sb.append(", displayName='").append(displayName).append('\'');
     sb.append('}');
     return sb.toString();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final User user = (User) o;
+    return age == user.age &&
+           Objects.equals(id, user.id) &&
+           Objects.equals(aNameField, user.aNameField) &&
+           Objects.equals(displayName, user.displayName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(aNameField, age, displayName, id);
   }
 }

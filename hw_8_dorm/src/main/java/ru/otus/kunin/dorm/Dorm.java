@@ -1,6 +1,7 @@
 package ru.otus.kunin.dorm;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
 public interface Dorm {
 
@@ -10,6 +11,6 @@ public interface Dorm {
 
   <T extends DormEntity> void save(T value) throws SQLException;
 
-  <T extends DormEntity> T load(long id, Class<T> clazz);
+  <T extends DormEntity> Optional<T> load(long id, Class<T> clazz) throws SQLException;
 
 }

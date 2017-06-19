@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
+import java.util.Optional;
 
 public class DormImpl implements Dorm {
 
@@ -16,12 +17,18 @@ public class DormImpl implements Dorm {
   private final SqlGenerator sqlGenerator;
   private final TypeMapper typeMapper;
   private final LoadingCache<Class<? extends DormEntity>, TypeMapping> typeMappingCache;
+  private final ResultSetMapper resultSetMapper;
 
-  public DormImpl(final Connection connection, final TypeMapper typeMapper, final SqlGenerator sqlGenerator) {
+  public DormImpl(
+      final Connection connection,
+      final TypeMapper typeMapper,
+      final SqlGenerator sqlGenerator,
+      final ResultSetMapper resultSetMapper) {
     this.connection = connection;
     this.typeMapper = typeMapper;
     this.sqlGenerator = sqlGenerator;
     this.typeMappingCache = CacheBuilder.newBuilder().build(CacheLoader.from(typeMapper::mappingForClass));
+    this.resultSetMapper = resultSetMapper;
   }
 
   @Override
@@ -62,7 +69,16 @@ public class DormImpl implements Dorm {
   }
 
   @Override
-  public <T extends DormEntity> T load(final long id, final Class<T> clazz) {
-    return null;
+  public <T extends DormEntity> Optional<T> load(final long id, final Class<T> clazz) throws SQLException {
+    TypeMapping typeMapping = typeMappingCache.getUnchecked(clazz);
+    SqlStatement statement = sqlGenerator.selectOne(typeMapping);
+    try (PreparedStatement preparedStatement = connection.prepareStatement(statement.getQuery())) {
+      preparedStatement.setLong(1, id);
+      ResultSet resultSet = preparedStatement.executeQuery();
+      if (resultSet.next()) {
+        return Optional.of(resultSetMapper.entityFromResultSet(resultSet, typeMapping));
+      }
+    }
+    return Optional.empty();
   }
 }

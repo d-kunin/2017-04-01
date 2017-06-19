@@ -7,6 +7,7 @@ import ru.otus.kunin.dorm.Connector;
 import ru.otus.kunin.dorm.Dorm;
 import ru.otus.kunin.dorm.DormImpl;
 import ru.otus.kunin.dorm.FieldMapperImpl;
+import ru.otus.kunin.dorm.ResultSetMapperImpl;
 import ru.otus.kunin.dorm.SqlGeneratorImpl;
 import ru.otus.kunin.dorm.TypeMapperImpl;
 
@@ -25,14 +26,16 @@ public class Main {
       Dorm dorm = new DormImpl(
           connection,
           new TypeMapperImpl(new FieldMapperImpl()),
-          new SqlGeneratorImpl()
-      );
+          new SqlGeneratorImpl(),
+          new ResultSetMapperImpl());
       try {
         dorm.createTable(User.class);
         User user = new User("dima", 27, "Dzmitry");
         dorm.save(user);
         user.setDisplayName("Dimon");
         dorm.save(user);
+        System.out.println(dorm.load(-1, User.class));
+        System.out.println(dorm.load(user.getId(), User.class).get().equals(user));
       } finally {
         dorm.dropTable(User.class);
       }
