@@ -3,11 +3,13 @@ package ru.otus.kunin.dorm;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -80,5 +82,20 @@ public class DormImpl implements Dorm {
       }
     }
     return Optional.empty();
+  }
+
+  @Override
+  public <T extends DormEntity> List<T> loadAll(final Class<T> clazz) throws SQLException {
+    TypeMapping typeMapping = typeMappingCache.getUnchecked(clazz);
+    SqlStatement statement = sqlGenerator.selectAll(typeMapping);
+    List<T> resultList = Lists.newArrayList();
+    try (PreparedStatement preparedStatement = connection.prepareStatement(statement.getQuery())) {
+      ResultSet resultSet = preparedStatement.executeQuery();
+      while (resultSet.next()) {
+        T entity = resultSetMapper.entityFromResultSet(resultSet, typeMapping);
+        resultList.add(entity);
+      }
+    }
+    return resultList;
   }
 }

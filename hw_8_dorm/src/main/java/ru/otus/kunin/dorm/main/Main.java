@@ -34,6 +34,8 @@ public class Main {
         dorm.save(user);
         System.out.println(dorm.load(-1, User.class));
         System.out.println(dorm.load(user.getId(), User.class).get().equals(user));
+        dorm.save(new User("name", 21, "nice display name"));
+        System.out.println(dorm.loadAll(User.class));
       } finally {
         dorm.dropTable(User.class);
       }
