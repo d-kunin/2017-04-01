@@ -1,4 +1,4 @@
-package ru.otus.kunin.dorm;
+package ru.otus.kunin.dorm.main;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 import javax.sql.DataSource;

@@ -1,4 +1,4 @@
-package ru.otus.kunin.dorm;
+package ru.otus.kunin.dorm.base;
 
 public interface SqlGenerator {
 

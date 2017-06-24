@@ -1,7 +1,10 @@
-package ru.otus.kunin.dorm;
+package ru.otus.kunin.dorm.base;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import ru.otus.kunin.dorm.api.DormEntity;
+import ru.otus.kunin.dorm.api.DormException;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;

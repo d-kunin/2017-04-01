@@ -1,9 +1,12 @@
-package ru.otus.kunin.dorm;
+package ru.otus.kunin.dorm.base;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
 
 import com.google.common.annotations.VisibleForTesting;
+import ru.otus.kunin.dorm.api.DormEntity;
+import ru.otus.kunin.dorm.api.DormException;
+
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;

@@ -1,13 +1,11 @@
-package ru.otus.kunin.dorm;
+package ru.otus.kunin.dorm.base;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import ru.otus.kunin.dorm.main.UserEntity;
 
 import java.lang.reflect.Field;
-import org.junit.Test;
-import ru.otus.kunin.dorm.main.User;
+
+import static org.junit.Assert.*;
 
 public class FieldMapperImplTest {
 
@@ -15,7 +13,7 @@ public class FieldMapperImplTest {
 
   @Test
   public void testMapsIdField() throws Exception {
-    final Field idField = ReflectionUtils.getFieldByName("id", User.class);
+    final Field idField = ReflectionUtils.getFieldByName("id", UserEntity.class);
     assertNotNull(idField);
     final FieldMapping idFieldMapping = fieldMapper.mapField(idField);
     assertEquals(idField, idFieldMapping.getField());
@@ -26,7 +24,7 @@ public class FieldMapperImplTest {
 
   @Test
   public void testMapsFieldWithCustomNameAndDefinition() throws Exception {
-    final Field aNameField = ReflectionUtils.getFieldByName("aNameField", User.class);
+    final Field aNameField = ReflectionUtils.getFieldByName("aNameField", UserEntity.class);
     final FieldMapping aNameFieldMapping = fieldMapper.mapField(aNameField);
     assertFalse(aNameFieldMapping.isId());
     assertEquals("name", aNameFieldMapping.getSqlName());
@@ -35,7 +33,7 @@ public class FieldMapperImplTest {
 
   @Test
   public void testMapsFieldWithCustomDefinition() throws Exception {
-    final Field ageField = ReflectionUtils.getFieldByName("age", User.class);
+    final Field ageField = ReflectionUtils.getFieldByName("age", UserEntity.class);
     final FieldMapping ageFieldMapping = fieldMapper.mapField(ageField);
     assertFalse(ageFieldMapping.isId());
     assertEquals("age", ageFieldMapping.getSqlName());
@@ -44,7 +42,7 @@ public class FieldMapperImplTest {
 
   @Test
   public void testMapsSimpleField() throws Exception {
-    final Field displayNameField = ReflectionUtils.getFieldByName("displayName", User.class);
+    final Field displayNameField = ReflectionUtils.getFieldByName("displayName", UserEntity.class);
     final FieldMapping displayNameFieldMapping = fieldMapper.mapField(displayNameField);
     assertFalse(displayNameFieldMapping.isId());
     assertEquals("displayName", displayNameFieldMapping.getSqlName());

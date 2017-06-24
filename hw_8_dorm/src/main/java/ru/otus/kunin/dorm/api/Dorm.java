@@ -1,4 +1,4 @@
-package ru.otus.kunin.dorm;
+package ru.otus.kunin.dorm.api;
 
 import java.sql.SQLException;
 import java.util.List;

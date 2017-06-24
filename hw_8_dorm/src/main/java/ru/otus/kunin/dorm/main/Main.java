@@ -1,15 +1,11 @@
 package ru.otus.kunin.dorm.main;
 
+import ru.otus.kunin.dorm.api.Dorm;
+import ru.otus.kunin.dorm.base.*;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import ru.otus.kunin.dorm.Connector;
-import ru.otus.kunin.dorm.Dorm;
-import ru.otus.kunin.dorm.DormImpl;
-import ru.otus.kunin.dorm.FieldMapperImpl;
-import ru.otus.kunin.dorm.ResultSetMapperImpl;
-import ru.otus.kunin.dorm.SqlGeneratorImpl;
-import ru.otus.kunin.dorm.TypeMapperImpl;
 
 public class Main {
 
@@ -25,19 +21,19 @@ public class Main {
           new SqlGeneratorImpl(),
           new ResultSetMapperImpl());
       try {
-        dorm.createTable(User.class);
-        User user = new User("dima", 27, "Dzmitry");
+        dorm.createTable(UserEntity.class);
+        UserEntity user = new UserEntity("dima", 27, "Dzmitry");
         dorm.save(user);
         user.setDisplayName("Dimon");
         user.setAge(39);
         user.setName("Updated Name");
         dorm.save(user);
-        System.out.println(dorm.load(-1, User.class));
-        System.out.println(dorm.load(user.getId(), User.class).get().equals(user));
-        dorm.save(new User("name", 21, "nice display name"));
-        System.out.println(dorm.loadAll(User.class));
+        System.out.println(dorm.load(-1, UserEntity.class));
+        System.out.println(dorm.load(user.getId(), UserEntity.class).get().equals(user));
+        dorm.save(new UserEntity("name", 21, "nice display name"));
+        System.out.println(dorm.loadAll(UserEntity.class));
       } finally {
-        dorm.dropTable(User.class);
+        dorm.dropTable(UserEntity.class);
       }
     }
   }

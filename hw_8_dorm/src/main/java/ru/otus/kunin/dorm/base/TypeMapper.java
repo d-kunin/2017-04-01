@@ -1,4 +1,6 @@
-package ru.otus.kunin.dorm;
+package ru.otus.kunin.dorm.base;
+
+import ru.otus.kunin.dorm.api.DormEntity;
 
 public interface TypeMapper {
 

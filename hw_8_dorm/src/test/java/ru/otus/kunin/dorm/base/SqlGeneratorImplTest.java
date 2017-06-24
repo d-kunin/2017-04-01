@@ -1,13 +1,13 @@
-package ru.otus.kunin.dorm;
+package ru.otus.kunin.dorm.base;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import ru.otus.kunin.dorm.main.User;
+import ru.otus.kunin.dorm.main.UserEntity;
 
 public class SqlGeneratorImplTest {
 
-  final TypeMapping typeMapping = new TypeMapperImpl(new FieldMapperImpl()).mappingForClass(User.class);
+  final TypeMapping typeMapping = new TypeMapperImpl(new FieldMapperImpl()).mappingForClass(UserEntity.class);
   final SqlGeneratorImpl sqlGenerator = new SqlGeneratorImpl();
 
   @Test

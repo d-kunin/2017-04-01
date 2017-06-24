@@ -1,6 +1,6 @@
 package ru.otus.kunin.dorm.main;
 
-import ru.otus.kunin.dorm.DormEntity;
+import ru.otus.kunin.dorm.api.DormEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,13 +9,13 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "dima_users")
-public class User extends DormEntity {
+public class UserEntity extends DormEntity {
 
-  public User() {
+  public UserEntity() {
     /* required */
   }
 
-  public User(final String name, final int age, final String displayName) {
+  public UserEntity(final String name, final int age, final String displayName) {
     this.aNameField = name;
     this.age = age;
     this.displayName = displayName;
@@ -55,7 +55,7 @@ public class User extends DormEntity {
 
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder("User{");
+    final StringBuilder sb = new StringBuilder("UserEntity{");
     sb.append(" id='").append(getId()).append('\'');
     sb.append(", aNameField='").append(aNameField).append('\'');
     sb.append(", age=").append(age);
@@ -72,7 +72,7 @@ public class User extends DormEntity {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final User user = (User) o;
+    final UserEntity user = (UserEntity) o;
     return age == user.age &&
            Objects.equals(id, user.id) &&
            Objects.equals(aNameField, user.aNameField) &&

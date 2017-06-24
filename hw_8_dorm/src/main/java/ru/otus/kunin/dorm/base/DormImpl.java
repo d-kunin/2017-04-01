@@ -1,9 +1,12 @@
-package ru.otus.kunin.dorm;
+package ru.otus.kunin.dorm.base;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import ru.otus.kunin.dorm.api.Dorm;
+import ru.otus.kunin.dorm.api.DormEntity;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
