@@ -1,12 +1,14 @@
 package ru.otus.kunin.dorm;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
+@MappedSuperclass
 public abstract class DormEntity {
 
   @Id
+  @Column(name = "id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   protected Long id;
 
   public long getId() {

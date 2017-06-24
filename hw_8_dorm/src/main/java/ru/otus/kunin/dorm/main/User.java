@@ -1,16 +1,18 @@
 package ru.otus.kunin.dorm.main;
 
-import java.util.Objects;
+import ru.otus.kunin.dorm.DormEntity;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import ru.otus.kunin.dorm.DormEntity;
+import java.util.Objects;
 
 @Entity
 @Table(name = "dima_users")
 public class User extends DormEntity {
 
   public User() {
+    /* required */
   }
 
   public User(final String name, final int age, final String displayName) {
