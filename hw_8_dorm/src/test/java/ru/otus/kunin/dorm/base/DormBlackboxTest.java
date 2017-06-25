@@ -1,8 +1,11 @@
 package ru.otus.kunin.dorm.base;
 
+import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import ru.otus.kunin.dorm.api.Dorm;
+import ru.otus.kunin.dorm.hibernate.DormHibernateImpl;
 import ru.otus.kunin.dorm.main.Connector;
 import ru.otus.kunin.dorm.main.UserEntity;
 
@@ -11,19 +14,20 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-public class DormImplTest {
+public class DormBlackboxTest {
 
   Connection connection;
-  DormImpl dorm;
+  Dorm dorm;
 
   @Before
   public void setUp() throws Exception {
     connection = Connector.createDataSource().getConnection();
-    dorm = new DormImpl(
-        connection,
-        new TypeMapperImpl(new FieldMapperImpl()),
-        new SqlGeneratorImpl(),
-        new ResultSetMapperImpl());
+//    dorm = new DormImpl(
+//        connection,
+//        new TypeMapperImpl(new FieldMapperImpl()),
+//        new SqlGeneratorImpl(),
+//        new ResultSetMapperImpl());
+    dorm = new DormHibernateImpl(Sets.newHashSet(UserEntity.class));
     dorm.createTable(UserEntity.class);
   }
 
