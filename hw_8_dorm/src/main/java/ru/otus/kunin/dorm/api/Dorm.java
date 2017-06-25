@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-public interface Dorm {
+public interface Dorm extends AutoCloseable {
 
   <T extends DormEntity> void createTable(Class<T> type) throws SQLException;
 

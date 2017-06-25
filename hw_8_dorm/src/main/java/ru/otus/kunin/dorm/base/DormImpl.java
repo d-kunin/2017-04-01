@@ -101,4 +101,9 @@ public class DormImpl implements Dorm {
     }
     return resultList;
   }
+
+  @Override
+  public void close() throws Exception {
+    connection.close();
+  }
 }

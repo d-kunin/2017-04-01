@@ -2,7 +2,6 @@ package ru.otus.kunin.dorm.api;
 
 import javax.persistence.*;
 
-@Entity
 @MappedSuperclass
 public abstract class DormEntity {
 
