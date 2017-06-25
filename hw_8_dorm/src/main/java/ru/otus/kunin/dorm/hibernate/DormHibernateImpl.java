@@ -22,7 +22,7 @@ public class DormHibernateImpl implements Dorm {
 
   private final SessionFactory sessionFactory;
 
-  public <T extends DormEntity> DormHibernateImpl(Set<Class<T>> annotatedClasses) {
+  public DormHibernateImpl(Set<Class<? extends DormEntity>> annotatedClasses) {
     StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder();
     final ImmutableMap<String, Object> settings = ImmutableMap.<String, Object>builder()
         .put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect")

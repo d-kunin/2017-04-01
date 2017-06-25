@@ -1,6 +1,6 @@
 package ru.otus.kunin.dorm.base;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,8 +10,10 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import ru.otus.kunin.dorm.api.Dorm;
 import ru.otus.kunin.dorm.hibernate.DormHibernateImpl;
+import ru.otus.kunin.dorm.main.AddressEntity;
 import ru.otus.kunin.dorm.main.Connector;
 import ru.otus.kunin.dorm.main.UserEntity;
+import ru.otus.kunin.dorm.main.UserWithAddressAndPhoneEntity;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -56,7 +58,11 @@ public class DormBlackboxTest {
         },
             "DormImpl"),
         new DormParameter(
-            () -> new DormHibernateImpl(Sets.newHashSet(UserEntity.class)),
+            () -> new DormHibernateImpl(ImmutableSet.of(
+                UserEntity.class,
+                UserWithAddressAndPhoneEntity.class,
+                AddressEntity.class
+            )),
             "DormHibernateImpl")};
   }
 
