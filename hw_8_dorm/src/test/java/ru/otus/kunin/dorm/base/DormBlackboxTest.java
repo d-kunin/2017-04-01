@@ -4,37 +4,80 @@ import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import ru.otus.kunin.dorm.api.Dorm;
 import ru.otus.kunin.dorm.hibernate.DormHibernateImpl;
 import ru.otus.kunin.dorm.main.Connector;
 import ru.otus.kunin.dorm.main.UserEntity;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 
+@RunWith(Parameterized.class)
 public class DormBlackboxTest {
 
-  Connection connection;
-  Dorm dorm;
+  interface DormFactory extends Supplier<Dorm> {
+  }
+
+  static class DormParameter {
+    public final DormFactory factory;
+    public final String name;
+
+    DormParameter(DormFactory factory, String name) {
+      this.factory = factory;
+      this.name = name;
+    }
+
+    @Override
+    public String toString() {
+      return name;
+    }
+  }
+
+  @Parameters(name = "{0}")
+  public static DormParameter[] data() throws SQLException {
+    return new DormParameter[]{
+        new DormParameter(() -> {
+          try {
+            return new DormImpl(
+                Connector.createDataSource().getConnection(),
+                new TypeMapperImpl(new FieldMapperImpl()),
+                new SqlGeneratorImpl(),
+                new ResultSetMapperImpl());
+          } catch (SQLException e) {
+            throw new RuntimeException(e);
+          }
+        },
+            "DormImpl"),
+        new DormParameter(
+            () -> new DormHibernateImpl(Sets.newHashSet(UserEntity.class)),
+            "DormHibernateImpl")};
+  }
+
+  @Parameter
+  public DormParameter dormParameter;
+  private Dorm dorm;
 
   @Before
   public void setUp() throws Exception {
-    connection = Connector.createDataSource().getConnection();
-//    dorm = new DormImpl(
-//        connection,
-//        new TypeMapperImpl(new FieldMapperImpl()),
-//        new SqlGeneratorImpl(),
-//        new ResultSetMapperImpl());
-    dorm = new DormHibernateImpl(Sets.newHashSet(UserEntity.class));
+    dorm = dormParameter.factory.get();
+    try {
+      dorm.dropTable(UserEntity.class);
+    } catch (Exception ignored) {
+    }
     dorm.createTable(UserEntity.class);
   }
 
   @After
   public void tearDown() throws Exception {
     dorm.dropTable(UserEntity.class);
-    connection.close();
+    dorm.close();
   }
 
   @Test
