@@ -13,10 +13,15 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
     /* required */
   }
 
-  public UserWithAddressAndPhoneEntity(final String name, final int age, final String displayName) {
+  public UserWithAddressAndPhoneEntity(
+      final String name,
+      final int age,
+      final String displayName,
+      final AddressEntity address) {
     this.aNameField = name;
     this.age = age;
     this.displayName = displayName;
+    this.address = address;
   }
 
   public String getName() {
@@ -59,7 +64,7 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
 
   private String displayName;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.ALL)
   private AddressEntity address;
 
   @Override

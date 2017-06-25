@@ -123,8 +123,27 @@ public class DormBlackboxTest {
     assertEquals(3, dorm.loadAll(UserEntity.class).size());
   }
 
+  @Test
+  public void testNewComplexUserIsSaved() throws Exception {
+    assertEquals(0, dorm.loadAll(UserWithAddressAndPhoneEntity.class).size());
+    UserWithAddressAndPhoneEntity user = makeComplexUserEntity();
+    assertTrue(user.isNew());
+    dorm.save(user);
+    assertFalse(user.isNew());
+    assertEquals(1, dorm.loadAll(UserWithAddressAndPhoneEntity.class).size());
+    assertEquals(user, dorm.load(user.getId(), UserWithAddressAndPhoneEntity.class).get());
+  }
+
   private static UserEntity makeUser() {
     return new UserEntity("user_name", 42, "user_display_name");
+  }
+
+  private static AddressEntity makeAddress() {
+    return new AddressEntity("Anders Reimers", 11750);
+  }
+
+  private static UserWithAddressAndPhoneEntity makeComplexUserEntity() {
+    return new UserWithAddressAndPhoneEntity("complex_name", 100, "complex user", makeAddress());
   }
 
 }

@@ -9,14 +9,14 @@ import java.util.Objects;
 public class AddressEntity extends DormEntity {
 
   private String street;
-  private int index;
+  private int postalCode;
 
   public AddressEntity() {
   }
 
-  public AddressEntity(String street, int index) {
+  public AddressEntity(String street, int postalCode) {
     this.street = street;
-    this.index = index;
+    this.postalCode = postalCode;
   }
 
   public String getStreet() {
@@ -27,12 +27,12 @@ public class AddressEntity extends DormEntity {
     this.street = street;
   }
 
-  public int getIndex() {
-    return index;
+  public int getPostalCode() {
+    return postalCode;
   }
 
-  public void setIndex(int index) {
-    this.index = index;
+  public void setPostalCode(int postalCode) {
+    this.postalCode = postalCode;
   }
 
   @Override
@@ -40,13 +40,13 @@ public class AddressEntity extends DormEntity {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     AddressEntity that = (AddressEntity) o;
-    return index == that.index &&
+    return postalCode == that.postalCode &&
         Objects.equals(id, that.id) &&
         Objects.equals(street, that.street);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(street, index, id);
+    return Objects.hash(street, postalCode, id);
   }
 }
