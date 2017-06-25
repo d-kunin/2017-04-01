@@ -74,6 +74,7 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
     sb.append(", aNameField='").append(aNameField).append('\'');
     sb.append(", age=").append(age);
     sb.append(", displayName='").append(displayName).append('\'');
+    sb.append(", address='").append(address).append('\'');
     sb.append('}');
     return sb.toString();
   }
@@ -90,7 +91,8 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
     return age == user.age &&
            Objects.equals(id, user.id) &&
            Objects.equals(aNameField, user.aNameField) &&
-           Objects.equals(displayName, user.displayName);
+           Objects.equals(displayName, user.displayName) &&
+           Objects.equals(address, user.address);
   }
 
   @Override

@@ -73,16 +73,14 @@ public class DormBlackboxTest {
   @Before
   public void setUp() throws Exception {
     dorm = dormParameter.factory.get();
-    try {
-      dorm.dropTable(UserEntity.class);
-    } catch (Exception ignored) {
-    }
+    dropTablesSilent();
     dorm.createTable(UserEntity.class);
+    dorm.createTable(UserWithAddressAndPhoneEntity.class);
   }
 
   @After
   public void tearDown() throws Exception {
-    dorm.dropTable(UserEntity.class);
+    dropTablesSilent();
     dorm.close();
   }
 
@@ -146,4 +144,11 @@ public class DormBlackboxTest {
     return new UserWithAddressAndPhoneEntity("complex_name", 100, "complex user", makeAddress());
   }
 
+  private void dropTablesSilent() {
+    try {
+      dorm.dropTable(UserEntity.class);
+      dorm.dropTable(UserWithAddressAndPhoneEntity.class);
+    } catch (Exception ignored) {
+    }
+  }
 }

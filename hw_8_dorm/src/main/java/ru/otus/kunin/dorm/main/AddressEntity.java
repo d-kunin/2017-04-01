@@ -49,4 +49,13 @@ public class AddressEntity extends DormEntity {
   public int hashCode() {
     return Objects.hash(street, postalCode, id);
   }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("AddressEntity{");
+    sb.append("street='").append(street).append('\'');
+    sb.append(", postalCode=").append(postalCode);
+    sb.append('}');
+    return sb.toString();
+  }
 }
