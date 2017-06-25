@@ -47,10 +47,10 @@ public class Main {
       user.setAge(39);
       user.setName("Updated Name");
       dorm.save(user);
-      System.out.println(dorm.load(-1, UserEntity.class));
-      System.out.println(dorm.load(user.getId(), UserEntity.class).get().equals(user));
       dorm.save(new UserEntity("name", 21, "nice display name"));
       System.out.println(dorm.loadAll(UserEntity.class));
+      System.out.println(dorm.load(-1, UserEntity.class));
+      System.out.println(dorm.load(user.getId(), UserEntity.class).get().equals(user));
     } finally {
       dorm.dropTable(UserEntity.class);
     }

@@ -1,13 +1,14 @@
 package ru.otus.kunin.dorm.base;
 
-import static java.util.stream.Collectors.toList;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 public class SqlGeneratorImpl implements SqlGenerator {
 

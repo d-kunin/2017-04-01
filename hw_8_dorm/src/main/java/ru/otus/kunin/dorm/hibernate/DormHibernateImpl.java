@@ -1,11 +1,14 @@
 package ru.otus.kunin.dorm.hibernate;
 
 import com.google.common.collect.ImmutableMap;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Environment;
+import org.hibernate.query.Query;
 import ru.otus.kunin.dorm.api.Dorm;
 import ru.otus.kunin.dorm.api.DormEntity;
 
@@ -13,6 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 public class DormHibernateImpl implements Dorm {
 
@@ -27,7 +31,7 @@ public class DormHibernateImpl implements Dorm {
         .put(Environment.USER, "tully")
         .put(Environment.PASS, "tully")
         .put(Environment.HBM2DDL_AUTO, "create")
-        .put(Environment.SHOW_SQL, true)
+//        .put(Environment.SHOW_SQL, true)
         .build();
     registryBuilder.applySettings(settings);
     final StandardServiceRegistry registry = registryBuilder.build();
@@ -51,17 +55,30 @@ public class DormHibernateImpl implements Dorm {
 
   @Override
   public <T extends DormEntity> void save(T value) throws SQLException {
-
+    withSession(session -> session.save(value));
   }
 
   @Override
   public <T extends DormEntity> Optional<T> load(long id, Class<T> clazz) throws SQLException {
-    return null;
+    return withSession(session -> {
+      final Query query = session.createQuery("from " + clazz.getSimpleName() + " where id = :id");
+      query.setParameter("id", id);
+      return Optional.ofNullable((T)query.uniqueResult());
+    });
   }
 
   @Override
   public <T extends DormEntity> List<T> loadAll(Class<T> clazz) throws SQLException {
-    return null;
+    return withSession(session -> session.createQuery("from " +  clazz.getSimpleName()).list());
+  }
+
+  private <R> R withSession(Function<Session, R> function) {
+    try (Session session = sessionFactory.openSession()) {
+      final Transaction transaction = session.beginTransaction();
+      final R result = function.apply(session);
+      transaction.commit();
+      return result;
+    }
   }
 
   @Override
