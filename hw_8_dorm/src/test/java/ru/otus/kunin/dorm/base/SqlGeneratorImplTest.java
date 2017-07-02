@@ -1,9 +1,9 @@
 package ru.otus.kunin.dorm.base;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 import ru.otus.kunin.dorm.main.entity.UserEntity;
+
+import static org.junit.Assert.assertEquals;
 
 public class SqlGeneratorImplTest {
 

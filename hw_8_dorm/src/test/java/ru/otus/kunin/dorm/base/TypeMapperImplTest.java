@@ -1,12 +1,11 @@
 package ru.otus.kunin.dorm.base;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
 import org.junit.Test;
 import ru.otus.kunin.dorm.main.entity.UserEntity;
+
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class TypeMapperImplTest {
 
