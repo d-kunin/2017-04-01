@@ -2,9 +2,8 @@ package ru.otus.kunin.dorm.base;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import com.zaxxer.hikari.HikariDataSource;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
@@ -29,11 +28,11 @@ public class DormBlackboxTest {
   interface DormFactory extends Supplier<Dorm> {
   }
 
-  static class DormParameter {
+  static class DormTestParameter {
     public final DormFactory factory;
     public final String name;
 
-    DormParameter(DormFactory factory, String name) {
+    DormTestParameter(DormFactory factory, String name) {
       this.factory = factory;
       this.name = name;
     }
@@ -45,12 +44,12 @@ public class DormBlackboxTest {
   }
 
   @Parameters(name = "{0}")
-  public static DormParameter[] data() throws SQLException {
-    return new DormParameter[]{
-        new DormParameter(() -> {
+  public static DormTestParameter[] data() throws SQLException {
+    return new DormTestParameter[]{
+        new DormTestParameter(() -> {
           try {
             return new DormImpl(
-                Connector.createDataSource().getConnection(),
+                sHikariDataSource.getConnection(),
                 new TypeMapperImpl(new FieldMapperImpl()),
                 new SqlGeneratorImpl(),
                 new ResultSetMapperImpl());
@@ -59,7 +58,7 @@ public class DormBlackboxTest {
           }
         },
             "DormImpl"),
-        new DormParameter(
+        new DormTestParameter(
             () -> new DormHibernateImpl(ImmutableSet.of(
                 UserEntity.class,
                 AddressEntity.class,
@@ -70,12 +69,12 @@ public class DormBlackboxTest {
   }
 
   @Parameter
-  public DormParameter dormParameter;
+  public DormTestParameter dormTestParameter;
   private Dorm dorm;
 
   @Before
   public void setUp() throws Exception {
-    dorm = dormParameter.factory.get();
+    dorm = dormTestParameter.factory.get();
     dropTablesSilent();
     dorm.createTable(UserEntity.class);
     dorm.createTable(UserWithAddressAndPhoneEntity.class);
@@ -163,5 +162,18 @@ public class DormBlackboxTest {
       dorm.dropTable(UserWithAddressAndPhoneEntity.class);
     } catch (Exception ignored) {
     }
+  }
+
+  private static HikariDataSource sHikariDataSource;
+
+  @BeforeClass
+  public static void beforeClass() {
+    sHikariDataSource = Connector.createHikariDataSource();
+  }
+
+  @AfterClass
+  public static void afterClass() {
+    sHikariDataSource.close();
+    sHikariDataSource = null;
   }
 }
