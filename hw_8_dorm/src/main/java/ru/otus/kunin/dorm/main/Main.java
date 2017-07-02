@@ -4,6 +4,10 @@ import com.google.common.collect.Sets;
 import ru.otus.kunin.dorm.api.Dorm;
 import ru.otus.kunin.dorm.base.*;
 import ru.otus.kunin.dorm.hibernate.DormHibernateImpl;
+import ru.otus.kunin.dorm.main.entity.AddressEntity;
+import ru.otus.kunin.dorm.main.entity.PhoneEntity;
+import ru.otus.kunin.dorm.main.entity.UserEntity;
+import ru.otus.kunin.dorm.main.entity.UserWithAddressAndPhoneEntity;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -26,8 +30,11 @@ public class Main {
 
   private static DormHibernateImpl makeHibernateDorm() {
     return new DormHibernateImpl(
-        Sets.newHashSet(UserEntity.class)
-    );
+        Sets.newHashSet(
+            UserEntity.class,
+            AddressEntity.class,
+            PhoneEntity.class,
+            UserWithAddressAndPhoneEntity.class));
   }
 
   private static DormImpl makeBaseDorm(Connection connection) {

@@ -1,4 +1,4 @@
-package ru.otus.kunin.dorm.main;
+package ru.otus.kunin.dorm.main.entity;
 
 import ru.otus.kunin.dorm.api.DormEntity;
 
@@ -11,7 +11,7 @@ public class AddressEntity extends DormEntity {
   private String street;
   private int postalCode;
 
-  public AddressEntity() {
+  /* required */ public AddressEntity() {
   }
 
   public AddressEntity(String street, int postalCode) {
@@ -53,7 +53,8 @@ public class AddressEntity extends DormEntity {
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder("AddressEntity{");
-    sb.append("street='").append(street).append('\'');
+    sb.append("id='").append(id).append('\'');
+    sb.append(", street=").append(street);
     sb.append(", postalCode=").append(postalCode);
     sb.append('}');
     return sb.toString();

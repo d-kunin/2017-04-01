@@ -1,4 +1,4 @@
-package ru.otus.kunin.dorm.main;
+package ru.otus.kunin.dorm.main.entity;
 
 import ru.otus.kunin.dorm.api.DormEntity;
 
@@ -11,8 +11,7 @@ import java.util.Objects;
 @Table(name = "dima_users")
 public class UserEntity extends DormEntity {
 
-  public UserEntity() {
-    /* required */
+  /* required */ public UserEntity() {
   }
 
   public UserEntity(final String name, final int age, final String displayName) {
@@ -56,7 +55,7 @@ public class UserEntity extends DormEntity {
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder("UserEntity{");
-    sb.append(" id='").append(getId()).append('\'');
+    sb.append("id='").append(getId()).append('\'');
     sb.append(", aNameField='").append(aNameField).append('\'');
     sb.append(", age=").append(age);
     sb.append(", displayName='").append(displayName).append('\'');

@@ -6,6 +6,7 @@ import ru.otus.kunin.dorm.api.DormEntity;
 import ru.otus.kunin.dorm.api.DormException;
 
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.lang.reflect.Field;
@@ -25,7 +26,7 @@ public class TypeMapperImpl implements TypeMapper {
       f -> Modifier.isTransient(f.getModifiers()), // is transient
       // TODO(dima) handle relations
       f -> f.getAnnotation(OneToOne.class) != null, // is one to one
-      f -> f.getAnnotation(OneToOne.class) != null, // is one to one
+      f -> f.getAnnotation(OneToMany.class) != null, // is one to many
       f -> f.getAnnotation(ManyToMany.class) != null // is many to many
       //
   ).stream().reduce(Predicate::or).orElse(field -> false);

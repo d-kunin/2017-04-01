@@ -31,7 +31,7 @@ public class DormHibernateImpl implements Dorm {
         .put(Environment.USER, "tully")
         .put(Environment.PASS, "tully")
         .put(Environment.HBM2DDL_AUTO, "create")
-//        .put(Environment.SHOW_SQL, true)
+        .put(Environment.SHOW_SQL, true)
         .build();
     registryBuilder.applySettings(settings);
     final StandardServiceRegistry registry = registryBuilder.build();
@@ -41,16 +41,6 @@ public class DormHibernateImpl implements Dorm {
 
     sessionFactory = metadataSources.getMetadataBuilder()
         .build().getSessionFactoryBuilder().build();
-  }
-
-  @Override
-  public <T extends DormEntity> void createTable(Class<T> type) throws SQLException {
-    // noop
-  }
-
-  @Override
-  public <T extends DormEntity> void dropTable(Class<T> type) throws SQLException {
-    // noop
   }
 
   @Override
@@ -84,5 +74,15 @@ public class DormHibernateImpl implements Dorm {
   @Override
   public void close() throws Exception {
     sessionFactory.close();
+  }
+
+  @Override
+  public <T extends DormEntity> void createTable(Class<T> type) throws SQLException {
+    // noop
+  }
+
+  @Override
+  public <T extends DormEntity> void dropTable(Class<T> type) throws SQLException {
+    // noop
   }
 }

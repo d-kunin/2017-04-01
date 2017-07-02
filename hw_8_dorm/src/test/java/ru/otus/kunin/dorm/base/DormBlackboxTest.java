@@ -1,6 +1,7 @@
 package ru.otus.kunin.dorm.base;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,10 +11,11 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import ru.otus.kunin.dorm.api.Dorm;
 import ru.otus.kunin.dorm.hibernate.DormHibernateImpl;
-import ru.otus.kunin.dorm.main.AddressEntity;
+import ru.otus.kunin.dorm.main.entity.AddressEntity;
 import ru.otus.kunin.dorm.main.Connector;
-import ru.otus.kunin.dorm.main.UserEntity;
-import ru.otus.kunin.dorm.main.UserWithAddressAndPhoneEntity;
+import ru.otus.kunin.dorm.main.entity.PhoneEntity;
+import ru.otus.kunin.dorm.main.entity.UserEntity;
+import ru.otus.kunin.dorm.main.entity.UserWithAddressAndPhoneEntity;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -60,8 +62,9 @@ public class DormBlackboxTest {
         new DormParameter(
             () -> new DormHibernateImpl(ImmutableSet.of(
                 UserEntity.class,
-                UserWithAddressAndPhoneEntity.class,
-                AddressEntity.class
+                AddressEntity.class,
+                PhoneEntity.class,
+                UserWithAddressAndPhoneEntity.class
             )),
             "DormHibernateImpl")};
   }
@@ -114,7 +117,7 @@ public class DormBlackboxTest {
   }
 
   @Test
-  public void testMultipleUsersSaved() throws Exception {
+  public void testMultipleUsersSavedAndLoaded() throws Exception {
     dorm.save(makeUser());
     dorm.save(makeUser());
     dorm.save(makeUser());
@@ -122,14 +125,15 @@ public class DormBlackboxTest {
   }
 
   @Test
-  public void testNewComplexUserIsSaved() throws Exception {
+  public void testNewComplexUserIsSavedAndLoaded() throws Exception {
     assertEquals(0, dorm.loadAll(UserWithAddressAndPhoneEntity.class).size());
     UserWithAddressAndPhoneEntity user = makeComplexUserEntity();
     assertTrue(user.isNew());
     dorm.save(user);
     assertFalse(user.isNew());
     assertEquals(1, dorm.loadAll(UserWithAddressAndPhoneEntity.class).size());
-    assertEquals(user, dorm.load(user.getId(), UserWithAddressAndPhoneEntity.class).get());
+    final UserWithAddressAndPhoneEntity loaded = dorm.load(user.getId(), UserWithAddressAndPhoneEntity.class).get();
+    assertEquals(user, loaded);
   }
 
   private static UserEntity makeUser() {
@@ -140,8 +144,17 @@ public class DormBlackboxTest {
     return new AddressEntity("Anders Reimers", 11750);
   }
 
+  private static PhoneEntity makePhone() {
+    return new PhoneEntity(17, "1234567890");
+  }
+
   private static UserWithAddressAndPhoneEntity makeComplexUserEntity() {
-    return new UserWithAddressAndPhoneEntity("complex_name", 100, "complex user", makeAddress());
+    return new UserWithAddressAndPhoneEntity(
+        "complex_name",
+        100,
+        "complex user",
+        makeAddress(),
+        Lists.newArrayList(makePhone(), makePhone()));
   }
 
   private void dropTablesSilent() {

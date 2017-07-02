@@ -1,8 +1,11 @@
-package ru.otus.kunin.dorm.main;
+package ru.otus.kunin.dorm.main.entity;
 
+import com.google.common.collect.ImmutableList;
 import ru.otus.kunin.dorm.api.DormEntity;
 
 import javax.persistence.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -14,14 +17,16 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
   }
 
   public UserWithAddressAndPhoneEntity(
-      final String name,
+      final String aNameField,
       final int age,
       final String displayName,
-      final AddressEntity address) {
-    this.aNameField = name;
+      final AddressEntity address,
+      final List<PhoneEntity> phones) {
+    this.aNameField = aNameField;
     this.age = age;
     this.displayName = displayName;
     this.address = address;
+    this.phones = phones;
   }
 
   public String getName() {
@@ -56,16 +61,13 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
     this.address = address;
   }
 
-  @Column(columnDefinition = "varchar(255)", name = "name")
-  private String aNameField;
+  public List<PhoneEntity> getPhones() {
+    return phones != null ? ImmutableList.copyOf(phones) : Collections.EMPTY_LIST;
+  }
 
-  @Column(columnDefinition = "int(3) not null default 0")
-  private int age;
-
-  private String displayName;
-
-  @OneToOne(cascade = CascadeType.ALL)
-  private AddressEntity address;
+  public void setPhones(List<PhoneEntity> phones) {
+    this.phones = phones;
+  }
 
   @Override
   public String toString() {
@@ -75,6 +77,7 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
     sb.append(", age=").append(age);
     sb.append(", displayName='").append(displayName).append('\'');
     sb.append(", address='").append(address).append('\'');
+    sb.append(", phones='").append(phones).append('\'');
     sb.append('}');
     return sb.toString();
   }
@@ -88,15 +91,34 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
       return false;
     }
     final UserWithAddressAndPhoneEntity user = (UserWithAddressAndPhoneEntity) o;
-    return age == user.age &&
+    return getAge() == user.getAge() &&
            Objects.equals(id, user.id) &&
-           Objects.equals(aNameField, user.aNameField) &&
-           Objects.equals(displayName, user.displayName) &&
-           Objects.equals(address, user.address);
+           Objects.equals(getName(), user.getName()) &&
+           Objects.equals(getDisplayName(), user.getDisplayName()) &&
+           Objects.equals(getPhones(), user.getPhones()) &&
+           Objects.equals(getAddress(), user.getAddress());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(aNameField, age, displayName, id);
+    return Objects.hash(aNameField, age, displayName, id, phones.size());
   }
+
+  @Column(columnDefinition = "varchar(255)", name = "name")
+  private String aNameField;
+
+  @Column(columnDefinition = "int(3) not null default 0")
+  private int age;
+
+  private String displayName;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  private AddressEntity address;
+
+  @OneToMany(
+      cascade =  CascadeType.ALL,
+      fetch = FetchType.EAGER,
+      orphanRemoval = true
+  )
+  private List<PhoneEntity> phones;
 }
