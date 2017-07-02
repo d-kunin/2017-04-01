@@ -120,5 +120,6 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
       fetch = FetchType.EAGER,
       orphanRemoval = true
   )
+  @JoinColumn(name = "user_id")
   private List<PhoneEntity> phones;
 }

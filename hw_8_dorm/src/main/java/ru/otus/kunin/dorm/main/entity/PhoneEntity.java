@@ -3,6 +3,8 @@ package ru.otus.kunin.dorm.main.entity;
 import ru.otus.kunin.dorm.api.DormEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.util.Objects;
 
 @Entity
@@ -59,4 +61,7 @@ public class PhoneEntity extends DormEntity {
 
   private int code;
   private String number;
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private UserWithAddressAndPhoneEntity user;
 }
