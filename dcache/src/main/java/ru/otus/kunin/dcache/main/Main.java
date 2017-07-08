@@ -7,7 +7,13 @@ public class Main {
 
   public static void main(String[] args) {
     final DcacheImpl<String, String> cache = new DcacheImpl<>();
-    System.out.println(cache.getAll(ImmutableSet.of("key1", "key2")));
+    cache.putIfAbsent("key1", "v1");
+    cache.putIfAbsent("key1", "v1_fucked");
+    cache.putIfAbsent("key2", "v2");
+    cache.putIfAbsent("key3", "v3");
+    cache.remove("key3");
+    System.out.println(cache.getAll(ImmutableSet.of("key1", "key2", "key3")));
+    throw new UnsupportedOperationException("Implement SoftReference");
   }
 
 }
