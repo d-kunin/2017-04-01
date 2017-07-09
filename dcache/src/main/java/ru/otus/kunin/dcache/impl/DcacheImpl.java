@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toMap;
 
 public class DcacheImpl<K, V> implements Dcache<K, V> {
 
-  private final ConcurrentMap<K, SoftReference<DcacheEntry<K, V>>> map = Maps.newConcurrentMap();
+  private final ConcurrentMap<K, DcacheEntry<K, V>> map = Maps.newConcurrentMap();
   private final Optional<CacheLoader<K, V>> cacheLoader;
   private final Optional<CacheLoader<K, V>> cacheWriter;
 
@@ -40,8 +40,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
 
   @Override
   public V get(final K key) {
-    final Optional<DcacheEntry<K, V>> entry = Optional.ofNullable(map.get(validateKey(key)))
-        .map(SoftReference::get);
+    final Optional<DcacheEntry<K, V>> entry = Optional.ofNullable(map.get(validateKey(key)));
     // TODO load if not present
     return entry.map(DcacheEntry::getValue).orElse(null);
   }
@@ -51,7 +50,6 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
     return set.stream()
         .map(map::get)
         .filter(ref -> ref != null && ref.get() != null)
-        .map(SoftReference::get)
         .collect(
             toMap(DcacheEntry::getKey,
                 DcacheEntry::getValue,
@@ -73,15 +71,15 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
 
   @Override
   public void put(final K k, final V v) {
-    map.put(k, createEntryRef(k, v));
+    map.put(k, createEntry(k, v));
     // TODO notify
   }
 
   @Override
   public V getAndPut(final K k, final V v) {
-    final Optional<SoftReference<DcacheEntry<K, V>>> oldEntryRef = Optional.of(map.replace(k, createEntryRef(k, v)));
+    final Optional<DcacheEntry<K, V>> oldEntry = Optional.of(map.replace(k, createEntry(k, v)));
     // TODO notify
-    return oldEntryRef.map(SoftReference::get).map(DcacheEntry::getValue).orElse(null);
+    return oldEntry.map(DcacheEntry::getValue).orElse(null);
   }
 
   @Override
@@ -91,31 +89,30 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
 
   @Override
   public boolean putIfAbsent(final K k, final V v) {
-    final SoftReference<DcacheEntry<K, V>> oldEntry = map.putIfAbsent(k, createEntryRef(k, v));
-    return Optional.ofNullable(oldEntry).map(SoftReference::get).map(DcacheEntry::getValue).isPresent();
+    final DcacheEntry<K, V> oldEntry = map.putIfAbsent(k, createEntry(k, v));
+    return Optional.ofNullable(oldEntry).map(DcacheEntry::getValue).isPresent();
     // TODO notify
   }
 
   @Override
   public boolean remove(final K k) {
-    return Optional.ofNullable(map.remove(k)).map(SoftReference::get).map(DcacheEntry::getValue).isPresent();
+    return Optional.ofNullable(map.remove(k)).map(DcacheEntry::getValue).isPresent();
   }
 
   @Override
   public boolean remove(final K k, final V v) {
-    // TODO notify if implemented
-    throw new UnsupportedOperationException("is not supported since we use SoftRef wrapper, we might need extend it");
+    return map.remove(k, createEntry(k, v));
   }
 
   @Override
   public V getAndRemove(final K k) {
-    return null;
+    return Optional.ofNullable(map.remove(k)).map(DcacheEntry::getValue).orElse(null);
     // TODO notify
   }
 
   @Override
-  public boolean replace(final K k, final V v, final V v1) {
-    return false;
+  public boolean replace(final K k, final V oldValue, final V newValue) {
+    return map.replace(k, createEntry(k, oldValue), createEntry(k, newValue));
     // TODO notify
   }
 
@@ -213,8 +210,8 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
     return Preconditions.checkNotNull(value, "value must be not null");
   }
 
-  private SoftReference<DcacheEntry<K, V>> createEntryRef(final K k, final V v) {
-    return new SoftReference<>(DcacheEntry.create(validateKey(k), validateValue(v)));
+  private DcacheEntry<K, V> createEntry(final K k, final V v) {
+    return DcacheEntry.create(validateKey(k), validateValue(v));
   }
 
 }

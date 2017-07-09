@@ -13,7 +13,11 @@ public class Main {
     cache.putIfAbsent("key3", "v3");
     cache.remove("key3");
     System.out.println(cache.getAll(ImmutableSet.of("key1", "key2", "key3")));
-    throw new UnsupportedOperationException("Implement SoftReference");
+    cache.remove("key1", "v1");
+    cache.remove("key2", "v1");
+    System.out.println(cache.getAll(ImmutableSet.of("key1", "key2", "key3")));
+    cache.replace("key2", "v2", "v2_updated");
+    System.out.println(cache.getAll(ImmutableSet.of("key1", "key2", "key3")));
   }
 
 }
