@@ -7,18 +7,18 @@ import javax.cache.Cache;
 import java.lang.ref.SoftReference;
 import java.util.Objects;
 
-public class DcacheEntry<K, V> extends SoftReference<V> implements Cache.Entry<K, V> {
+public class SoftEntry<K, V> extends SoftReference<V> implements Cache.Entry<K, V> {
 
   private final K key;
 
-  public DcacheEntry(final K key, final V value) {
+  public SoftEntry(final K key, final V value) {
     super(value);
     this.key = key;
   }
 
-  public static <K, V> DcacheEntry<K, V> create(K key, V value) {
-    return new DcacheEntry<>(Preconditions.checkNotNull(key),
-                             Preconditions.checkNotNull(value));
+  public static <K, V> SoftEntry<K, V> create(K key, V value) {
+    return new SoftEntry<>(Preconditions.checkNotNull(key),
+                           Preconditions.checkNotNull(value));
   }
 
   @Override
@@ -33,7 +33,7 @@ public class DcacheEntry<K, V> extends SoftReference<V> implements Cache.Entry<K
 
   @Override
   public <T> T unwrap(final Class<T> clazz) {
-    if (clazz == DcacheEntry.class) {
+    if (clazz == SoftEntry.class) {
       return (T) this;
     }
     throw new IllegalArgumentException();
@@ -52,7 +52,7 @@ public class DcacheEntry<K, V> extends SoftReference<V> implements Cache.Entry<K
   public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    final DcacheEntry<?, ?> that = (DcacheEntry<?, ?>) o;
+    final SoftEntry<?, ?> that = (SoftEntry<?, ?>) o;
     return Objects.equals(key, that.key) &&
            Objects.equals(getValue(), that.getValue());
   }
@@ -62,7 +62,7 @@ public class DcacheEntry<K, V> extends SoftReference<V> implements Cache.Entry<K
     return Objects.hash(key, getValue());
   }
 
-  public boolean hasValue() {
-    return getValue() != null;
+  public boolean isGarbageCollected() {
+    return null == getValue();
   }
 }

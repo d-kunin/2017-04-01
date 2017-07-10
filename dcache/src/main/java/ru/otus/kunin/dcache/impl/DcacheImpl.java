@@ -1,7 +1,8 @@
 package ru.otus.kunin.dcache.impl;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import ru.otus.kunin.dcache.Dcache;
@@ -22,13 +23,18 @@ import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.EntryProcessorResult;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toMap;
+import static ru.otus.kunin.dcache.impl.RefUtil.mutable;
 
 public class DcacheImpl<K, V> implements Dcache<K, V> {
 
-  private final ConcurrentMap<K, DcacheEntry<K, V>> map = Maps.newConcurrentMap();
+  private final ConcurrentMap<K, SoftEntry<K, V>> map = Maps.newConcurrentMap();
+  // TODO
   private final Optional<CacheLoader<K, V>> cacheLoader;
   private final Optional<CacheLoader<K, V>> cacheWriter;
+
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
   public DcacheImpl() {
@@ -44,9 +50,9 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   @Override
   public V get(final K key) {
     throwIfClosed();
-    final Optional<DcacheEntry<K, V>> entry = Optional.ofNullable(map.get(validateKey(key)));
+    final Optional<SoftEntry<K, V>> entry = Optional.ofNullable(map.get(validateKey(key)));
     // TODO load if not present
-    return entry.map(DcacheEntry::getValue).orElse(null);
+    return entry.map(SoftEntry::getValue).orElse(null);
   }
 
   @Override
@@ -54,11 +60,12 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
     throwIfClosed();
     return set.stream()
         .map(map::get)
-        .filter(ref -> ref != null && ref.get() != null)
+        .filter(Predicates.notNull())
+        .map(RefUtil::strongify)
+        .filter(StrongEntry::hasValue)
         .collect(
-            toMap(DcacheEntry::getKey,
-                DcacheEntry::getValue,
-                MoreObjects::firstNonNull)); // reduce keys
+            toMap(Entry::getKey,
+                  Entry::getValue));
   }
 
   @Override
@@ -86,9 +93,9 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   @Override
   public V getAndPut(final K k, final V v) {
     throwIfClosed();
-    final Optional<DcacheEntry<K, V>> oldEntry = Optional.of(map.replace(k, createEntry(k, v)));
+    final Optional<SoftEntry<K, V>> oldEntry = Optional.of(map.replace(k, createEntry(k, v)));
     // TODO notify
-    return oldEntry.map(DcacheEntry::getValue).orElse(null);
+    return oldEntry.map(SoftEntry::getValue).orElse(null);
   }
 
   @Override
@@ -100,15 +107,15 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   @Override
   public boolean putIfAbsent(final K k, final V v) {
     throwIfClosed();
-    final DcacheEntry<K, V> oldEntry = map.putIfAbsent(k, createEntry(k, v));
-    return Optional.ofNullable(oldEntry).map(DcacheEntry::getValue).isPresent();
+    final SoftEntry<K, V> oldEntry = map.putIfAbsent(k, createEntry(k, v));
+    return Optional.ofNullable(oldEntry).map(SoftEntry::getValue).isPresent();
     // TODO notify
   }
 
   @Override
   public boolean remove(final K k) {
     throwIfClosed();
-    return Optional.ofNullable(map.remove(k)).map(DcacheEntry::getValue).isPresent();
+    return Optional.ofNullable(map.remove(k)).map(SoftEntry::getValue).isPresent();
   }
 
   @Override
@@ -120,7 +127,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   @Override
   public V getAndRemove(final K k) {
     throwIfClosed();
-    return Optional.ofNullable(map.remove(k)).map(DcacheEntry::getValue).orElse(null);
+    return Optional.ofNullable(map.remove(k)).map(SoftEntry::getValue).orElse(null);
     // TODO notify
   }
 
@@ -142,7 +149,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   public V getAndReplace(final K k, final V v) {
     throwIfClosed();
     return Optional.ofNullable(map.replace(k, createEntry(k, v)))
-        .map(DcacheEntry::getValue)
+        .map(SoftEntry::getValue)
         .orElse(null);
     // TODO notify
   }
@@ -179,15 +186,44 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
                       final EntryProcessor<K, V, T> entryProcessor,
                       final Object... objects) throws EntryProcessorException {
     throwIfClosed();
-    return null;
+    checkNotNull(entryProcessor);
+    //TODO load
+    final MutableEntry<K, V> mutableEntry = mutable(
+        Optional.ofNullable(map.get(k))
+            .map(RefUtil::strongify)
+            .orElse(StrongEntry.create(k, null)));
+    final T result = entryProcessor.process(mutableEntry, objects);
+    processMutation(mutableEntry);
+    return result;
+  }
+
+  private void processMutation(final MutableEntry<K, V> mutableEntry) {
+    checkArgument(!(mutableEntry.isRemoved() && mutableEntry.isNewValueSet()),
+                  "can't be removed and have new value at the same time for key: " + mutableEntry.getKey());
+    if (mutableEntry.isRemoved()) {
+      remove(mutableEntry.getKey());
+    }
+    if (mutableEntry.isNewValueSet()) {
+      put(mutableEntry.getKey(), mutableEntry.getNewValue());
+    }
   }
 
   @Override
-  public <T> Map<K, EntryProcessorResult<T>> invokeAll(final Set<? extends K> set,
+  public <T> Map<K, EntryProcessorResult<T>> invokeAll(final Set<? extends K> keys,
                                                        final EntryProcessor<K, V, T> entryProcessor,
                                                        final Object... objects) {
     throwIfClosed();
-    return null;
+    checkNotNull(keys);
+    final ImmutableMap.Builder<K, EntryProcessorResult<T>> builder = ImmutableMap.builder();
+    for (final K key : keys) {
+      try {
+        final T result = invoke(key, entryProcessor, objects);
+        builder.put(key, () -> result);
+      } catch (Exception passed) {
+        builder.put(key, () -> { throw new EntryProcessorException(passed); });
+      }
+    }
+    return builder.build();
   }
 
   @Override
@@ -241,15 +277,15 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   }
 
   private K validateKey(K key) {
-    return Preconditions.checkNotNull(key, "key must be not null");
+    return checkNotNull(key, "key must be not null");
   }
 
   private V validateValue(V value) {
-    return Preconditions.checkNotNull(value, "value must be not null");
+    return checkNotNull(value, "value must be not null");
   }
 
-  private DcacheEntry<K, V> createEntry(final K k, final V v) {
-    return DcacheEntry.create(validateKey(k), validateValue(v));
+  private SoftEntry<K, V> createEntry(final K k, final V v) {
+    return SoftEntry.create(validateKey(k), validateValue(v));
   }
 
 }
