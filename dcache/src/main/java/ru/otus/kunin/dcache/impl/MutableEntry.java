@@ -5,6 +5,10 @@ import com.google.common.base.Preconditions;
 
 class MutableEntry<K, V> implements javax.cache.processor.MutableEntry<K, V> {
 
+  /*
+    getValue() should generate hit/miss
+   */
+
   private final K key;
   private final V oldValue;
 
