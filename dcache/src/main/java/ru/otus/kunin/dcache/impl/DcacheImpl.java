@@ -1,6 +1,5 @@
 package ru.otus.kunin.dcache.impl;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -17,7 +16,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.cache.CacheManager;
 import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.configuration.Configuration;
-import javax.cache.integration.CacheLoader;
 import javax.cache.integration.CompletionListener;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
@@ -31,27 +29,12 @@ import static ru.otus.kunin.dcache.impl.RefUtil.mutable;
 public class DcacheImpl<K, V> implements Dcache<K, V> {
 
   private final ConcurrentMap<K, SoftEntry<K, V>> map = Maps.newConcurrentMap();
-  // TODO
-  private final Optional<CacheLoader<K, V>> cacheLoader;
-  private final Optional<CacheLoader<K, V>> cacheWriter;
-
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
-
-  public DcacheImpl() {
-    this(Optional.empty(), Optional.empty());
-  }
-
-  public DcacheImpl(final Optional<CacheLoader<K, V>> cacheLoader,
-                    final Optional<CacheLoader<K, V>> cacheWriter) {
-    this.cacheLoader = cacheLoader;
-    this.cacheWriter = cacheWriter;
-  }
 
   @Override
   public V get(final K key) {
     throwIfClosed();
     final Optional<SoftEntry<K, V>> entry = Optional.ofNullable(map.get(validateKey(key)));
-    // TODO load if not present
     return entry.map(SoftEntry::getValue).orElse(null);
   }
 
@@ -79,7 +62,6 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
                       final boolean reload,
                       final CompletionListener completionListener) {
     throwIfClosed();
-    // TODO load all
     // TODO notify
   }
 
@@ -187,7 +169,6 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
                       final Object... objects) throws EntryProcessorException {
     throwIfClosed();
     checkNotNull(entryProcessor);
-    //TODO load
     final MutableEntry<K, V> mutableEntry = mutable(
         Optional.ofNullable(map.get(k))
             .map(RefUtil::strongify)
