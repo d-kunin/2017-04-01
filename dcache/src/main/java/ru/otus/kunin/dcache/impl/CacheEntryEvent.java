@@ -19,8 +19,8 @@ public class CacheEntryEvent<K, V> extends javax.cache.event.CacheEntryEvent<K, 
                          final V oldValue) {
     super(Preconditions.checkNotNull(source), Preconditions.checkNotNull(eventType));
     this.key = Preconditions.checkNotNull(key);
-    this.value = Preconditions.checkNotNull(value);
-    this.oldValue = Preconditions.checkNotNull(oldValue);
+    this.value = value;
+    this.oldValue = oldValue;
   }
 
   @Override
@@ -64,5 +64,16 @@ public class CacheEntryEvent<K, V> extends javax.cache.event.CacheEntryEvent<K, 
   @Override
   public int hashCode() {
     return Objects.hash(getKey(), getValue(), getOldValue());
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("CacheEntryEvent{");
+    sb.append("type=").append(getEventType());
+    sb.append(", key=").append(key);
+    sb.append(", value=").append(value);
+    sb.append(", oldValue=").append(oldValue);
+    sb.append('}');
+    return sb.toString();
   }
 }

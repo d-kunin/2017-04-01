@@ -1,6 +1,8 @@
 package ru.otus.kunin.dcache.main;
 
 import com.google.common.collect.ImmutableSet;
+import ru.otus.kunin.dcache.impl.CacheListenerAdapter;
+import ru.otus.kunin.dcache.impl.CompositeEventListenerImpl;
 import ru.otus.kunin.dcache.impl.DcacheImpl;
 
 import javax.cache.processor.EntryProcessor;
@@ -9,7 +11,19 @@ import java.util.Optional;
 public class Main {
 
   public static void main(String[] args) {
-    final DcacheImpl<String, String> cache = new DcacheImpl<>(Optional.empty());
+
+    final CompositeEventListenerImpl<String, String> eventListener = new CompositeEventListenerImpl<>();
+    eventListener.addListener(CacheListenerAdapter.fromOnCreatedListener(
+        cacheEntryEvents ->
+            cacheEntryEvents.forEach(e -> System.out.println("Created: " + e))));
+    eventListener.addListener(CacheListenerAdapter.fromOnRemovedListener(
+        cacheEntryEvents ->
+            cacheEntryEvents.forEach(e -> System.out.println("Removed: " + e))));
+    eventListener.addListener(CacheListenerAdapter.fromOnUpdatedListener(
+        cacheEntryEvents ->
+            cacheEntryEvents.forEach(e -> System.out.println("Updated: " + e))));
+    
+    final DcacheImpl<String, String> cache = new DcacheImpl<>(Optional.of(eventListener));
 
     cache.putIfAbsent("key1", "v1");
     cache.putIfAbsent("key1", "v1_fucked");

@@ -27,7 +27,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toMap;
 import static ru.otus.kunin.dcache.impl.RefUtil.mutable;
-import static ru.otus.kunin.dcache.impl.RefUtil.strongify;
 
 public class DcacheImpl<K, V> implements Dcache<K, V> {
 
@@ -90,11 +89,14 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   public boolean putIfAbsent(final K k, final V v) {
     throwIfClosed();
     final SoftEntry<K, V> oldEntry = map.putIfAbsent(k, createEntry(k, v));
-    final boolean wasCreated = Optional.ofNullable(oldEntry).map(SoftEntry::getValue).isPresent();
-    if (wasCreated) {
+    final boolean wasPut = !Optional.ofNullable(oldEntry)
+        .map(RefUtil::strongify)
+        .map(StrongEntry::getValue)
+        .isPresent();
+    if (wasPut) {
       notifyCreatedOrUpdated(k, v, Optional.empty());
     }
-    return wasCreated;
+    return wasPut;
   }
 
   @Override
@@ -296,13 +298,17 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
       final CacheEntryEvent<K, V> entryEvent = oldValue
           .map(old -> new CacheEntryEvent<>(this, EventType.UPDATED, key, newValue, old))
           .orElse(new CacheEntryEvent<>(this, EventType.CREATED, key, newValue, null));
-      l.onCreated(Lists.newArrayList(entryEvent));
+      if (EventType.CREATED == entryEvent.getEventType()) {
+        l.onCreated(Lists.newArrayList(entryEvent));
+      } else {
+        l.onUpdated(Lists.newArrayList(entryEvent));
+      }
     });
   }
 
   private void notifyRemoved(final K key, final V oldValue) {
     eventListener.ifPresent(l ->
-        l.onCreated(Lists.newArrayList(new CacheEntryEvent<>(this, EventType.REMOVED, key, null, oldValue))));
+        l.onRemoved(Lists.newArrayList(new CacheEntryEvent<>(this, EventType.REMOVED, key, null, oldValue))));
   }
 
   private void throwIfClosed() {
