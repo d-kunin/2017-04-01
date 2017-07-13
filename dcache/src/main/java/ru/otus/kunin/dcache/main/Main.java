@@ -4,11 +4,13 @@ import com.google.common.collect.ImmutableSet;
 import ru.otus.kunin.dcache.impl.DcacheImpl;
 
 import javax.cache.processor.EntryProcessor;
+import java.util.Optional;
 
 public class Main {
 
   public static void main(String[] args) {
-    final DcacheImpl<String, String> cache = new DcacheImpl<>();
+    final DcacheImpl<String, String> cache = new DcacheImpl<>(Optional.empty());
+
     cache.putIfAbsent("key1", "v1");
     cache.putIfAbsent("key1", "v1_fucked");
     cache.putIfAbsent("key2", "v2");

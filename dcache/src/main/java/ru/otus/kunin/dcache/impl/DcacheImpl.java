@@ -1,11 +1,20 @@
 package ru.otus.kunin.dcache.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import ru.otus.kunin.dcache.Dcache;
 
+import javax.cache.CacheManager;
+import javax.cache.configuration.CacheEntryListenerConfiguration;
+import javax.cache.configuration.Configuration;
+import javax.cache.event.EventType;
+import javax.cache.integration.CompletionListener;
+import javax.cache.processor.EntryProcessor;
+import javax.cache.processor.EntryProcessorException;
+import javax.cache.processor.EntryProcessorResult;
 import java.lang.ref.SoftReference;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,23 +22,22 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.cache.CacheManager;
-import javax.cache.configuration.CacheEntryListenerConfiguration;
-import javax.cache.configuration.Configuration;
-import javax.cache.integration.CompletionListener;
-import javax.cache.processor.EntryProcessor;
-import javax.cache.processor.EntryProcessorException;
-import javax.cache.processor.EntryProcessorResult;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toMap;
 import static ru.otus.kunin.dcache.impl.RefUtil.mutable;
+import static ru.otus.kunin.dcache.impl.RefUtil.strongify;
 
 public class DcacheImpl<K, V> implements Dcache<K, V> {
 
   private final ConcurrentMap<K, SoftEntry<K, V>> map = Maps.newConcurrentMap();
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
+  private final Optional<CompositeEventListener<K, V>> eventListener;
+
+  public DcacheImpl(final Optional<CompositeEventListener<K, V>> eventListener) {
+    this.eventListener = eventListener;
+  }
 
   @Override
   public V get(final K key) {
@@ -58,25 +66,17 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   }
 
   @Override
-  public void loadAll(final Set<? extends K> keys,
-                      final boolean reload,
-                      final CompletionListener completionListener) {
-    throwIfClosed();
-    // TODO notify
-  }
-
-  @Override
   public void put(final K k, final V v) {
     throwIfClosed();
-    map.put(k, createEntry(k, v));
-    // TODO notify
+    final Optional<V> oldValue = Optional.ofNullable(map.put(k, createEntry(k, v))).map(SoftEntry::getValue);
+    notifyCreatedOrUpdated(k, v, oldValue);
   }
 
   @Override
   public V getAndPut(final K k, final V v) {
     throwIfClosed();
     final Optional<SoftEntry<K, V>> oldEntry = Optional.of(map.replace(k, createEntry(k, v)));
-    // TODO notify
+    notifyCreatedOrUpdated(k, v, oldEntry.map(SoftEntry::getValue));
     return oldEntry.map(SoftEntry::getValue).orElse(null);
   }
 
@@ -90,50 +90,77 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   public boolean putIfAbsent(final K k, final V v) {
     throwIfClosed();
     final SoftEntry<K, V> oldEntry = map.putIfAbsent(k, createEntry(k, v));
-    return Optional.ofNullable(oldEntry).map(SoftEntry::getValue).isPresent();
-    // TODO notify
+    final boolean wasCreated = Optional.ofNullable(oldEntry).map(SoftEntry::getValue).isPresent();
+    if (wasCreated) {
+      notifyCreatedOrUpdated(k, v, Optional.empty());
+    }
+    return wasCreated;
   }
 
   @Override
   public boolean remove(final K k) {
     throwIfClosed();
-    return Optional.ofNullable(map.remove(k)).map(SoftEntry::getValue).isPresent();
+    final Optional<V> oldValue = Optional.ofNullable(map.remove(k))
+        .map(RefUtil::strongify)
+        .map(StrongEntry::getValue);
+    if (oldValue.isPresent()) {
+      notifyRemoved(k, oldValue.get());
+    }
+    return oldValue.isPresent();
   }
 
   @Override
   public boolean remove(final K k, final V v) {
     throwIfClosed();
-    return map.remove(k, createEntry(k, v));
+    final boolean wasRemoved = map.remove(k, createEntry(k, v));
+    if (wasRemoved) {
+      notifyRemoved(k, v);
+    }
+    return wasRemoved;
   }
 
   @Override
   public V getAndRemove(final K k) {
     throwIfClosed();
-    return Optional.ofNullable(map.remove(k)).map(SoftEntry::getValue).orElse(null);
-    // TODO notify
+    final V oldValue = Optional.ofNullable(map.remove(k)).map(SoftEntry::getValue).orElse(null);
+    if (null != oldValue) {
+      notifyRemoved(k, oldValue);
+    }
+    return oldValue;
   }
 
   @Override
   public boolean replace(final K k, final V oldValue, final V newValue) {
     throwIfClosed();
-    return map.replace(k, createEntry(k, oldValue), createEntry(k, newValue));
-    // TODO notify
+    final boolean wasReplaced = map.replace(k, createEntry(k, oldValue), createEntry(k, newValue));
+    if (wasReplaced) {
+      notifyCreatedOrUpdated(k, newValue, Optional.of(oldValue));
+    }
+    return wasReplaced;
   }
 
   @Override
   public boolean replace(final K key, final V newValue) {
     throwIfClosed();
-    return Optional.ofNullable(map.replace(key, createEntry(key, newValue))).isPresent();
-    // TODO notify
+    final Optional<V> oldValue = Optional.ofNullable(map.replace(key, createEntry(key, newValue)))
+        .map(RefUtil::strongify)
+        .map(StrongEntry::getValue);
+    if (oldValue.isPresent()) {
+      notifyCreatedOrUpdated(key, newValue, oldValue);
+    }
+    return oldValue.isPresent();
   }
 
   @Override
   public V getAndReplace(final K k, final V v) {
     throwIfClosed();
-    return Optional.ofNullable(map.replace(k, createEntry(k, v)))
-        .map(SoftEntry::getValue)
-        .orElse(null);
-    // TODO notify
+    final Optional<V> oldValue = Optional.ofNullable(map.replace(k, createEntry(k, v)))
+        .map(RefUtil::strongify)
+        .map(StrongEntry::getValue);
+    if (oldValue.isPresent()) {
+      notifyCreatedOrUpdated(k, v, oldValue);
+    }
+    return oldValue.orElse(null);
   }
 
   @Override
@@ -238,17 +265,44 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
 
   @Override
   public void registerCacheEntryListener(final CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration) {
-
+    Preconditions.checkArgument(eventListener.isPresent());
+    final CacheListenerAdapter<K, V> cacheListenerAdapter =
+        CacheListenerAdapter.fromConfiguration(cacheEntryListenerConfiguration);
+    eventListener.get().addListener(cacheListenerAdapter);
   }
 
   @Override
   public void deregisterCacheEntryListener(final CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration) {
-
+    Preconditions.checkArgument(eventListener.isPresent());
+    final CacheListenerAdapter<K, V> cacheListenerAdapter =
+        CacheListenerAdapter.fromConfiguration(cacheEntryListenerConfiguration);
+    eventListener.get().removeListener(cacheListenerAdapter);
   }
 
   @Override
   public Iterator<Entry<K, V>> iterator() {
-    return null;
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void loadAll(final Set<? extends K> keys,
+                      final boolean reload,
+                      final CompletionListener completionListener) {
+    throw new UnsupportedOperationException();
+  }
+
+  private void notifyCreatedOrUpdated(final K key, final V newValue, final Optional<V> oldValue) {
+    eventListener.ifPresent(l -> {
+      final CacheEntryEvent<K, V> entryEvent = oldValue
+          .map(old -> new CacheEntryEvent<>(this, EventType.UPDATED, key, newValue, old))
+          .orElse(new CacheEntryEvent<>(this, EventType.CREATED, key, newValue, null));
+      l.onCreated(Lists.newArrayList(entryEvent));
+    });
+  }
+
+  private void notifyRemoved(final K key, final V oldValue) {
+    eventListener.ifPresent(l ->
+        l.onCreated(Lists.newArrayList(new CacheEntryEvent<>(this, EventType.REMOVED, key, null, oldValue))));
   }
 
   private void throwIfClosed() {
