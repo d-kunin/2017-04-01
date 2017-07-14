@@ -45,7 +45,7 @@ public class MutableEntry<K, V> implements javax.cache.processor.MutableEntry<K,
 
   @Override
   public <T> T unwrap(final Class<T> clazz) {
-    if (clazz == SoftEntry.class) {
+    if (this.getClass().isAssignableFrom(clazz)) {
       return (T) this;
     }
     throw new IllegalArgumentException();

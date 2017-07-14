@@ -45,7 +45,7 @@ import static java.util.stream.Collectors.toMap;
 public class DiCache<K, V> implements Cache<K, V> {
 
   private static final Logger LOG = Logger.getLogger(DiCache.class);
-  private static final long EXPIRATION_CHECK_PERIOD_MS = 500;
+  private static final long EXPIRATION_CHECK_PERIOD_MS = 50;
 
   private final ConcurrentMap<K, SoftEntry<K, V>> map = Maps.newConcurrentMap();
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
