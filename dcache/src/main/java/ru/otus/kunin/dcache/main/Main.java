@@ -1,16 +1,17 @@
 package ru.otus.kunin.dcache.main;
 
 import com.google.common.collect.ImmutableSet;
+
 import ru.otus.kunin.dcache.impl.CacheListenerAdapter;
 import ru.otus.kunin.dcache.impl.CompositeEventListenerImpl;
 import ru.otus.kunin.dcache.impl.DcacheImpl;
 
-import javax.cache.processor.EntryProcessor;
 import java.util.Optional;
+import javax.cache.processor.EntryProcessor;
 
 public class Main {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
 
     final CompositeEventListenerImpl<String, String> eventListener = new CompositeEventListenerImpl<>();
     eventListener.addListener(CacheListenerAdapter.fromOnCreatedListener(
@@ -22,6 +23,9 @@ public class Main {
     eventListener.addListener(CacheListenerAdapter.fromOnUpdatedListener(
         cacheEntryEvents ->
             cacheEntryEvents.forEach(e -> System.out.println("Updated: " + e))));
+    eventListener.addListener(CacheListenerAdapter.fromOnExpiredListener(
+        cacheEntryEvents ->
+            cacheEntryEvents.forEach(e -> System.out.println("Expired: " + e))));
     
     final DcacheImpl<String, String> cache = new DcacheImpl<>(Optional.of(eventListener));
 
@@ -58,6 +62,11 @@ public class Main {
     cache.invokeAll(keys, testProcessor)
         .forEach((s, result) -> System.out.println(s + " value is as long as " + result.get()));
     System.out.println(cache.getAll(keys));
+
+    // Expire entry and wait to see it cleaned up
+    cache.expireEntry("key4");
+    Thread.sleep(1000);
+    cache.close();
   }
 
 }

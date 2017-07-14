@@ -1,12 +1,27 @@
 package ru.otus.kunin.dcache.impl;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import org.apache.log4j.Logger;
 import ru.otus.kunin.dcache.Dcache;
 
+import java.lang.ref.SoftReference;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import javax.cache.CacheManager;
 import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.configuration.Configuration;
@@ -15,13 +30,6 @@ import javax.cache.integration.CompletionListener;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.EntryProcessorResult;
-import java.lang.ref.SoftReference;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -30,12 +38,21 @@ import static ru.otus.kunin.dcache.impl.RefUtil.mutable;
 
 public class DcacheImpl<K, V> implements Dcache<K, V> {
 
+  private static final Logger LOG = Logger.getLogger(DcacheImpl.class);
+  private static final long EXPIRATION_CHECK_PERIOD_MS = 500;
+
   private final ConcurrentMap<K, SoftEntry<K, V>> map = Maps.newConcurrentMap();
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private final Optional<CompositeEventListener<K, V>> eventListener;
+  private final ScheduledExecutorService executor;
 
   public DcacheImpl(final Optional<CompositeEventListener<K, V>> eventListener) {
     this.eventListener = eventListener;
+    executor = Executors.newSingleThreadScheduledExecutor();
+    executor.scheduleAtFixedRate(this::removeExpiredEntries,
+                                 EXPIRATION_CHECK_PERIOD_MS,
+                                 EXPIRATION_CHECK_PERIOD_MS,
+                                 TimeUnit.MILLISECONDS);
   }
 
   @Override
@@ -250,6 +267,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   public void close() {
     throwIfClosed();
     isClosed.set(true);
+    executor.shutdown();
   }
 
   @Override
@@ -309,6 +327,36 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   private void notifyRemoved(final K key, final V oldValue) {
     eventListener.ifPresent(l ->
         l.onRemoved(Lists.newArrayList(new CacheEntryEvent<>(this, EventType.REMOVED, key, null, oldValue))));
+  }
+
+  private void notifyExpired(final List<Map.Entry<K, SoftEntry<K, V>>> expiredEntries) {
+    eventListener.ifPresent(listener -> {
+      List<javax.cache.event.CacheEntryEvent<? extends K, ? extends V>> events = expiredEntries
+          .stream()
+          .map(e -> new CacheEntryEvent<K, V>(this, EventType.EXPIRED, e.getKey(), null, null))
+          .collect(Collectors.toList());
+      listener.onExpired(events);
+    });
+  }
+
+  private void removeExpiredEntries() {
+    LOG.info("Collecting expired entries ... ");
+    List<Map.Entry<K, SoftEntry<K, V>>> expiredEntries = map.entrySet().stream()
+        .filter(e -> e.getValue().isGarbageCollected())
+        .collect(Collectors.toList());
+    expiredEntries.forEach(e -> map.remove(e.getKey()));
+
+    LOG.info("Removed " + expiredEntries.size() + " entries.");
+    notifyExpired(expiredEntries);
+  }
+
+  @VisibleForTesting
+  public void expireEntry(K key) {
+    SoftEntry<K, V> kvSoftEntry = map.get(key);
+    if (null == kvSoftEntry) {
+      return;
+    }
+    kvSoftEntry.clear();
   }
 
   private void throwIfClosed() {
