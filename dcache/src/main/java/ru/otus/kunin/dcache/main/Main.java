@@ -2,31 +2,17 @@ package ru.otus.kunin.dcache.main;
 
 import com.google.common.collect.ImmutableSet;
 import ru.otus.kunin.dcache.base.DiCache;
-import ru.otus.kunin.dcache.base.event.CacheListenerAdapter;
-import ru.otus.kunin.dcache.base.event.CompositeEventListenerImpl;
+import ru.otus.kunin.dcache.base.event.SimpleCacheEventListener;
 
+import javax.cache.event.CacheEntryEvent;
+import javax.cache.event.CacheEntryListenerException;
 import javax.cache.processor.EntryProcessor;
-import java.util.Optional;
 
 public class Main {
 
   public static void main(String[] args) throws InterruptedException {
-
-    final CompositeEventListenerImpl<String, String> eventListener = new CompositeEventListenerImpl<>();
-    eventListener.addListener(CacheListenerAdapter.fromOnCreatedListener(
-        cacheEntryEvents ->
-            cacheEntryEvents.forEach(e -> System.out.println("Created: " + e))));
-    eventListener.addListener(CacheListenerAdapter.fromOnRemovedListener(
-        cacheEntryEvents ->
-            cacheEntryEvents.forEach(e -> System.out.println("Removed: " + e))));
-    eventListener.addListener(CacheListenerAdapter.fromOnUpdatedListener(
-        cacheEntryEvents ->
-            cacheEntryEvents.forEach(e -> System.out.println("Updated: " + e))));
-    eventListener.addListener(CacheListenerAdapter.fromOnExpiredListener(
-        cacheEntryEvents ->
-            cacheEntryEvents.forEach(e -> System.out.println("Expired: " + e))));
-    
-    final DiCache<String, String> cache = new DiCache<>(Optional.of(eventListener));
+    final DiCache<String, String> cache = new DiCache<>();
+    cache.registerCacheEntryListener(sEventListener);
 
     cache.putIfAbsent("key1", "v1");
     cache.putIfAbsent("key1", "v1_fucked");
@@ -65,7 +51,29 @@ public class Main {
     // Expire entry and wait to see it cleaned up
     cache.expireEntry("key4");
     Thread.sleep(1000);
+    cache.unwrap(DiCache.class);
     cache.close();
   }
 
+  private static SimpleCacheEventListener<String, String> sEventListener = new SimpleCacheEventListener<String, String>() {
+    @Override
+    public void onCreated(final Iterable<CacheEntryEvent<? extends String, ? extends String>> ex) throws CacheEntryListenerException {
+      ex.forEach(e -> System.out.println("Created: " + e));
+    }
+
+    @Override
+    public void onExpired(final Iterable<CacheEntryEvent<? extends String, ? extends String>> ex) throws CacheEntryListenerException {
+      ex.forEach(e -> System.out.println("Expired: " + e));
+    }
+
+    @Override
+    public void onRemoved(final Iterable<CacheEntryEvent<? extends String, ? extends String>> ex) throws CacheEntryListenerException {
+      ex.forEach(e -> System.out.println("Removed: " + e));
+    }
+
+    @Override
+    public void onUpdated(final Iterable<CacheEntryEvent<? extends String, ? extends String>> ex) throws CacheEntryListenerException {
+      ex.forEach(e -> System.out.println("Updated: " + e));
+    }
+  };
 }

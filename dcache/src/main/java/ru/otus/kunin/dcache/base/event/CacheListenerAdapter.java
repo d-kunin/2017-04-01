@@ -16,22 +16,6 @@ import java.util.Optional;
 
 public class CacheListenerAdapter<K, V> {
 
-  public static <K, V> CacheListenerAdapter<K, V> fromOnCreatedListener(CacheEntryCreatedListener<K ,V> createdListener) {
-    return fromListener(createdListener);
-  }
-
-  public static <K, V> CacheListenerAdapter<K, V> fromOnUpdatedListener(CacheEntryUpdatedListener<K ,V> updatedListener) {
-    return fromListener(updatedListener);
-  }
-
-  public static <K, V> CacheListenerAdapter<K, V> fromOnRemovedListener(CacheEntryRemovedListener<K ,V> removedListener) {
-    return fromListener(removedListener);
-  }
-
-  public static <K, V> CacheListenerAdapter<K, V> fromOnExpiredListener(CacheEntryExpiredListener<K ,V> expiredListener) {
-    return fromListener(expiredListener);
-  }
-
   public static <K, V> CacheListenerAdapter<K, V> fromListener(CacheEntryListener<K, V> listener) {
     Preconditions.checkNotNull(listener);
     final MutableCacheEntryListenerConfiguration<K, V> configuration = new MutableCacheEntryListenerConfiguration<>(

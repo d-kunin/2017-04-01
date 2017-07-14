@@ -1,7 +1,6 @@
 package ru.otus.kunin.dcache.base;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -14,11 +13,13 @@ import ru.otus.kunin.dcache.base.entry.StrongEntry;
 import ru.otus.kunin.dcache.base.event.CacheEntryEvent;
 import ru.otus.kunin.dcache.base.event.CacheListenerAdapter;
 import ru.otus.kunin.dcache.base.event.CompositeEventListener;
+import ru.otus.kunin.dcache.base.event.CompositeEventListenerImpl;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.configuration.Configuration;
+import javax.cache.event.CacheEntryListener;
 import javax.cache.event.EventType;
 import javax.cache.integration.CompletionListener;
 import javax.cache.processor.EntryProcessor;
@@ -48,11 +49,11 @@ public class DiCache<K, V> implements Cache<K, V> {
 
   private final ConcurrentMap<K, SoftEntry<K, V>> map = Maps.newConcurrentMap();
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
-  private final Optional<CompositeEventListener<K, V>> eventListener;
+  private final CompositeEventListener<K, V> compositeEventListener;
   private final ScheduledExecutorService executor;
 
-  public DiCache(final Optional<CompositeEventListener<K, V>> eventListener) {
-    this.eventListener = eventListener;
+  public DiCache() {
+    this.compositeEventListener = new CompositeEventListenerImpl<>();
     executor = Executors.newSingleThreadScheduledExecutor();
     executor.scheduleAtFixedRate(this::removeExpiredEntries,
                                  EXPIRATION_CHECK_PERIOD_MS,
@@ -83,7 +84,9 @@ public class DiCache<K, V> implements Cache<K, V> {
   @Override
   public boolean containsKey(final K key) {
     throwIfClosed();
-    return Optional.ofNullable(map.get(validateKey(key))).map(SoftReference::get).isPresent();
+    return Optional.ofNullable(map.get(validateKey(key)))
+        .map(SoftReference::get)
+        .isPresent();
   }
 
   @Override
@@ -146,7 +149,9 @@ public class DiCache<K, V> implements Cache<K, V> {
   @Override
   public V getAndRemove(final K k) {
     throwIfClosed();
-    final V oldValue = Optional.ofNullable(map.remove(k)).map(SoftEntry::getValue).orElse(null);
+    final V oldValue = Optional.ofNullable(map.remove(k))
+        .map(SoftEntry::getValue)
+        .orElse(null);
     if (null != oldValue) {
       notifyRemoved(k, oldValue);
     }
@@ -282,7 +287,7 @@ public class DiCache<K, V> implements Cache<K, V> {
 
   @Override
   public <T> T unwrap(final Class<T> aClass) {
-    if (DiCache.class == aClass) {
+    if (this.getClass().isAssignableFrom(aClass)) {
       return (T) this;
     }
     throw new IllegalArgumentException();
@@ -290,18 +295,23 @@ public class DiCache<K, V> implements Cache<K, V> {
 
   @Override
   public void registerCacheEntryListener(final CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration) {
-    Preconditions.checkArgument(eventListener.isPresent());
     final CacheListenerAdapter<K, V> cacheListenerAdapter =
         CacheListenerAdapter.fromConfiguration(cacheEntryListenerConfiguration);
-    eventListener.get().addListener(cacheListenerAdapter);
+    compositeEventListener.addListener(cacheListenerAdapter);
   }
 
   @Override
   public void deregisterCacheEntryListener(final CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration) {
-    Preconditions.checkArgument(eventListener.isPresent());
     final CacheListenerAdapter<K, V> cacheListenerAdapter =
         CacheListenerAdapter.fromConfiguration(cacheEntryListenerConfiguration);
-    eventListener.get().removeListener(cacheListenerAdapter);
+    compositeEventListener.removeListener(cacheListenerAdapter);
+  }
+
+  public CacheEntryListenerConfiguration<K, V> registerCacheEntryListener(final CacheEntryListener<K, V> listener) {
+    final CacheListenerAdapter<K, V> cacheListenerAdapter =
+        CacheListenerAdapter.fromListener(listener);
+    compositeEventListener.addListener(cacheListenerAdapter);
+    return cacheListenerAdapter.getConfiguration();
   }
 
   @Override
@@ -317,31 +327,27 @@ public class DiCache<K, V> implements Cache<K, V> {
   }
 
   private void notifyCreatedOrUpdated(final K key, final V newValue, final Optional<V> oldValue) {
-    eventListener.ifPresent(l -> {
-      final CacheEntryEvent<K, V> entryEvent = oldValue
-          .map(old -> new CacheEntryEvent<>(this, EventType.UPDATED, key, newValue, old))
-          .orElse(new CacheEntryEvent<>(this, EventType.CREATED, key, newValue, null));
-      if (EventType.CREATED == entryEvent.getEventType()) {
-        l.onCreated(Lists.newArrayList(entryEvent));
-      } else {
-        l.onUpdated(Lists.newArrayList(entryEvent));
-      }
-    });
+    final CacheEntryEvent<K, V> entryEvent = oldValue
+        .map(old -> new CacheEntryEvent<>(this, EventType.UPDATED, key, newValue, old))
+        .orElse(new CacheEntryEvent<>(this, EventType.CREATED, key, newValue, null));
+    if (EventType.CREATED == entryEvent.getEventType()) {
+      compositeEventListener.onCreated(Lists.newArrayList(entryEvent));
+    } else {
+      compositeEventListener.onUpdated(Lists.newArrayList(entryEvent));
+    }
   }
 
   private void notifyRemoved(final K key, final V oldValue) {
-    eventListener.ifPresent(l ->
-        l.onRemoved(Lists.newArrayList(new CacheEntryEvent<>(this, EventType.REMOVED, key, null, oldValue))));
+    compositeEventListener.onRemoved(Lists.newArrayList(
+        new CacheEntryEvent<>(this, EventType.REMOVED, key, null, oldValue)));
   }
 
   private void notifyExpired(final List<Map.Entry<K, SoftEntry<K, V>>> expiredEntries) {
-    eventListener.ifPresent(listener -> {
-      List<javax.cache.event.CacheEntryEvent<? extends K, ? extends V>> events = expiredEntries
-          .stream()
-          .map(e -> new CacheEntryEvent<K, V>(this, EventType.EXPIRED, e.getKey(), null, null))
-          .collect(Collectors.toList());
-      listener.onExpired(events);
-    });
+    List<javax.cache.event.CacheEntryEvent<? extends K, ? extends V>> events = expiredEntries
+        .stream()
+        .map(e -> new CacheEntryEvent<K, V>(this, EventType.EXPIRED, e.getKey(), null, null))
+        .collect(Collectors.toList());
+    compositeEventListener.onExpired(events);
   }
 
   private void removeExpiredEntries() {
