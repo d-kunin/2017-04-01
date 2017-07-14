@@ -1,4 +1,4 @@
-package ru.otus.kunin.dcache.impl;
+package ru.otus.kunin.dcache.base;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -6,10 +6,24 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import org.apache.log4j.Logger;
-import ru.otus.kunin.dcache.Dcache;
+import ru.otus.kunin.dcache.base.entry.EntryUtil;
+import ru.otus.kunin.dcache.base.entry.MutableEntry;
+import ru.otus.kunin.dcache.base.entry.SoftEntry;
+import ru.otus.kunin.dcache.base.entry.StrongEntry;
+import ru.otus.kunin.dcache.base.event.CacheEntryEvent;
+import ru.otus.kunin.dcache.base.event.CacheListenerAdapter;
+import ru.otus.kunin.dcache.base.event.CompositeEventListener;
 
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.configuration.CacheEntryListenerConfiguration;
+import javax.cache.configuration.Configuration;
+import javax.cache.event.EventType;
+import javax.cache.integration.CompletionListener;
+import javax.cache.processor.EntryProcessor;
+import javax.cache.processor.EntryProcessorException;
+import javax.cache.processor.EntryProcessorResult;
 import java.lang.ref.SoftReference;
 import java.util.Iterator;
 import java.util.List;
@@ -22,23 +36,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import javax.cache.CacheManager;
-import javax.cache.configuration.CacheEntryListenerConfiguration;
-import javax.cache.configuration.Configuration;
-import javax.cache.event.EventType;
-import javax.cache.integration.CompletionListener;
-import javax.cache.processor.EntryProcessor;
-import javax.cache.processor.EntryProcessorException;
-import javax.cache.processor.EntryProcessorResult;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toMap;
-import static ru.otus.kunin.dcache.impl.RefUtil.mutable;
 
-public class DcacheImpl<K, V> implements Dcache<K, V> {
+public class DiCache<K, V> implements Cache<K, V> {
 
-  private static final Logger LOG = Logger.getLogger(DcacheImpl.class);
+  private static final Logger LOG = Logger.getLogger(DiCache.class);
   private static final long EXPIRATION_CHECK_PERIOD_MS = 500;
 
   private final ConcurrentMap<K, SoftEntry<K, V>> map = Maps.newConcurrentMap();
@@ -46,7 +51,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   private final Optional<CompositeEventListener<K, V>> eventListener;
   private final ScheduledExecutorService executor;
 
-  public DcacheImpl(final Optional<CompositeEventListener<K, V>> eventListener) {
+  public DiCache(final Optional<CompositeEventListener<K, V>> eventListener) {
     this.eventListener = eventListener;
     executor = Executors.newSingleThreadScheduledExecutor();
     executor.scheduleAtFixedRate(this::removeExpiredEntries,
@@ -68,7 +73,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
     return set.stream()
         .map(map::get)
         .filter(Predicates.notNull())
-        .map(RefUtil::strongify)
+        .map(EntryUtil::strongify)
         .filter(StrongEntry::hasValue)
         .collect(
             toMap(Entry::getKey,
@@ -107,7 +112,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
     throwIfClosed();
     final SoftEntry<K, V> oldEntry = map.putIfAbsent(k, createEntry(k, v));
     final boolean wasPut = !Optional.ofNullable(oldEntry)
-        .map(RefUtil::strongify)
+        .map(EntryUtil::strongify)
         .map(StrongEntry::getValue)
         .isPresent();
     if (wasPut) {
@@ -120,7 +125,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   public boolean remove(final K k) {
     throwIfClosed();
     final Optional<V> oldValue = Optional.ofNullable(map.remove(k))
-        .map(RefUtil::strongify)
+        .map(EntryUtil::strongify)
         .map(StrongEntry::getValue);
     if (oldValue.isPresent()) {
       notifyRemoved(k, oldValue.get());
@@ -162,7 +167,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   public boolean replace(final K key, final V newValue) {
     throwIfClosed();
     final Optional<V> oldValue = Optional.ofNullable(map.replace(key, createEntry(key, newValue)))
-        .map(RefUtil::strongify)
+        .map(EntryUtil::strongify)
         .map(StrongEntry::getValue);
     if (oldValue.isPresent()) {
       notifyCreatedOrUpdated(key, newValue, oldValue);
@@ -174,7 +179,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
   public V getAndReplace(final K k, final V v) {
     throwIfClosed();
     final Optional<V> oldValue = Optional.ofNullable(map.replace(k, createEntry(k, v)))
-        .map(RefUtil::strongify)
+        .map(EntryUtil::strongify)
         .map(StrongEntry::getValue);
     if (oldValue.isPresent()) {
       notifyCreatedOrUpdated(k, v, oldValue);
@@ -215,9 +220,9 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
                       final Object... objects) throws EntryProcessorException {
     throwIfClosed();
     checkNotNull(entryProcessor);
-    final MutableEntry<K, V> mutableEntry = mutable(
+    final MutableEntry<K, V> mutableEntry = EntryUtil.mutable(
         Optional.ofNullable(map.get(k))
-            .map(RefUtil::strongify)
+            .map(EntryUtil::strongify)
             .orElse(StrongEntry.create(k, null)));
     final T result = entryProcessor.process(mutableEntry, objects);
     processMutation(mutableEntry);
@@ -277,7 +282,7 @@ public class DcacheImpl<K, V> implements Dcache<K, V> {
 
   @Override
   public <T> T unwrap(final Class<T> aClass) {
-    if (DcacheImpl.class == aClass || Dcache.class == aClass) {
+    if (DiCache.class == aClass) {
       return (T) this;
     }
     throw new IllegalArgumentException();

@@ -1,44 +1,41 @@
-package ru.otus.kunin.dcache.impl;
+package ru.otus.kunin.dcache.base.event;
 
 import com.google.common.base.Preconditions;
 
 import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.configuration.Factory;
 import javax.cache.configuration.MutableCacheEntryListenerConfiguration;
-import javax.cache.event.*;
+import javax.cache.event.CacheEntryCreatedListener;
+import javax.cache.event.CacheEntryEventFilter;
+import javax.cache.event.CacheEntryExpiredListener;
+import javax.cache.event.CacheEntryListener;
+import javax.cache.event.CacheEntryRemovedListener;
+import javax.cache.event.CacheEntryUpdatedListener;
 import java.util.Objects;
 import java.util.Optional;
 
 public class CacheListenerAdapter<K, V> {
 
   public static <K, V> CacheListenerAdapter<K, V> fromOnCreatedListener(CacheEntryCreatedListener<K ,V> createdListener) {
-    Preconditions.checkNotNull(createdListener);
-    final MutableCacheEntryListenerConfiguration<K, V> configuration = new MutableCacheEntryListenerConfiguration<>(
-        () -> createdListener, () -> null, false, false
-    );
-    return fromConfiguration(configuration);
+    return fromListener(createdListener);
   }
 
   public static <K, V> CacheListenerAdapter<K, V> fromOnUpdatedListener(CacheEntryUpdatedListener<K ,V> updatedListener) {
-    Preconditions.checkNotNull(updatedListener);
-    final MutableCacheEntryListenerConfiguration<K, V> configuration = new MutableCacheEntryListenerConfiguration<>(
-        () -> updatedListener, () -> null, false, false
-    );
-    return fromConfiguration(configuration);
+    return fromListener(updatedListener);
   }
 
   public static <K, V> CacheListenerAdapter<K, V> fromOnRemovedListener(CacheEntryRemovedListener<K ,V> removedListener) {
-    Preconditions.checkNotNull(removedListener);
-    final MutableCacheEntryListenerConfiguration<K, V> configuration = new MutableCacheEntryListenerConfiguration<>(
-        () -> removedListener, () -> null, false, false
-    );
-    return fromConfiguration(configuration);
+    return fromListener(removedListener);
   }
 
   public static <K, V> CacheListenerAdapter<K, V> fromOnExpiredListener(CacheEntryExpiredListener<K ,V> expiredListener) {
-    Preconditions.checkNotNull(expiredListener);
+    return fromListener(expiredListener);
+  }
+
+  public static <K, V> CacheListenerAdapter<K, V> fromListener(CacheEntryListener<K, V> listener) {
+    Preconditions.checkNotNull(listener);
     final MutableCacheEntryListenerConfiguration<K, V> configuration = new MutableCacheEntryListenerConfiguration<>(
-        () -> expiredListener, () -> null, false, false
+        () -> listener, () -> null, false, false
     );
     return fromConfiguration(configuration);
   }

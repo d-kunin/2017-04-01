@@ -1,9 +1,9 @@
-package ru.otus.kunin.dcache.impl;
+package ru.otus.kunin.dcache.base.entry;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
-class MutableEntry<K, V> implements javax.cache.processor.MutableEntry<K, V> {
+public class MutableEntry<K, V> implements javax.cache.processor.MutableEntry<K, V> {
 
   /*
     getValue() should generate hit/miss
@@ -15,7 +15,7 @@ class MutableEntry<K, V> implements javax.cache.processor.MutableEntry<K, V> {
   private boolean removed = false;
   private V newValue = null;
 
-  MutableEntry(final K key, final V oldValue) {
+  public MutableEntry(final K key, final V oldValue) {
     this.key = key;
     this.oldValue = oldValue;
   }

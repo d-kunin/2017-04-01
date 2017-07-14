@@ -1,13 +1,13 @@
-package ru.otus.kunin.dcache.impl;
+package ru.otus.kunin.dcache.base.entry;
 
 import javax.cache.Cache;
 
-public class RefUtil {
+public class EntryUtil {
 
-  private RefUtil() {}
+  private EntryUtil() {}
 
   public static <K, V> StrongEntry<K, V> strongify(Cache.Entry<K, V> entry) {
-    return new ru.otus.kunin.dcache.impl.AutoValue_StrongEntry<>(entry.getKey(), entry.getValue());
+    return StrongEntry.create(entry.getKey(), entry.getValue());
   }
 
   public static <K, V> MutableEntry<K, V> mutable(Cache.Entry<K, V> entry) {

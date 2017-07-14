@@ -1,13 +1,12 @@
 package ru.otus.kunin.dcache.main;
 
 import com.google.common.collect.ImmutableSet;
+import ru.otus.kunin.dcache.base.DiCache;
+import ru.otus.kunin.dcache.base.event.CacheListenerAdapter;
+import ru.otus.kunin.dcache.base.event.CompositeEventListenerImpl;
 
-import ru.otus.kunin.dcache.impl.CacheListenerAdapter;
-import ru.otus.kunin.dcache.impl.CompositeEventListenerImpl;
-import ru.otus.kunin.dcache.impl.DcacheImpl;
-
-import java.util.Optional;
 import javax.cache.processor.EntryProcessor;
+import java.util.Optional;
 
 public class Main {
 
@@ -27,7 +26,7 @@ public class Main {
         cacheEntryEvents ->
             cacheEntryEvents.forEach(e -> System.out.println("Expired: " + e))));
     
-    final DcacheImpl<String, String> cache = new DcacheImpl<>(Optional.of(eventListener));
+    final DiCache<String, String> cache = new DiCache<>(Optional.of(eventListener));
 
     cache.putIfAbsent("key1", "v1");
     cache.putIfAbsent("key1", "v1_fucked");

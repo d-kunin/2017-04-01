@@ -1,4 +1,4 @@
-package ru.otus.kunin.dcache.impl;
+package ru.otus.kunin.dcache.base.entry;
 
 import com.google.auto.value.AutoValue;
 
@@ -11,10 +11,10 @@ import javax.cache.Cache;
  * with value garbage collected we return this entry that
  * has a string reference to the value.
  */
-abstract class StrongEntry<K, V> implements Cache.Entry<K, V> {
+public abstract class StrongEntry<K, V> implements Cache.Entry<K, V> {
 
   public static <K, V> StrongEntry<K, V> create(K key, V value) {
-    return new ru.otus.kunin.dcache.impl.AutoValue_StrongEntry<>(key, value);
+    return new ru.otus.kunin.dcache.base.entry.AutoValue_StrongEntry<>(key, value);
   }
 
   @Override

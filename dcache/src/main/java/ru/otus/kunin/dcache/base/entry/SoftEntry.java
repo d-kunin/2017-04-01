@@ -1,5 +1,4 @@
-package ru.otus.kunin.dcache.impl;
-
+package ru.otus.kunin.dcache.base.entry;
 
 import com.google.common.base.Preconditions;
 
