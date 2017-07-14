@@ -1,4 +1,4 @@
-package ru.otus.kunin.dcache.base.entry;
+package ru.otus.kunin.dicache.base.entry;
 
 import com.google.auto.value.AutoValue;
 
@@ -14,7 +14,7 @@ import javax.cache.Cache;
 public abstract class StrongEntry<K, V> implements Cache.Entry<K, V> {
 
   public static <K, V> StrongEntry<K, V> create(K key, V value) {
-    return new ru.otus.kunin.dcache.base.entry.AutoValue_StrongEntry<>(key, value);
+    return new ru.otus.kunin.dicache.base.entry.AutoValue_StrongEntry<>(key, value);
   }
 
   @Override

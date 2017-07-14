@@ -1,4 +1,4 @@
-package ru.otus.kunin.dcache.base;
+package ru.otus.kunin.dicache.base;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicates;
@@ -6,14 +6,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
-import ru.otus.kunin.dcache.base.entry.EntryUtil;
-import ru.otus.kunin.dcache.base.entry.MutableEntry;
-import ru.otus.kunin.dcache.base.entry.SoftEntry;
-import ru.otus.kunin.dcache.base.entry.StrongEntry;
-import ru.otus.kunin.dcache.base.event.CacheEntryEvent;
-import ru.otus.kunin.dcache.base.event.CacheListenerAdapter;
-import ru.otus.kunin.dcache.base.event.CompositeEventListener;
-import ru.otus.kunin.dcache.base.event.CompositeEventListenerImpl;
+import ru.otus.kunin.dicache.base.entry.EntryUtil;
+import ru.otus.kunin.dicache.base.entry.MutableEntry;
+import ru.otus.kunin.dicache.base.entry.SoftEntry;
+import ru.otus.kunin.dicache.base.entry.StrongEntry;
+import ru.otus.kunin.dicache.base.event.CacheEntryEvent;
+import ru.otus.kunin.dicache.base.event.CacheListenerAdapter;
+import ru.otus.kunin.dicache.base.event.CompositeEventListener;
+import ru.otus.kunin.dicache.base.event.CompositeEventListenerImpl;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;

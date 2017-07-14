@@ -1,4 +1,4 @@
-package ru.otus.kunin.dcache.base.event;
+package ru.otus.kunin.dicache.base.event;
 
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryEvent;

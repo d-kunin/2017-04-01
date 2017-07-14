@@ -1,4 +1,4 @@
-package ru.otus.kunin.dcache.base.event;
+package ru.otus.kunin.dicache.base.event;
 
 import com.google.common.collect.Lists;
 

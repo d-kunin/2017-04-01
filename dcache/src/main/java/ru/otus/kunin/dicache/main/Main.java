@@ -1,8 +1,8 @@
-package ru.otus.kunin.dcache.main;
+package ru.otus.kunin.dicache.main;
 
 import com.google.common.collect.ImmutableSet;
-import ru.otus.kunin.dcache.base.DiCache;
-import ru.otus.kunin.dcache.base.event.SimpleCacheEventListener;
+import ru.otus.kunin.dicache.base.DiCache;
+import ru.otus.kunin.dicache.base.event.SimpleCacheEventListener;
 
 import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryListenerException;
