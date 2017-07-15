@@ -3,7 +3,11 @@ package ru.otus.kunin.dorm.base;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
@@ -17,10 +21,13 @@ import ru.otus.kunin.dorm.main.entity.UserEntity;
 import ru.otus.kunin.dorm.main.entity.UserWithAddressAndPhoneEntity;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class DormBlackboxTest {
@@ -46,17 +53,18 @@ public class DormBlackboxTest {
   @Parameters(name = "{0}")
   public static DormTestParameter[] data() throws SQLException {
     return new DormTestParameter[]{
-        new DormTestParameter(() -> {
-          try {
-            return new DormImpl(
-                sHikariDataSource.getConnection(),
-                new TypeMapperImpl(new FieldMapperImpl()),
-                new SqlGeneratorImpl(),
-                new ResultSetMapperImpl());
-          } catch (SQLException e) {
-            throw new RuntimeException(e);
-          }
-        },
+        new DormTestParameter(
+            () -> {
+              try {
+                return new DormImpl(
+                    sHikariDataSource.getConnection(),
+                    new TypeMapperImpl(new FieldMapperImpl()),
+                    new SqlGeneratorImpl(),
+                    new ResultSetMapperImpl());
+              } catch (SQLException e) {
+                throw new RuntimeException(e);
+              }
+            },
             "DormImpl"),
         new DormTestParameter(
             () -> new DormHibernateImpl(ImmutableSet.of(
@@ -65,7 +73,20 @@ public class DormBlackboxTest {
                 PhoneEntity.class,
                 UserWithAddressAndPhoneEntity.class
             )),
-            "DormHibernateImpl")};
+            "DormHibernateImpl"),
+        new DormTestParameter(
+            () -> {
+              try {
+                return new CachingDorm(new DormImpl(
+                    sHikariDataSource.getConnection(),
+                    new TypeMapperImpl(new FieldMapperImpl()),
+                    new SqlGeneratorImpl(),
+                    new ResultSetMapperImpl()));
+              } catch (SQLException e) {
+                throw new RuntimeException(e);
+              }
+            },
+            "CachedDorm")};
   }
 
   @Parameter
@@ -82,8 +103,8 @@ public class DormBlackboxTest {
 
   @After
   public void tearDown() throws Exception {
-    dropTablesSilent();
     dorm.close();
+    dropTablesSilent();
   }
 
   @Test
@@ -133,6 +154,24 @@ public class DormBlackboxTest {
     assertEquals(1, dorm.loadAll(UserWithAddressAndPhoneEntity.class).size());
     final UserWithAddressAndPhoneEntity loaded = dorm.load(user.getId(), UserWithAddressAndPhoneEntity.class).get();
     assertEquals(user, loaded);
+  }
+
+  @Test
+  public void testPerformanceLoadAndSaveSimpleEntity() throws Exception {
+    final int size = 25;
+    final ArrayList<UserEntity> users = new ArrayList<>(size);
+    for (int i = 0; i < size; i++) {
+      final UserEntity user = makeUser();
+      users.add(user);
+      dorm.save(user);
+    }
+    for (int i = 0; i < size; i++) {
+      for (final UserEntity user : users) {
+        final UserEntity loadedUser = dorm.load(user.getId(), user.getClass()).get();
+        loadedUser.setAge(loadedUser.getAge() + 1);
+        dorm.save(loadedUser);
+      }
+    }
   }
 
   private static UserEntity makeUser() {

@@ -31,8 +31,8 @@ public class DormHibernateImpl implements Dorm {
         .put(Environment.USER, "tully")
         .put(Environment.PASS, "tully")
         .put(Environment.HBM2DDL_AUTO, "create")
-        .put(Environment.SHOW_SQL, true)
-        .put(Environment.FORMAT_SQL, true)
+        .put(Environment.SHOW_SQL, false)
+        .put(Environment.FORMAT_SQL, false)
         .put("hibernate.connection.provider_class", "org.hibernate.hikaricp.internal.HikariCPConnectionProvider")
         .build();
     registryBuilder.applySettings(settings);
