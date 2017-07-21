@@ -20,10 +20,10 @@ public class ParasortTest {
   @Parameters(name = "list size = {0}")
   public static List<Integer> sizes() {
     return Lists.newArrayList(
-        2 << 15,
-        2 << 18,
-        2 << 20,
-        2 << 22);
+        65_536,
+        524_288,
+        2_097_152,
+        8_388_608);
   }
 
   @Parameter
@@ -42,36 +42,31 @@ public class ParasortTest {
 
   @Test
   public void testSystemSort() throws Exception {
-    Parasort.Sort<Integer> system = Parasort.system();
-    List<Integer> sorted = system.sort(list);
+    List<Integer> sorted = Parasort.system(list);
     assertTrue(isSorted(sorted));
   }
 
   @Test
   public void testStreamSort() throws Exception {
-    Parasort.Sort<Integer> stream = Parasort.stream();
-    List<Integer> sorted = stream.sort(list);
+    List<Integer> sorted = Parasort.stream(list);
     assertTrue(isSorted(sorted));
   }
 
   @Test
   public void testArraysParallelSort() throws Exception {
-    Parasort.Sort<Integer> arraysParallel = Parasort.arraysParallel();
-    List<Integer> sorted = arraysParallel.sort(list);
+    List<Integer> sorted = Parasort.arraysParallel(list);
     assertTrue(isSorted(sorted));
   }
 
   @Test
   public void testCustomSortWithExecutor() throws Exception {
-    Parasort.Sort<Integer> sortWithExecutor = Parasort.customSortWithExecutor();
-    List<Integer> sorted = sortWithExecutor.sort(list);
+    List<Integer> sorted = Parasort.customSortWithExecutor(list);
     assertTrue(isSorted(sorted));
   }
 
   @Test
   public void testCustomSortWithNewThread() throws Exception {
-    Parasort.Sort<Integer> sortWithNewThreads = Parasort.customSortWithNewThreads();
-    List<Integer> sorted = sortWithNewThreads.sort(list);
+    List<Integer> sorted = Parasort.customSortWithNewThreads(list);
     assertTrue(isSorted(sorted));
   }
 
