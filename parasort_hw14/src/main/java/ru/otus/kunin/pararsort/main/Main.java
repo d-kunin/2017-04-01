@@ -9,7 +9,7 @@ public class Main {
 
   public static void main(String[] args) {
     final ArrayList<Integer> list = Lists.newArrayList(1, 2, 3);
-    Parasort.<Integer>customSort().sort(list);
+    Parasort.<Integer>customSortWithExecutor().sort(list);
   }
 
 }

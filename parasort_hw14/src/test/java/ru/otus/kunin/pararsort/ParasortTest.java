@@ -20,10 +20,10 @@ public class ParasortTest {
   @Parameters(name = "list size = {0}")
   public static List<Integer> sizes() {
     return Lists.newArrayList(
-        2 << 5,
-        2 << 10,
         2 << 15,
-        2 << 20);
+        2 << 18,
+        2 << 20,
+        2 << 22);
   }
 
   @Parameter
@@ -62,9 +62,16 @@ public class ParasortTest {
   }
 
   @Test
-  public void testCustomSort() throws Exception {
-    Parasort.Sort<Integer> customSort = Parasort.customSort();
-    List<Integer> sorted = customSort.sort(list);
+  public void testCustomSortWithExecutor() throws Exception {
+    Parasort.Sort<Integer> sortWithExecutor = Parasort.customSortWithExecutor();
+    List<Integer> sorted = sortWithExecutor.sort(list);
+    assertTrue(isSorted(sorted));
+  }
+
+  @Test
+  public void testCustomSortWithNewThread() throws Exception {
+    Parasort.Sort<Integer> sortWithNewThreads = Parasort.customSortWithNewThreads();
+    List<Integer> sorted = sortWithNewThreads.sort(list);
     assertTrue(isSorted(sorted));
   }
 
