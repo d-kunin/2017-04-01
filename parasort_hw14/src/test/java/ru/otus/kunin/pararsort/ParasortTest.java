@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
@@ -20,9 +21,9 @@ public class ParasortTest {
   @Parameters(name = "list size = {0}")
   public static List<Integer> sizes() {
     return Lists.newArrayList(
-        65_536,
+        65_537,
         524_288,
-        2_097_152,
+        2_097_153,
         8_388_608);
   }
 
@@ -62,6 +63,7 @@ public class ParasortTest {
   public void testCustomSortWithExecutor() throws Exception {
     List<Integer> sorted = Parasort.customSortWithExecutor(list);
     assertTrue(isSorted(sorted));
+    assertEquals(list.size(), sorted.size());
   }
 
   @Test

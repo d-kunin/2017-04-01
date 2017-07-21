@@ -50,7 +50,7 @@ public class Parasort {
 
     final ArrayList<Future<List<T>>> futures = Lists.newArrayList();
     for (int i = 0; i < list.size(); i += chunkSize) {
-      final SortTask<T> sortTask = new SortTask(list.subList(i, i + chunkSize));
+      final SortTask<T> sortTask = new SortTask(list.subList(i, Math.min(i + chunkSize, list.size())));
       futures.add(SORT_EXECUTOR_SERVICE.submit(sortTask));
     }
     LOG.info("Number of tasks/treads running {}", futures.size());
