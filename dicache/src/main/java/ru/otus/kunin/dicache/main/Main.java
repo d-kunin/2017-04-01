@@ -51,7 +51,7 @@ public class Main {
     // Expire entry and wait to see it cleaned up
     cache.expireEntry("key4");
     Thread.sleep(1000);
-    cache.unwrap(DiCache.class);
+    System.out.println(cache.unwrap(DiCache.class).getStats());
     cache.close();
   }
 

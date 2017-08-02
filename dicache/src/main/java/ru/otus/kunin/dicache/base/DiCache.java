@@ -14,6 +14,7 @@ import ru.otus.kunin.dicache.base.event.CacheEntryEvent;
 import ru.otus.kunin.dicache.base.event.CacheListenerAdapter;
 import ru.otus.kunin.dicache.base.event.CompositeEventListener;
 import ru.otus.kunin.dicache.base.event.CompositeEventListenerImpl;
+import ru.otus.kunin.dicache.base.stats.CacheStatisticsMXBeanImpl;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
@@ -22,6 +23,7 @@ import javax.cache.configuration.Configuration;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.EventType;
 import javax.cache.integration.CompletionListener;
+import javax.cache.management.CacheStatisticsMXBean;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.EntryProcessorResult;
@@ -37,6 +39,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,6 +55,8 @@ public class DiCache<K, V> implements Cache<K, V> {
   private final CompositeEventListener<K, V> compositeEventListener;
   private final ScheduledExecutorService executor;
 
+  private final CacheStatisticsMXBeanImpl stats = new CacheStatisticsMXBeanImpl();
+
   public DiCache() {
     this.compositeEventListener = new CompositeEventListenerImpl<>();
     executor = Executors.newSingleThreadScheduledExecutor();
@@ -61,17 +66,29 @@ public class DiCache<K, V> implements Cache<K, V> {
                                  TimeUnit.MILLISECONDS);
   }
 
+  public CacheStatisticsMXBean getStats() {
+    return stats;
+  }
+
   @Override
   public V get(final K key) {
     throwIfClosed();
+    stats.onGet();
+
     final Optional<SoftEntry<K, V>> entry = Optional.ofNullable(map.get(validateKey(key)));
-    return entry.map(SoftEntry::getValue).orElse(null);
+    final V value = entry.map(SoftEntry::getValue).orElse(null);
+    if (null != value) {
+      stats.onHit();
+    } else {
+      stats.onMiss();
+    }
+    return value;
   }
 
   @Override
   public Map<K, V> getAll(final Set<? extends K> set) {
     throwIfClosed();
-    return set.stream()
+    final Map<K, V> result = set.stream()
         .map(map::get)
         .filter(Predicates.notNull())
         .map(EntryUtil::strongify)
@@ -79,6 +96,13 @@ public class DiCache<K, V> implements Cache<K, V> {
         .collect(
             toMap(Entry::getKey,
                   Entry::getValue));
+    final int get = set.size();
+    final int hit = result.size();
+    final int miss = set.size() - result.size();
+    IntStream.of(get).forEach(ignored -> stats.onGet());
+    IntStream.of(hit).forEach(ignored -> stats.onHit());
+    IntStream.of(miss).forEach(ignored -> stats.onMiss());
+    return result;
   }
 
   @Override
@@ -92,6 +116,7 @@ public class DiCache<K, V> implements Cache<K, V> {
   @Override
   public void put(final K k, final V v) {
     throwIfClosed();
+    stats.onPut();
     final Optional<V> oldValue = Optional.ofNullable(map.put(k, createEntry(k, v))).map(SoftEntry::getValue);
     notifyCreatedOrUpdated(k, v, oldValue);
   }
@@ -99,9 +124,17 @@ public class DiCache<K, V> implements Cache<K, V> {
   @Override
   public V getAndPut(final K k, final V v) {
     throwIfClosed();
+    stats.onGet();
+    stats.onPut();
     final Optional<SoftEntry<K, V>> oldEntry = Optional.of(map.replace(k, createEntry(k, v)));
     notifyCreatedOrUpdated(k, v, oldEntry.map(SoftEntry::getValue));
-    return oldEntry.map(SoftEntry::getValue).orElse(null);
+    final V returnValue = oldEntry.map(SoftEntry::getValue).orElse(null);
+    if (null != returnValue) {
+      stats.onHit();
+    } else {
+      stats.onMiss();
+    }
+    return returnValue;
   }
 
   @Override
@@ -119,6 +152,7 @@ public class DiCache<K, V> implements Cache<K, V> {
         .map(StrongEntry::getValue)
         .isPresent();
     if (wasPut) {
+      stats.onPut();
       notifyCreatedOrUpdated(k, v, Optional.empty());
     }
     return wasPut;
@@ -131,6 +165,7 @@ public class DiCache<K, V> implements Cache<K, V> {
         .map(EntryUtil::strongify)
         .map(StrongEntry::getValue);
     if (oldValue.isPresent()) {
+      stats.onRemove();
       notifyRemoved(k, oldValue.get());
     }
     return oldValue.isPresent();
@@ -141,6 +176,7 @@ public class DiCache<K, V> implements Cache<K, V> {
     throwIfClosed();
     final boolean wasRemoved = map.remove(k, createEntry(k, v));
     if (wasRemoved) {
+      stats.onRemove();
       notifyRemoved(k, v);
     }
     return wasRemoved;
@@ -153,6 +189,8 @@ public class DiCache<K, V> implements Cache<K, V> {
         .map(SoftEntry::getValue)
         .orElse(null);
     if (null != oldValue) {
+      stats.onGet();
+      stats.onRemove();
       notifyRemoved(k, oldValue);
     }
     return oldValue;
@@ -356,6 +394,7 @@ public class DiCache<K, V> implements Cache<K, V> {
         .filter(e -> e.getValue().isGarbageCollected())
         .collect(Collectors.toList());
     expiredEntries.forEach(e -> map.remove(e.getKey()));
+    expiredEntries.forEach(ignored -> stats.onEvict());
 
     LOG.info("Removed " + expiredEntries.size() + " entries.");
     notifyExpired(expiredEntries);
