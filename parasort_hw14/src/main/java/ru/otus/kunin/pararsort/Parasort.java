@@ -82,7 +82,7 @@ public class Parasort {
 
     final ArrayList<SortThread<T>> sortThreads = Lists.newArrayList();
     for (int i = 0; i < list.size(); i += chunkSize) {
-      final SortThread<T> sortThread = new SortThread<>(list.subList(i, i + chunkSize));
+      final SortThread<T> sortThread = new SortThread<>(list.subList(i, Math.min(i + chunkSize, list.size())));
       sortThread.start();
       sortThreads.add(sortThread);
     }

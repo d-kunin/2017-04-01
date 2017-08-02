@@ -4,31 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Some merge code from the internet.
+ * Some merge code from the Internet.
  */
 public class Merge {
 
   public static <T extends Comparable<? super T>> List<T> mergeList(List<T> a, List<T> b) {
-    List<T> returnList = new ArrayList<>(a.size() + b.size());
-    List<T> smallerList = a.size() <= b.size() ? a : b;
-    List<T> longerList = smallerList.equals(a) ? b : a;
-    int s1 = 0;
-    int s2 = 0;
-    while (s1 < smallerList.size() && s2 < longerList.size()) {
-      if (smallerList.get(s1).compareTo(longerList.get(s2)) < 0) {
-        returnList.add(smallerList.get(s1));
-        s1++;
+    final List<T> returnList = new ArrayList<>(a.size() + b.size());
+    int indexA = 0;
+    int indexB = 0;
+    while (indexA < a.size() && indexB < b.size()) {
+      if (a.get(indexA).compareTo(b.get(indexB)) < 0) {
+        returnList.add(a.get(indexA));
+        indexA++;
       } else {
-        returnList.add(longerList.get(s2));
-        s2++;
+        returnList.add(b.get(indexB));
+        indexB++;
       }
     }
     // Append the remaining array
-    if (s1 < smallerList.size()) {
-      returnList.addAll(smallerList.subList(s1, smallerList.size()));
+    if (indexA < a.size()) {
+      returnList.addAll(a.subList(indexA, a.size()));
     }
-    if (s2 < longerList.size()) {
-      returnList.addAll(longerList.subList(s2, longerList.size()));
+    if (indexB < b.size()) {
+      returnList.addAll(b.subList(indexB, b.size()));
     }
     return returnList;
   }
