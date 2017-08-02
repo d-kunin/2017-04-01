@@ -25,7 +25,8 @@ public class Main {
           "jdbc version: " + metaData.getJDBCMajorVersion() + "." + metaData.getJDBCMinorVersion());
       Lists.newArrayList(
           makeBaseDorm(dataSource.getConnection()),
-          makeHibernateDorm())
+          makeHibernateDorm(),
+          makeCachingDorm(makeBaseDorm(dataSource.getConnection())))
           .forEach(d -> {
             try (Dorm dorm = d) {
               run(dorm);
@@ -51,6 +52,10 @@ public class Main {
         new TypeMapperImpl(new FieldMapperImpl()),
         new SqlGeneratorImpl(),
         new ResultSetMapperImpl());
+  }
+
+  private static CachingDorm makeCachingDorm(Dorm wrap) {
+    return new CachingDorm(wrap);
   }
 
   private static void run(Dorm dorm) throws SQLException {
