@@ -14,12 +14,14 @@ public class LoginServlet extends HttpServlet {
                        final HttpServletResponse resp) throws ServletException, IOException {
 
     final PrintWriter writer = resp.getWriter();
+    final String failed = req.getParameter("failed");
     writer.write("<!DOCTYPE html>\n" +
                      "<html>\n" +
                      "<head>\n" +
                      "    <title></title>\n" +
                      "</head>\n" +
                      "<body>\n" +
+                     (null == failed ? "" : "<p>try 'tully'</p><br/>") +
                      "<form method='POST' action='/j_security_check'>\n" +
                      "    <input type='text' name='j_username' value='tully'/><br/>\n" +
                      "    <input type='password' name='j_password' value='tully'/><br/>\n" +
