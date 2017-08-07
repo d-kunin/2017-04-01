@@ -12,7 +12,8 @@ public class WelcomeServlet extends DefaultServlet {
 
   @Override
   protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
-    final ImmutableMap<String, Object> dataModel = ImmutableMap.of("user", "blabla");
+    final ImmutableMap<String, Object> dataModel =
+        ImmutableMap.of("user", request.getUserPrincipal().getName());
     response.getWriter()
         .println(TemplateProcessor.instance().getPage("welcome.html", dataModel));
     response.setContentType("text/html;charset=utf-8");
