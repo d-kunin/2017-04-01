@@ -23,9 +23,16 @@ class TemplateProcessor {
 
   private static TemplateProcessor instance = new TemplateProcessor();
 
-  private final Configuration configuration = new Configuration(Configuration.VERSION_2_3_23);
+  private final Configuration configuration;
 
   private TemplateProcessor() {
+    configuration = new Configuration(Configuration.VERSION_2_3_23);
+    try {
+      configuration.setDirectoryForTemplateLoading(new File(HTML_DIR));
+    } catch (IOException e) {
+      LOG.error("Cant create template processor", e);
+      throw new RuntimeException(e);
+    }
   }
 
   static TemplateProcessor instance() {
@@ -34,7 +41,7 @@ class TemplateProcessor {
 
   String getPage(String filename, Map<String, Object> data) {
     try (Writer stream = new StringWriter()) {
-      Template template = configuration.getTemplate(HTML_DIR + File.separator + filename);
+      Template template = configuration.getTemplate(filename);
       template.process(data, stream);
       return stream.toString();
     } catch (TemplateException | IOException e) {
