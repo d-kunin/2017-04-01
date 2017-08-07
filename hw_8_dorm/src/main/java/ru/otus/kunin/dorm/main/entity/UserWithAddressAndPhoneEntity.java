@@ -3,7 +3,14 @@ package ru.otus.kunin.dorm.main.entity;
 import com.google.common.collect.ImmutableList;
 import ru.otus.kunin.dorm.api.DormEntity;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
