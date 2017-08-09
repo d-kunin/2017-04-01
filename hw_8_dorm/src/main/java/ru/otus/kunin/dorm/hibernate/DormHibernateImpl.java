@@ -74,7 +74,7 @@ public class DormHibernateImpl implements Dorm {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     sessionFactory.close();
   }
 

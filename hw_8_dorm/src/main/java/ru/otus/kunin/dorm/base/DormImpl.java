@@ -103,7 +103,11 @@ public class DormImpl implements Dorm {
   }
 
   @Override
-  public void close() throws Exception {
-    connection.close();
+  public void close() {
+    try {
+      connection.close();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

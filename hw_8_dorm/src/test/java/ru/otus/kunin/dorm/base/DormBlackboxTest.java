@@ -212,7 +212,9 @@ public class DormBlackboxTest {
 
   @AfterClass
   public static void afterClass() {
-    sHikariDataSource.close();
-    sHikariDataSource = null;
+    if (sHikariDataSource != null) {
+      sHikariDataSource.close();
+      sHikariDataSource = null;
+    }
   }
 }

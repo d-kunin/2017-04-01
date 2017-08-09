@@ -8,6 +8,7 @@ import ru.otus.kunin.dicache.base.DiCache;
 import ru.otus.kunin.dorm.api.Dorm;
 import ru.otus.kunin.dorm.api.DormEntity;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -83,7 +84,7 @@ public class CachingDorm implements Dorm {
     }
     final Optional<T> loaded = impl.load(id, clazz);
     loaded.ifPresent(v -> cache.put(cacheKey, v));
-    loaded.ifPresent(v-> LOG.info("read from source: " + value));
+    loaded.ifPresent(v -> LOG.info("read from source: " + value));
     return loaded;
   }
 
@@ -97,9 +98,17 @@ public class CachingDorm implements Dorm {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     saveExecutor.shutdownNow().forEach(Runnable::run);
-    impl.close();
-    cache.close();
+    try {
+      impl.close();
+      cache.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public DiCache<CacheKey, Object> getCache() {
+    return cache;
   }
 }

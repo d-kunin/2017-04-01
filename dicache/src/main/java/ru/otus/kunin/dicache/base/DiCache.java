@@ -389,14 +389,12 @@ public class DiCache<K, V> implements Cache<K, V> {
   }
 
   private void removeExpiredEntries() {
-    LOG.info("Collecting expired entries ... ");
     List<Map.Entry<K, SoftEntry<K, V>>> expiredEntries = map.entrySet().stream()
         .filter(e -> e.getValue().isGarbageCollected())
         .collect(Collectors.toList());
     expiredEntries.forEach(e -> map.remove(e.getKey()));
     expiredEntries.forEach(ignored -> stats.onEvict());
 
-    LOG.info("Removed " + expiredEntries.size() + " entries.");
     notifyExpired(expiredEntries);
   }
 

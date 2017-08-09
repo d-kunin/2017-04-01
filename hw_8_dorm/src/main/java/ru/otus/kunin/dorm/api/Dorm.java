@@ -1,10 +1,11 @@
 package ru.otus.kunin.dorm.api;
 
+import java.io.Closeable;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-public interface Dorm extends AutoCloseable {
+public interface Dorm extends Closeable {
 
   <T extends DormEntity> void createTable(Class<T> type) throws SQLException;
 
