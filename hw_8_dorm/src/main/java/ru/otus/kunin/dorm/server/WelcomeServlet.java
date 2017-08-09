@@ -15,7 +15,7 @@ public class WelcomeServlet extends DefaultServlet {
     final ImmutableMap<String, Object> dataModel =
         ImmutableMap.of("user", request.getUserPrincipal().getName());
     response.getWriter()
-        .println(TemplateProcessor.instance().getPage("welcome.html", dataModel));
+        .println(TemplateProcessor.instance().getPage("welcome.ftl", dataModel));
     response.setContentType("text/html;charset=utf-8");
     response.setStatus(HttpServletResponse.SC_OK);
   }

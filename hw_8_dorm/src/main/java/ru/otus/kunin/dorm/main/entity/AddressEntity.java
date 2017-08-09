@@ -11,7 +11,8 @@ public class AddressEntity extends DormEntity {
   private String street;
   private int postalCode;
 
-  /* required */ public AddressEntity() {
+  /* required */
+  public AddressEntity() {
   }
 
   public AddressEntity(String street, int postalCode) {

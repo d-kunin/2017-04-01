@@ -55,13 +55,13 @@ public class DormHibernateImpl implements Dorm {
     return withSession(session -> {
       final Query query = session.createQuery("from " + clazz.getSimpleName() + " where id = :id");
       query.setParameter("id", id);
-      return Optional.ofNullable((T)query.uniqueResult());
+      return Optional.ofNullable((T) query.uniqueResult());
     });
   }
 
   @Override
   public <T extends DormEntity> List<T> loadAll(Class<T> clazz) throws SQLException {
-    return withSession(session -> session.createQuery("from " +  clazz.getSimpleName()).list());
+    return withSession(session -> session.createQuery("from " + clazz.getSimpleName()).list());
   }
 
   private <R> R withSession(Function<Session, R> function) {

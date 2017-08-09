@@ -19,7 +19,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
 
 public class TypeMapperImpl implements TypeMapper {
-  
+
   private final FieldMapper fieldMapper;
 
   private final Predicate<Field> skipFieldPredicate = ImmutableList.<Predicate<Field>>of(

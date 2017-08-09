@@ -11,7 +11,8 @@ import java.util.Objects;
 @Table(name = "dima_users")
 public class UserEntity extends DormEntity {
 
-  /* required */ public UserEntity() {
+  /* required */
+  public UserEntity() {
   }
 
   public UserEntity(final String name, final int age, final String displayName) {
@@ -73,9 +74,9 @@ public class UserEntity extends DormEntity {
     }
     final UserEntity user = (UserEntity) o;
     return age == user.age &&
-           Objects.equals(id, user.id) &&
-           Objects.equals(aNameField, user.aNameField) &&
-           Objects.equals(displayName, user.displayName);
+        Objects.equals(id, user.id) &&
+        Objects.equals(aNameField, user.aNameField) &&
+        Objects.equals(displayName, user.displayName);
   }
 
   @Override

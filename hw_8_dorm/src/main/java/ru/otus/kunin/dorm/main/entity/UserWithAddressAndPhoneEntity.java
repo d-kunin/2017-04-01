@@ -99,11 +99,11 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
     }
     final UserWithAddressAndPhoneEntity user = (UserWithAddressAndPhoneEntity) o;
     return getAge() == user.getAge() &&
-           Objects.equals(id, user.id) &&
-           Objects.equals(getName(), user.getName()) &&
-           Objects.equals(getDisplayName(), user.getDisplayName()) &&
-           Objects.equals(getPhones(), user.getPhones()) &&
-           Objects.equals(getAddress(), user.getAddress());
+        Objects.equals(id, user.id) &&
+        Objects.equals(getName(), user.getName()) &&
+        Objects.equals(getDisplayName(), user.getDisplayName()) &&
+        Objects.equals(getPhones(), user.getPhones()) &&
+        Objects.equals(getAddress(), user.getAddress());
   }
 
   @Override
@@ -123,7 +123,7 @@ public class UserWithAddressAndPhoneEntity extends DormEntity {
   private AddressEntity address;
 
   @OneToMany(
-      cascade =  CascadeType.ALL,
+      cascade = CascadeType.ALL,
       fetch = FetchType.EAGER,
       orphanRemoval = true
   )

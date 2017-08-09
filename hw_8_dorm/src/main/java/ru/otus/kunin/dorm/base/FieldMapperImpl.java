@@ -21,8 +21,10 @@ public class FieldMapperImpl implements FieldMapper {
       .put(String.class, "text")
       .build();
 
-  @VisibleForTesting final static String ID_FIELD_NAME = "id";
-  @VisibleForTesting final static String ID_FIELD_DEFINITION = "bigint auto_increment primary key";
+  @VisibleForTesting
+  final static String ID_FIELD_NAME = "id";
+  @VisibleForTesting
+  final static String ID_FIELD_DEFINITION = "bigint auto_increment primary key";
 
   @Override
   public FieldMapping mapField(final Field field) {

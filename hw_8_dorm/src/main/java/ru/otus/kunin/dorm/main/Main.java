@@ -27,7 +27,7 @@ public class Main {
     try (HikariDataSource dataSource = Connector.createHikariDataSource()) {
       final DatabaseMetaData metaData = dataSource.getConnection().getMetaData();
       System.out.println("Connected to: " + metaData.getURL() + "\n" +
-          "jdbc version: " + metaData.getJDBCMajorVersion() + "." + metaData.getJDBCMinorVersion());
+                             "jdbc version: " + metaData.getJDBCMajorVersion() + "." + metaData.getJDBCMinorVersion());
       Lists.newArrayList(
           makeBaseDorm(dataSource.getConnection()),
           makeHibernateDorm(),

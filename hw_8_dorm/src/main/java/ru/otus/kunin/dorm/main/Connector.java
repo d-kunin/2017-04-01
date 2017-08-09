@@ -11,7 +11,7 @@ public class Connector {
   private static final int PORT = 3306;
   private static final String SERVER_NAME = "localhost";
   private static final String DB_NAME = "db_example";
-  private static final String JDBC_URL = "jdbc:mysql://" + SERVER_NAME + ":" +  PORT + "/" + DB_NAME;
+  private static final String JDBC_URL = "jdbc:mysql://" + SERVER_NAME + ":" + PORT + "/" + DB_NAME;
 
   public static MysqlDataSource createMySqlDataSource() {
     final MysqlDataSource mysqlDataSource = new MysqlDataSource();
@@ -31,7 +31,7 @@ public class Connector {
     config.addDataSourceProperty("cachePrepStmts", "true");
     config.addDataSourceProperty("prepStmtCacheSize", "250");
     config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-    return  new HikariDataSource(config);
+    return new HikariDataSource(config);
   }
 
 }

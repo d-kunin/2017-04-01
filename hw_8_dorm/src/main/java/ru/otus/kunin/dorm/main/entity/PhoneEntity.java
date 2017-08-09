@@ -10,7 +10,8 @@ import java.util.Objects;
 @Entity
 public class PhoneEntity extends DormEntity {
 
-  /* required */ public PhoneEntity() {
+  /* required */
+  public PhoneEntity() {
   }
 
   public PhoneEntity(int code, String number) {

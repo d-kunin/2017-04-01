@@ -20,7 +20,7 @@ public class SqlGeneratorImpl implements SqlGenerator {
         .map(fm -> fm.getSqlName() + " " + fm.getSqlDefinition())
         .collect(toList());
     String query = "create table " + type.getSqlTable() + " " +
-               "(" + Joiner.on(", ").join(columns) + ");";
+        "(" + Joiner.on(", ").join(columns) + ");";
     return new SqlStatement(query);
   }
 
@@ -38,8 +38,8 @@ public class SqlGeneratorImpl implements SqlGenerator {
     String[] valuesPlaceholders = new String[nonIdFieldMappings.size()];
     Arrays.fill(valuesPlaceholders, "?");
     String query = "insert into " + type.getSqlTable() + " " +
-               "(" + Joiner.on(", ").join(columnNames) + ") " +
-               "values (" + Joiner.on(", ").join(valuesPlaceholders) + ");";
+        "(" + Joiner.on(", ").join(columnNames) + ") " +
+        "values (" + Joiner.on(", ").join(valuesPlaceholders) + ");";
     ImmutableMap.Builder<Integer, FieldMapping> mapBuilder = ImmutableMap.builder();
     for (int i = 0; i < nonIdFieldMappings.size(); i++) {
       mapBuilder.put(i + 1, nonIdFieldMappings.get(i));
@@ -56,8 +56,8 @@ public class SqlGeneratorImpl implements SqlGenerator {
         .collect(toList());
     String idPlusPlaceholder = idField.getSqlName() + "=?";
     String query = "update " + type.getSqlTable() + " " +
-               "set " + Joiner.on(", ").join(columnsPlusPlaceholders) + " " +
-               "where " + idPlusPlaceholder + ";";
+        "set " + Joiner.on(", ").join(columnsPlusPlaceholders) + " " +
+        "where " + idPlusPlaceholder + ";";
     ImmutableMap.Builder<Integer, FieldMapping> mapBuilder = ImmutableMap.builder();
     for (int i = 0; i < nonIdFieldMappings.size(); i++) {
       mapBuilder.put(i + 1, nonIdFieldMappings.get(i));
@@ -69,7 +69,7 @@ public class SqlGeneratorImpl implements SqlGenerator {
   @Override
   public SqlStatement selectOne(final TypeMapping type) {
     String query = "select * from " + type.getSqlTable() + " " +
-               "where " + type.getIdField().getSqlName() + "=?;";
+        "where " + type.getIdField().getSqlName() + "=?;";
     ImmutableMap<Integer, FieldMapping> parameters = ImmutableMap.of(1, type.getIdField());
     return new SqlStatement(query, parameters);
   }
