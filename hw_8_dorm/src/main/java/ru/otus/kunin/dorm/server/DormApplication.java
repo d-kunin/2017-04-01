@@ -1,7 +1,6 @@
 package ru.otus.kunin.dorm.server;
 
 import com.google.common.io.Closer;
-import com.zaxxer.hikari.HikariDataSource;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.HashLoginService;
@@ -10,21 +9,14 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
-import ru.otus.kunin.dorm.base.CachingDorm;
-import ru.otus.kunin.dorm.base.DormImpl;
-import ru.otus.kunin.dorm.base.FieldMapperImpl;
-import ru.otus.kunin.dorm.base.ResultSetMapperImpl;
-import ru.otus.kunin.dorm.base.SqlGeneratorImpl;
-import ru.otus.kunin.dorm.base.TypeMapperImpl;
-import ru.otus.kunin.dorm.main.Connector;
+import ru.otus.kunin.dicache.base.DiCache;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.sql.SQLException;
 
 public class DormApplication implements Closeable {
 
-  private final CachingDorm cachingDorm;
+  private final DiCache<String, String> cache;
   private final Closer closer = Closer.create();
 
 
@@ -35,18 +27,7 @@ public class DormApplication implements Closeable {
   }
 
   public DormApplication() {
-    try {
-      final HikariDataSource hikariDataSource = closer.register(
-          Connector.createHikariDataSource());
-      cachingDorm = closer.register(new CachingDorm(
-          new DormImpl(
-              hikariDataSource.getConnection(),
-              new TypeMapperImpl(new FieldMapperImpl()),
-              new SqlGeneratorImpl(),
-              new ResultSetMapperImpl())));
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
+    cache = closer.register(new DiCache<>());
   }
 
   void start() throws Exception {
@@ -56,7 +37,7 @@ public class DormApplication implements Closeable {
     context.setContextPath("/");
     context.addServlet(WelcomeServlet.class, "");
     context.addServlet(LoginServlet.class, "/login");
-    context.addServlet(new ServletHolder(new CacheServlet(cachingDorm.getCache())), "/stats");
+    context.addServlet(new ServletHolder(new CacheServlet(cache)), "/stats");
     context.setSecurityHandler(createSecurityHandler());
 
     final Server server = new Server(8081);
