@@ -18,7 +18,7 @@
 <form action="/stats" method="get">
     <input type="hidden" name="action" value="read"/>
     Read by key: <input type="text" name="read_key" value="${read_key!}"><br>
-    Value is: <input type="text" name="read_value" value="${result_read!}" readonly><br>
+    Value is: <input type="text" value="${result_read!}" readonly><br>
     <input type="submit" value="Send">
 </form>
 <br/>
