@@ -18,7 +18,7 @@ import static com.google.common.base.Predicates.not;
 
 public class CacheServlet extends HttpServlet {
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final DiCache<String, String> diCache;
   private final LinkedList<String> logs = new LinkedList<>();
 
@@ -29,6 +29,7 @@ public class CacheServlet extends HttpServlet {
   @Override
   protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     final ImmutableMap.Builder<String, Object> dataModelBuilder = new ImmutableMap.Builder();
+
     if ("read".equals(req.getParameter("action"))) {
       final Optional<String> keyToRead = Optional.ofNullable(req.getParameter("read_key"));
       logs.add(0, "reading " + keyToRead);
@@ -39,7 +40,7 @@ public class CacheServlet extends HttpServlet {
       });
     }
 
-    Map<String, Object> stats = objectMapper.convertValue(diCache.getStats(), Map.class);
+    Map<String, Object> stats = OBJECT_MAPPER.convertValue(diCache.getStats(), Map.class);
     dataModelBuilder.put("stats", stats.entrySet());
     dataModelBuilder.put("logs", logs);
     render(resp, dataModelBuilder.build());
@@ -48,6 +49,7 @@ public class CacheServlet extends HttpServlet {
   @Override
   protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     final ImmutableMap.Builder<String, Object> dataModelBuilder = new ImmutableMap.Builder();
+
     if ("write".equals(req.getParameter("action"))) {
       final Optional<String> keyToWrite = Optional.ofNullable(req.getParameter("new_key"));
       final Optional<String> valueToWrite = Optional.ofNullable(req.getParameter("new_value"));
@@ -57,7 +59,7 @@ public class CacheServlet extends HttpServlet {
       }
     }
 
-    Map<String, Object> stats = objectMapper.convertValue(diCache.getStats(), Map.class);
+    Map<String, Object> stats = OBJECT_MAPPER.convertValue(diCache.getStats(), Map.class);
     dataModelBuilder.put("stats", stats.entrySet());
     dataModelBuilder.put("logs", logs);
     render(resp, dataModelBuilder.build());
