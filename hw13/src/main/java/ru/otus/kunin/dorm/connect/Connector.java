@@ -1,6 +1,5 @@
 package ru.otus.kunin.dorm.connect;
 
-import com.mysql.cj.jdbc.MysqlDataSource;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -24,16 +23,6 @@ public class Connector {
     } catch (SQLException e) {
       throw new IllegalStateException(e);
     }
-  }
-
-  public static MysqlDataSource createMySqlDataSource() {
-    final MysqlDataSource mysqlDataSource = new MysqlDataSource();
-    mysqlDataSource.setUser(USER);
-    mysqlDataSource.setPassword(PASSWORD);
-    mysqlDataSource.setPort(PORT);
-    mysqlDataSource.setServerName(SERVER_NAME);
-    mysqlDataSource.setDatabaseName(DB_NAME);
-    return mysqlDataSource;
   }
 
   public static HikariDataSource createHikariDataSource() {
