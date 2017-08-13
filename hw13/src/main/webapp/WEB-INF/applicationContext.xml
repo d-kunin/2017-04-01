@@ -1,0 +1,12 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="dorm" class="ru.otus.kunin.dorm.base.DormImpl" factory-method="create">
+    </bean>
+
+    <bean id="dicache" class="ru.otus.kunin.dicache.base.DiCache">
+    </bean>
+
+</beans>
