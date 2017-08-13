@@ -1,4 +1,4 @@
-package ru.otus.kunin.dorm.server;
+package ru.otus.kunin.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import ru.otus.kunin.dicache.DiCache;
 import ru.otus.kunin.dorm.base.DormImpl;
-import ru.otus.kunin.dorm.templates.TemplateProcessor;
+import ru.otus.kunin.templates.TemplateProcessor;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

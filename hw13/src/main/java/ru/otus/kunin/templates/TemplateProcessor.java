@@ -1,4 +1,4 @@
-package ru.otus.kunin.dorm.templates;
+package ru.otus.kunin.templates;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
