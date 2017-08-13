@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.kunin.dicache.base.DiCache;
+import ru.otus.kunin.dicache.DiCache;
 import ru.otus.kunin.dorm.api.Dorm;
 import ru.otus.kunin.dorm.api.DormEntity;
 

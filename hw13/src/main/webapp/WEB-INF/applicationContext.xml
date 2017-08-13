@@ -6,7 +6,7 @@
     <bean id="dorm" class="ru.otus.kunin.dorm.base.DormImpl" factory-method="create">
     </bean>
 
-    <bean id="dicache" class="ru.otus.kunin.dicache.base.DiCache">
+    <bean id="dicache" class="ru.otus.kunin.dicache.DiCache">
     </bean>
 
 </beans>
