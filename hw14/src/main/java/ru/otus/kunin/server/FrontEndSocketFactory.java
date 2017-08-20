@@ -11,6 +11,8 @@ import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 public class FrontEndSocketFactory implements WebSocketCreator {
 
   private static final Logger LOG = LoggerFactory.getLogger(FrontEndSocketFactory.class);
@@ -19,8 +21,9 @@ public class FrontEndSocketFactory implements WebSocketCreator {
   public static class FrontEndSocket {
 
     @OnWebSocketConnect
-    public void onConnect(Session session) {
+    public void onConnect(Session session) throws IOException {
       LOG.info("Connecting {}", session);
+      session.getRemote().sendString("Handshake OK");
     }
 
     @OnWebSocketClose
