@@ -1,7 +1,7 @@
 var ws;
 
 init = function () {
-    ws = new WebSocket("ws://localhost:8090/chat");
+    ws = new WebSocket("ws://localhost:8091/wschat");
     ws.onopen = function (event) {
 
     }
