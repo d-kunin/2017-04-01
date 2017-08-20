@@ -41,7 +41,12 @@ public class FrontEndSocketFactory implements WebSocketCreator {
   @Override
   public Object createWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
     LOG.info("Creating socket {}", req);
-    return new FrontEndSocket();
+    if (req.hasSubProtocol("dima_v1")) {
+      resp.setAcceptedSubProtocol("dima_v1");
+      return new FrontEndSocket();
+    } else {
+      return null;
+    }
   }
 
 }
