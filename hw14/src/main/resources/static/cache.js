@@ -33,8 +33,8 @@ init = function () {
        console.log("Close", event.data)
     }
 
-    var $btnNewValue = document.getElementById("btnNewValue");
-    $btnNewValue.addEventListener("click", function (event) {
+    document.getElementById("btnNewValue")
+            .addEventListener("click", function (event) {
         var $inputNewKey = document.getElementById("inputNewKey");
         var $inputNewValue = document.getElementById("inputNewValue");
         sendRequest("add", {
@@ -42,4 +42,13 @@ init = function () {
             "value": $inputNewValue.value
         });
     });
+
+    document.getElementById("btnReadValue")
+             .addEventListener("click", function (event) {
+        var $inputReadKey = document.getElementById("inputReadKey");
+        sendRequest("get", {
+            "key": $inputReadKey.value,
+        });
+    });
+
 };
