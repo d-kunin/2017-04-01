@@ -8,21 +8,19 @@
 <body onload="init()">
 <!-- send new value here -->
 <br/>
-<form action="cache" method="post">
-    <input type="hidden" name="action" value="write"/>
-    New key: <input type="text" name="new_key"><br/>
-    New value: <input type="text" name="new_value"><br/>
-    <input type="submit" value="Send">
-</form>
-<br/>
+<div>
+    New key: <input id="inputNewKey"><br>
+    New value: <input id="inputNewValue"><br>
+    <button id="btnNewValue">Add</button>
+</div>
 <!-- read value here -->
-<form action="cache" method="get">
-    <input type="hidden" name="action" value="read"/>
-    Read by key: <input type="text" name="read_key" value="${read_key!}"><br>
-    Value is: <input type="text" value="${result_read!}" readonly><br>
-    <input type="submit" value="Send">
-</form>
+<div>
+    Read by key: <input id="inputReadKey"><br>
+    Value is: <input id="inputReadValue" readonly><br>
+    <button id="btnReadValue">Get</button>
+</div>
 <br/>
+
 <!-- show stats here -->
 <br/>
 <table>

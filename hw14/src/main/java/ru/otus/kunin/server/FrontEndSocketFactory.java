@@ -1,5 +1,6 @@
 package ru.otus.kunin.server;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -10,6 +11,7 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.otus.kunin.frontend.jsonrpc.JsonRequest;
 
 import java.io.IOException;
 
@@ -33,7 +35,8 @@ public class FrontEndSocketFactory implements WebSocketCreator {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String text) {
-      LOG.info("Message {} {}", session, text);
+      final JsonRequest jsonRequest = JsonRequest.fromJson(text);
+      LOG.info("Message {}", jsonRequest);
     }
 
   }
