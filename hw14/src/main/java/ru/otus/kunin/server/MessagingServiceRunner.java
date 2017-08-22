@@ -9,6 +9,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import ru.otus.kunin.dicache.DiCache;
 import ru.otus.kunin.dorm.base.DormImpl;
+import ru.otus.kunin.frontend.jsonrpc.RpcManager;
 
 public class MessagingServiceRunner {
 
@@ -19,10 +20,14 @@ public class MessagingServiceRunner {
     resourceHandler.setDirectoriesListed(true);
     resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
 
+    // Deps
+    final RpcManager rpcManager = new RpcManager(null);
+    //
+
     final CacheServlet cacheServlet = new CacheServlet(new DiCache<>(), DormImpl.create());
     final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
     servletContextHandler.addServlet(new ServletHolder(cacheServlet), "/cache");
-    servletContextHandler.addServlet(new ServletHolder(new WsCacheServlet()), "/cache/websocket");
+    servletContextHandler.addServlet(new ServletHolder(new WsCacheServlet(rpcManager)), "/cache/websocket");
 
     server.setHandler(
         new HandlerList(resourceHandler,

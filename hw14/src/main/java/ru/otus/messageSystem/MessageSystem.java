@@ -19,6 +19,11 @@ public final class MessageSystem implements Closeable {
     messagesMap.put(addressee.getAddress(), new ConcurrentLinkedQueue<>());
   }
 
+  public void removeAddressee(Addressee addressee) {
+    addresseeMap.remove(addressee.getAddress());
+    messagesMap.remove(addressee.getAddress());
+  }
+
   public void sendMessage(Message message) {
     messagesMap.get(message.getTo()).add(message);
   }
