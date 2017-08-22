@@ -25,7 +25,6 @@ public class FrontEndSocketFactory implements WebSocketCreator {
     @OnWebSocketConnect
     public void onConnect(Session session) throws IOException {
       LOG.info("Connecting {}", session);
-      session.getRemote().sendString("Handshake OK");
     }
 
     @OnWebSocketClose

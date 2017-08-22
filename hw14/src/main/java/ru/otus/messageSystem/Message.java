@@ -1,4 +1,4 @@
-package ru.otus.l151.messageSystem;
+package ru.otus.messageSystem;
 
 /**
  * @author tully
