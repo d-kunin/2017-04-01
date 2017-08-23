@@ -1,8 +1,6 @@
 package ru.otus.kunin.server;
 
-import ru.otus.kunin.dicache.DiCache;
 import ru.otus.messageSystem.Address;
-import ru.otus.messageSystem.Addressee;
 import ru.otus.messageSystem.Message;
 import ru.otus.messageSystem.MessageSystemContext;
 
@@ -24,13 +22,13 @@ public class AddToCacheMessage extends Message {
   }
 
   @Override
-  public void exec(final Addressee addressee) {
-    if (addressee instanceof DiCache) {
-      execOnCache((DiCache<String, String>) addressee);
-    }
+  public void exec(AddressableCache addressableCache) {
+    addressableCache.put(key, value);
+    messageSystemContext.messageSystem().sendMessage(
+        new AddToCacheMessageResult(getTo(),
+                                    getFrom(),
+                                    String.format("added {%s:%s}", key, value),
+                                    null));
   }
 
-  private void execOnCache(DiCache<String, String> cache) {
-    cache.put(key, value);
-  }
 }

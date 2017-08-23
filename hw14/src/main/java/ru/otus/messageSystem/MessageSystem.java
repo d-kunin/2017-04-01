@@ -57,7 +57,7 @@ public final class MessageSystem implements Closeable {
   private void processQueue(final Addressee addressee, final ConcurrentLinkedQueue<Message> queue) {
     while (!queue.isEmpty()) {
       Message message = queue.poll();
-      message.exec(addressee);
+      addressee.accept(message);
     }
   }
 

@@ -11,25 +11,28 @@ import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.kunin.frontend.jsonrpc.JsonRequest;
-import ru.otus.kunin.frontend.jsonrpc.RpcManager;
+import ru.otus.messageSystem.Address;
+import ru.otus.messageSystem.Addressee;
+import ru.otus.messageSystem.Message;
+import ru.otus.messageSystem.MessageSystemContext;
 
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public class FrontEndSocketManager implements WebSocketCreator {
+public class WebsocketConnectionFactory implements WebSocketCreator {
 
-  private static final Logger LOG = LoggerFactory.getLogger(FrontEndSocketManager.class);
+  private static final Logger LOG = LoggerFactory.getLogger(WebsocketConnectionFactory.class);
 
   private final CopyOnWriteArraySet<Session> activeSessions = new CopyOnWriteArraySet<>();
 
-  private final RpcManager rpcManager;
+  private final MessageSystemContext messageSystemContext;
 
-  public FrontEndSocketManager(final RpcManager rpcManager) {
-    this.rpcManager = rpcManager;
+  public WebsocketConnectionFactory(final MessageSystemContext messageSystemContext) {
+    this.messageSystemContext = messageSystemContext;
   }
 
   @WebSocket
-  public class FrontEndSocket {
+  public class WebsocketConnection {
 
     @OnWebSocketConnect
     public void onConnect(Session session) throws IOException {
@@ -50,7 +53,26 @@ public class FrontEndSocketManager implements WebSocketCreator {
     public void onMessage(Session session, String text) {
       final JsonRequest jsonRequest = JsonRequest.fromJson(text);
       LOG.info("Message {}", jsonRequest);
-      rpcManager.onRequest(jsonRequest, session.getRemote().getInetSocketAddress().toString());
+      onRequest(jsonRequest, session);
+    }
+
+    public void onRequest(JsonRequest jsonRequest, Session session) {
+      if ("add".equals(jsonRequest.method())) {
+        final String key = jsonRequest.params().get("key").textValue();
+        final String value = jsonRequest.params().get("value").textValue();
+        final String requestId = jsonRequest.id();
+        final AddToCacheMessage addToCacheMessage =
+            new AddToCacheMessage(messageSystemContext, new Address(requestId),
+                                  messageSystemContext.cacheAddress(),
+                                  key,
+                                  value);
+        messageSystemContext.messageSystem().addAddressee(new AddressableJsonRequest(jsonRequest, session));
+        messageSystemContext.messageSystem().sendMessage(addToCacheMessage);
+      }
+
+      if ("get".equals(jsonRequest.method())) {
+
+      }
     }
   }
 
@@ -59,7 +81,7 @@ public class FrontEndSocketManager implements WebSocketCreator {
     LOG.info("Creating socket {}", req);
     if (req.hasSubProtocol("dima_v1")) {
       resp.setAcceptedSubProtocol("dima_v1");
-      return new FrontEndSocket();
+      return new WebsocketConnection();
     } else {
       return null;
     }

@@ -5,4 +5,6 @@ package ru.otus.messageSystem;
  */
 public interface Addressee {
     Address getAddress();
+
+    void accept(Message message);
 }
