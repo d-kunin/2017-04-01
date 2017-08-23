@@ -69,5 +69,16 @@ public class WebsocketConnection {
           new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
       messageSystemContext.messageSystem().sendMessage(getFromCacheMessage);
     }
+
+    if ("stats".equals(jsonRequest.method())) {
+      final String requestId = jsonRequest.id();
+      final GetStatsMessage getStatsMessage =
+          new GetStatsMessage(messageSystemContext,
+                                  new Address(requestId),
+                                  messageSystemContext.cacheAddress());
+      messageSystemContext.messageSystem().addAddressee(
+          new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
+      messageSystemContext.messageSystem().sendMessage(getStatsMessage);
+    }
   }
 }

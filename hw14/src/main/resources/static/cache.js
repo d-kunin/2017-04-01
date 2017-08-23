@@ -29,6 +29,18 @@ function requestStats() {
     pendingStatsRequestId = sendRequest("stats", null).id;
 }
 
+function populateStats(stats) {
+    var tbody = document.getElementById('tbody');
+    tbody.innerHTML = "";
+    for (var property in stats) {
+        if (stats.hasOwnProperty(property)) {
+            var tr = "<tr>";
+            tr += "<td>" + property + "</td>" + "<td>" + stats[property] + "</td></tr>";
+            tbody.innerHTML += tr;
+        }
+    }
+}
+
 init = function () {
     ws = new WebSocket("ws://localhost:8090/cache/websocket");
     ws.onopen = function (event) {
@@ -48,6 +60,7 @@ init = function () {
             requestStats();
         } else if (response.id == pendingStatsRequestId) {
             pendingStatsRequestId = null;
+            populateStats(response.result)
         } else if (response.id == pendingPutRequestId) {
             pendingPutRequestId = null;
             requestStats();
