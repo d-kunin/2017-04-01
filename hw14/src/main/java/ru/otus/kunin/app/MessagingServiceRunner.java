@@ -28,11 +28,9 @@ public class MessagingServiceRunner {
     messageSystem.addAddressee(addressableCache);
 
     final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-    servletContextHandler.addServlet(new ServletHolder(new WebsocketConnectorServlet(messageSystemContext)), "/cache/websocket");
-
-    server.setHandler(new HandlerList(resourceHandler,
-                        servletContextHandler,
-                        new DefaultHandler()));
+    final ServletHolder servletHolder = new ServletHolder(new WebsocketConnectorServlet(messageSystemContext));
+    servletContextHandler.addServlet(servletHolder, "/cache/websocket");
+    server.setHandler(new HandlerList(resourceHandler, servletContextHandler));
 
     messageSystem.start();
     server.start();
