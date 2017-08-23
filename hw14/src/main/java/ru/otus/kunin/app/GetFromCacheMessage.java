@@ -22,10 +22,7 @@ public class GetFromCacheMessage extends Message {
   public void exec(AddressableCache addressableCache) {
     final String value = addressableCache.get(key);
     messageSystemContext.messageSystem().sendMessage(
-        new ResultMessage(getTo(),
-                          getFrom(),
-                          value,
-                          null));
+        new ResultMessage(getTo(), getFrom(), value, null));
   }
 
 }

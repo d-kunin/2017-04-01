@@ -4,28 +4,24 @@ import ru.otus.messageSystem.Address;
 import ru.otus.messageSystem.Message;
 import ru.otus.messageSystem.MessageSystemContext;
 
+import javax.cache.management.CacheStatisticsMXBean;
+
 public class GetStatsMessage extends Message {
 
-  private final String key;
   private final MessageSystemContext messageSystemContext;
 
   public GetStatsMessage(final MessageSystemContext messageSystemContext,
                          final Address from,
-                         final Address to,
-                         final String key) {
+                         final Address to) {
     super(from, to);
     this.messageSystemContext = messageSystemContext;
-    this.key = key;
   }
 
   @Override
   public void exec(AddressableCache addressableCache) {
-    final String value = addressableCache.get(key);
+    final CacheStatisticsMXBean stats = addressableCache.getStats();
     messageSystemContext.messageSystem().sendMessage(
-        new ResultMessage(getTo(),
-                          getFrom(),
-                          value,
-                          null));
+        new ResultMessage(getTo(), getFrom(), stats, null));
   }
 
 }
