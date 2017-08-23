@@ -24,7 +24,7 @@ function sendRequest(method, params) {
 }
 
 init = function () {
-    ws = new WebSocket("ws://localhost:8090/cache/websocket", "dima_v1");
+    ws = new WebSocket("ws://localhost:8090/cache/websocket");
     ws.onopen = function (event) {
         console.log("Opened", event.data)
     }

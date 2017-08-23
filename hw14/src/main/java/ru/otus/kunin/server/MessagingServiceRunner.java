@@ -7,8 +7,6 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
-import ru.otus.kunin.dicache.DiCache;
-import ru.otus.kunin.dorm.base.DormImpl;
 import ru.otus.messageSystem.MessageSystem;
 import ru.otus.messageSystem.MessageSystemContext;
 
@@ -21,7 +19,6 @@ public class MessagingServiceRunner {
     resourceHandler.setDirectoriesListed(true);
     resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
 
-    // Deps
     final MessageSystem messageSystem = new MessageSystem();
     final AddressableCache addressableCache = new AddressableCache();
     final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
@@ -29,15 +26,11 @@ public class MessagingServiceRunner {
         .cacheAddress(addressableCache.getAddress())
         .build();
     messageSystem.addAddressee(addressableCache);
-    //
 
-    final CacheServlet cacheServlet = new CacheServlet(new DiCache<>(), DormImpl.create());
     final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-    servletContextHandler.addServlet(new ServletHolder(cacheServlet), "/cache");
     servletContextHandler.addServlet(new ServletHolder(new WsCacheServlet(messageSystemContext)), "/cache/websocket");
 
-    server.setHandler(
-        new HandlerList(resourceHandler,
+    server.setHandler(new HandlerList(resourceHandler,
                         servletContextHandler,
                         new DefaultHandler()));
 
