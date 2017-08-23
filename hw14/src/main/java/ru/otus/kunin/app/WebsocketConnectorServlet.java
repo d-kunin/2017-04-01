@@ -1,5 +1,7 @@
 package ru.otus.kunin.app;
 
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
@@ -8,14 +10,14 @@ import ru.otus.messageSystem.MessageSystemContext;
 
 import java.util.concurrent.TimeUnit;
 
-public class WsCacheServlet extends WebSocketServlet {
+public class WebsocketConnectorServlet extends WebSocketServlet {
 
-  private static final Logger LOG = LoggerFactory.getLogger(WsCacheServlet.class);
+  private static final Logger LOG = LoggerFactory.getLogger(WebsocketConnectorServlet.class);
   private final static long IDLE_MS = TimeUnit.HOURS.toMillis(36);
 
   private final MessageSystemContext messageSystemContext;
 
-  public WsCacheServlet(final MessageSystemContext messageSystemContext) {
+  public WebsocketConnectorServlet(final MessageSystemContext messageSystemContext) {
     this.messageSystemContext = messageSystemContext;
   }
 
@@ -23,8 +25,12 @@ public class WsCacheServlet extends WebSocketServlet {
   public void configure(final WebSocketServletFactory factory) {
     LOG.info("Configuring ... " + factory);
     factory.getPolicy().setIdleTimeout(IDLE_MS);
-    factory.setCreator(new WebsocketConnectionFactory(messageSystemContext));
+    factory.setCreator(this::createWebSocket);
     LOG.info("Configuration done");
+  }
+
+  public Object createWebSocket(final ServletUpgradeRequest req, final ServletUpgradeResponse resp) {
+    return new WebsocketConnection(messageSystemContext);
   }
 
 }

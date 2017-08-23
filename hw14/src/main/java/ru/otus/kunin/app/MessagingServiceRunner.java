@@ -7,8 +7,6 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
-import ru.otus.kunin.app.AddressableCache;
-import ru.otus.kunin.app.WsCacheServlet;
 import ru.otus.messageSystem.MessageSystem;
 import ru.otus.messageSystem.MessageSystemContext;
 
@@ -30,7 +28,7 @@ public class MessagingServiceRunner {
     messageSystem.addAddressee(addressableCache);
 
     final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-    servletContextHandler.addServlet(new ServletHolder(new WsCacheServlet(messageSystemContext)), "/cache/websocket");
+    servletContextHandler.addServlet(new ServletHolder(new WebsocketConnectorServlet(messageSystemContext)), "/cache/websocket");
 
     server.setHandler(new HandlerList(resourceHandler,
                         servletContextHandler,
