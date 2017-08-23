@@ -45,6 +45,7 @@ init = function () {
     ws = new WebSocket("ws://localhost:8090/cache/websocket");
     ws.onopen = function (event) {
         console.log("Opened", event.data)
+        requestStats();
     }
     ws.onmessage = function (event) {
         console.log("Message", event.data)
