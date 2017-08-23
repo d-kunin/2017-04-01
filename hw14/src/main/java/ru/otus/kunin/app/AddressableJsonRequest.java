@@ -1,9 +1,9 @@
-package ru.otus.kunin.server;
+package ru.otus.kunin.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.api.Session;
-import ru.otus.kunin.frontend.jsonrpc.JsonRequest;
-import ru.otus.kunin.frontend.jsonrpc.JsonResponse;
+import ru.otus.kunin.jsonrpc.JsonRequest;
+import ru.otus.kunin.jsonrpc.JsonResponse;
 import ru.otus.messageSystem.Address;
 import ru.otus.messageSystem.Addressee;
 import ru.otus.messageSystem.Message;

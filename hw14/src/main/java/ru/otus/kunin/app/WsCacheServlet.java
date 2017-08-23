@@ -1,4 +1,4 @@
-package ru.otus.kunin.server;
+package ru.otus.kunin.app;
 
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;

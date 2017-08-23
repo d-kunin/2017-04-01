@@ -1,7 +1,7 @@
 package ru.otus.messageSystem;
 
-import ru.otus.kunin.server.AddressableCache;
-import ru.otus.kunin.server.AddressableJsonRequest;
+import ru.otus.kunin.app.AddressableCache;
+import ru.otus.kunin.app.AddressableJsonRequest;
 
 /**
  * @author tully

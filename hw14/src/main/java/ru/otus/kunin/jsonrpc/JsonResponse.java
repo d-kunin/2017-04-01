@@ -1,4 +1,4 @@
-package ru.otus.kunin.frontend.jsonrpc;
+package ru.otus.kunin.jsonrpc;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;

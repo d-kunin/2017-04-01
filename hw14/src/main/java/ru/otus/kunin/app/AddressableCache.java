@@ -1,4 +1,4 @@
-package ru.otus.kunin.server;
+package ru.otus.kunin.app;
 
 import ru.otus.kunin.dicache.DiCache;
 import ru.otus.messageSystem.Address;

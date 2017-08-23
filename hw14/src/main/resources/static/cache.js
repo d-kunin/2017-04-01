@@ -1,5 +1,7 @@
 var ws;
 var pendingGetValueRequestId;
+var pendingStatsRequestId;
+var pendingPutRequestId;
 
 function guid() {
   function s4() {
@@ -23,6 +25,10 @@ function sendRequest(method, params) {
     return request;
 }
 
+function requestStats() {
+    pendingStatsRequestId = sendRequest("stats", null).id;
+}
+
 init = function () {
     ws = new WebSocket("ws://localhost:8090/cache/websocket");
     ws.onopen = function (event) {
@@ -39,6 +45,12 @@ init = function () {
             } else {
                 document.getElementById("inputReadValue").value = "<null>";
             }
+            requestStats();
+        } else if (response.id == pendingStatsRequestId) {
+            pendingStatsRequestId = null;
+        } else if (response.id == pendingPutRequestId) {
+            pendingPutRequestId = null;
+            requestStats();
         }
     }
     ws.onclose = function (event) {
@@ -49,10 +61,10 @@ init = function () {
             .addEventListener("click", function (event) {
         var $inputNewKey = document.getElementById("inputNewKey");
         var $inputNewValue = document.getElementById("inputNewValue");
-        sendRequest("add", {
+        pendingPutRequestId = sendRequest("add", {
             "key": $inputNewKey.value,
             "value": $inputNewValue.value
-        });
+        }).id;
     });
 
     document.getElementById("btnReadValue").addEventListener("click", function (event) {

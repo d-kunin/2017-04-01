@@ -1,4 +1,4 @@
-package ru.otus.kunin.server;
+package ru.otus.kunin.app;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -7,7 +7,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.kunin.frontend.jsonrpc.JsonRequest;
+import ru.otus.kunin.jsonrpc.JsonRequest;
 import ru.otus.messageSystem.Address;
 import ru.otus.messageSystem.MessageSystemContext;
 
@@ -60,14 +60,14 @@ public class WebsocketConnection {
     if ("get".equals(jsonRequest.method())) {
       final String key = jsonRequest.params().get("key").textValue();
       final String requestId = jsonRequest.id();
-      final GetFromCacheCacheMessage getFromCacheCacheMessage =
-          new GetFromCacheCacheMessage(messageSystemContext,
-                                       new Address(requestId),
-                                       messageSystemContext.cacheAddress(),
-                                       key);
+      final GetFromCacheMessage getFromCacheMessage =
+          new GetFromCacheMessage(messageSystemContext,
+                                  new Address(requestId),
+                                  messageSystemContext.cacheAddress(),
+                                  key);
       messageSystemContext.messageSystem().addAddressee(
           new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
-      messageSystemContext.messageSystem().sendMessage(getFromCacheCacheMessage);
+      messageSystemContext.messageSystem().sendMessage(getFromCacheMessage);
     }
   }
 }

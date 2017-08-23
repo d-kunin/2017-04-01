@@ -1,33 +1,30 @@
-package ru.otus.kunin.server;
+package ru.otus.kunin.app;
 
 import ru.otus.messageSystem.Address;
 import ru.otus.messageSystem.Message;
 import ru.otus.messageSystem.MessageSystemContext;
 
-public class AddToCacheMessage extends Message {
+public class GetFromCacheMessage extends Message {
 
   private final String key;
-  private final String value;
   private final MessageSystemContext messageSystemContext;
 
-  public AddToCacheMessage(final MessageSystemContext messageSystemContext,
-                           final Address from,
-                           final Address to,
-                           final String key,
-                           final String value) {
+  public GetFromCacheMessage(final MessageSystemContext messageSystemContext,
+                             final Address from,
+                             final Address to,
+                             final String key) {
     super(from, to);
     this.messageSystemContext = messageSystemContext;
     this.key = key;
-    this.value = value;
   }
 
   @Override
   public void exec(AddressableCache addressableCache) {
-    addressableCache.put(key, value);
+    final String value = addressableCache.get(key);
     messageSystemContext.messageSystem().sendMessage(
         new ResultMessage(getTo(),
                           getFrom(),
-                          String.format("added {%s:%s}", key, value),
+                          value,
                           null));
   }
 
