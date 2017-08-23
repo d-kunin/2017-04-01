@@ -1,4 +1,5 @@
 var ws;
+var pendingGetValueRequestId;
 
 function guid() {
   function s4() {
@@ -19,6 +20,7 @@ function sendRequest(method, params) {
     var json = JSON.stringify(request);
     ws.send(json);
     console.log(json);
+    return request;
 }
 
 init = function () {
@@ -28,6 +30,16 @@ init = function () {
     }
     ws.onmessage = function (event) {
         console.log("Message", event.data)
+        var response = JSON.parse(event.data);
+        if (response.id == pendingGetValueRequestId) {
+            pendingGetValueRequestId = null;
+            var value = response.result;
+            if (null != value) {
+                document.getElementById("inputReadValue").value = value;
+            } else {
+                document.getElementById("inputReadValue").value = "<null>";
+            }
+        }
     }
     ws.onclose = function (event) {
        console.log("Close", event.data)
@@ -43,12 +55,12 @@ init = function () {
         });
     });
 
-    document.getElementById("btnReadValue")
-             .addEventListener("click", function (event) {
+    document.getElementById("btnReadValue").addEventListener("click", function (event) {
+        document.getElementById("inputReadValue").value = "";
         var $inputReadKey = document.getElementById("inputReadKey");
-        sendRequest("get", {
+        pendingGetValueRequestId = sendRequest("get", {
             "key": $inputReadKey.value,
-        });
+        }).id;
     });
 
 };

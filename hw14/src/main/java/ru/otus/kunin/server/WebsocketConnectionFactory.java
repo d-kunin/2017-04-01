@@ -70,7 +70,15 @@ public class WebsocketConnectionFactory implements WebSocketCreator {
       }
 
       if ("get".equals(jsonRequest.method())) {
-
+        final String key = jsonRequest.params().get("key").textValue();
+        final String requestId = jsonRequest.id();
+        final GetFromCacheCacheMessage getFromCacheCacheMessage =
+            new GetFromCacheCacheMessage(messageSystemContext, new Address(requestId),
+                                  messageSystemContext.cacheAddress(),
+                                  key);
+        messageSystemContext.messageSystem().addAddressee(
+            new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
+        messageSystemContext.messageSystem().sendMessage(getFromCacheCacheMessage);
       }
     }
   }
