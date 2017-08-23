@@ -3,15 +3,15 @@ package ru.otus.kunin.server;
 import ru.otus.messageSystem.Address;
 import ru.otus.messageSystem.Message;
 
-public class AddToCacheMessageResult extends Message {
+public class ResultMessage extends Message {
 
-  private final String result;
+  private final Object result;
   private final String error;
 
-  public AddToCacheMessageResult(final Address from,
-                                 final Address to,
-                                 final String result,
-                                 final String error) {
+  public ResultMessage(final Address from,
+                       final Address to,
+                       final Object result,
+                       final String error) {
     super(from, to);
     this.result = result;
     this.error = error;

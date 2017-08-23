@@ -38,7 +38,7 @@ public class AddressableJsonRequest implements Addressee {
     message.exec(this);
   }
 
-  public void sendResponse(String result, String error) {
+  public void sendResponse(Object result, String error) {
     final JsonResponse jsonResponse = JsonResponse.create(result, error, jsonRequest.id());
     try {
       final String json = OBJECT_MAPPER.writeValueAsString(jsonResponse);

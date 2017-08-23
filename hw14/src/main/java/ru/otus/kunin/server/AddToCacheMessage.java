@@ -25,10 +25,10 @@ public class AddToCacheMessage extends Message {
   public void exec(AddressableCache addressableCache) {
     addressableCache.put(key, value);
     messageSystemContext.messageSystem().sendMessage(
-        new AddToCacheMessageResult(getTo(),
-                                    getFrom(),
-                                    String.format("added {%s:%s}", key, value),
-                                    null));
+        new ResultMessage(getTo(),
+                          getFrom(),
+                          String.format("added {%s:%s}", key, value),
+                          null));
   }
 
 }
