@@ -3,8 +3,6 @@ package ru.otus.kunin.server;
 import ru.otus.messageSystem.Address;
 import ru.otus.messageSystem.Message;
 
-import static com.sun.corba.se.spi.activation.IIOP_CLEAR_TEXT.value;
-
 public class AddToCacheMessageResult extends Message {
 
   private final String result;
@@ -21,6 +19,6 @@ public class AddToCacheMessageResult extends Message {
 
   @Override
   public void exec(final AddressableJsonRequest addressableJsonRequest) {
-    addressableJsonRequest.sendResult(result, error);
+    addressableJsonRequest.sendResponse(result, error);
   }
 }

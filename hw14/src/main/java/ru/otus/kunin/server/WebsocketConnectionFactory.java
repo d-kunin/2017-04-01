@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.kunin.frontend.jsonrpc.JsonRequest;
 import ru.otus.messageSystem.Address;
-import ru.otus.messageSystem.Addressee;
-import ru.otus.messageSystem.Message;
 import ru.otus.messageSystem.MessageSystemContext;
 
 import java.io.IOException;
@@ -66,7 +64,8 @@ public class WebsocketConnectionFactory implements WebSocketCreator {
                                   messageSystemContext.cacheAddress(),
                                   key,
                                   value);
-        messageSystemContext.messageSystem().addAddressee(new AddressableJsonRequest(jsonRequest, session));
+        messageSystemContext.messageSystem().addAddressee(
+            new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
         messageSystemContext.messageSystem().sendMessage(addToCacheMessage);
       }
 

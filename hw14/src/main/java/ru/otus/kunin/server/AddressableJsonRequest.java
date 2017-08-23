@@ -1,6 +1,5 @@
 package ru.otus.kunin.server;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.api.Session;
 import ru.otus.kunin.frontend.jsonrpc.JsonRequest;
@@ -8,6 +7,7 @@ import ru.otus.kunin.frontend.jsonrpc.JsonResponse;
 import ru.otus.messageSystem.Address;
 import ru.otus.messageSystem.Addressee;
 import ru.otus.messageSystem.Message;
+import ru.otus.messageSystem.MessageSystemContext;
 
 import java.io.IOException;
 
@@ -17,10 +17,15 @@ public class AddressableJsonRequest implements Addressee {
 
   private final JsonRequest jsonRequest;
   private final Session session;
+  private final MessageSystemContext messageSystemContext;
 
-  public AddressableJsonRequest(final JsonRequest jsonRequest, final Session session) {
+
+  public AddressableJsonRequest(final JsonRequest jsonRequest,
+                                final Session session,
+                                final MessageSystemContext messageSystemContext) {
     this.jsonRequest = jsonRequest;
     this.session = session;
+    this.messageSystemContext = messageSystemContext;
   }
 
   @Override
@@ -33,13 +38,15 @@ public class AddressableJsonRequest implements Addressee {
     message.exec(this);
   }
 
-  public void sendResult(String result, String error) {
+  public void sendResponse(String result, String error) {
     final JsonResponse jsonResponse = JsonResponse.create(result, error, jsonRequest.id());
     try {
       final String json = OBJECT_MAPPER.writeValueAsString(jsonResponse);
       session.getRemote().sendString(json);
     } catch (IOException e) {
       throw new RuntimeException(e);
+    } finally {
+      messageSystemContext.messageSystem().removeAddressee(this);
     }
   }
 }
