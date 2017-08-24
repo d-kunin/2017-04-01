@@ -1,5 +1,6 @@
-package ru.otus.kunin.app;
+package ru.otus.kunin.app.message;
 
+import ru.otus.kunin.app.AddressableCache;
 import ru.otus.messageSystem.AcyclicVisitorMessage;
 import ru.otus.messageSystem.Address;
 import ru.otus.messageSystem.MessageSystemContext;
@@ -25,7 +26,7 @@ public class AddToCacheMessage extends AcyclicVisitorMessage<AddressableCache> {
   protected void visit(AddressableCache addressableCache) {
     addressableCache.put(key, value);
     messageSystemContext.messageSystem().sendMessage(
-        new ResultMessage(getTo(), getFrom(), String.format("added {%s:%s}", key, value), null));
+        new JsonResponseMessage(getTo(), getFrom(), String.format("added {%s:%s}", key, value), null));
   }
 
 }

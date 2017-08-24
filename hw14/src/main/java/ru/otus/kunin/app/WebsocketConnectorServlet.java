@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class WebsocketConnectorServlet extends WebSocketServlet {
 
   private static final Logger LOG = LoggerFactory.getLogger(WebsocketConnectorServlet.class);
-  private final static long IDLE_MS = TimeUnit.HOURS.toMillis(36);
+  private final static long IDLE_MS = TimeUnit.HOURS.toMillis(72);
 
   private final MessageSystemContext messageSystemContext;
 

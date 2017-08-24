@@ -7,8 +7,12 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.otus.kunin.app.message.AddToCacheMessage;
+import ru.otus.kunin.app.message.GetFromCacheMessage;
+import ru.otus.kunin.app.message.GetStatsMessage;
 import ru.otus.kunin.jsonrpc.JsonRequest;
 import ru.otus.messageSystem.Address;
+import ru.otus.messageSystem.Message;
 import ru.otus.messageSystem.MessageSystemContext;
 
 import java.io.IOException;
@@ -39,46 +43,44 @@ public class WebsocketConnection {
   public void onMessage(Session session, String text) {
     final JsonRequest jsonRequest = JsonRequest.fromJson(text);
     LOG.info("Message {}", jsonRequest);
-    onRequest(jsonRequest, session);
+    if (jsonRequest != null) {
+      onRequest(jsonRequest, session);
+    } else {
+      LOG.warn("Invalid client input: {}", text);
+    }
   }
 
   public void onRequest(JsonRequest jsonRequest, Session session) {
+    Message message = null;
+
     if ("add".equals(jsonRequest.method())) {
       final String key = jsonRequest.params().get("key").textValue();
       final String value = jsonRequest.params().get("value").textValue();
-      final String requestId = jsonRequest.id();
-      final AddToCacheMessage addToCacheMessage =
-          new AddToCacheMessage(messageSystemContext, Address.create(requestId),
-                                messageSystemContext.cacheAddress(),
-                                key,
-                                value);
-      messageSystemContext.messageSystem().addAddressee(
-          new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
-      messageSystemContext.messageSystem().sendMessage(addToCacheMessage);
+      message = new AddToCacheMessage(messageSystemContext, Address.create(jsonRequest.id()),
+                                      messageSystemContext.cacheAddress(),
+                                      key,
+                                      value);
     }
 
     if ("get".equals(jsonRequest.method())) {
       final String key = jsonRequest.params().get("key").textValue();
-      final String requestId = jsonRequest.id();
-      final GetFromCacheMessage getFromCacheMessage =
-          new GetFromCacheMessage(messageSystemContext,
-                                  Address.create(requestId),
-                                  messageSystemContext.cacheAddress(),
-                                  key);
-      messageSystemContext.messageSystem().addAddressee(
-          new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
-      messageSystemContext.messageSystem().sendMessage(getFromCacheMessage);
+      message = new GetFromCacheMessage(messageSystemContext,
+                                        Address.create(jsonRequest.id()),
+                                        messageSystemContext.cacheAddress(),
+                                        key);
     }
 
     if ("stats".equals(jsonRequest.method())) {
-      final String requestId = jsonRequest.id();
-      final GetStatsMessage getStatsMessage =
-          new GetStatsMessage(messageSystemContext,
-                                  Address.create(requestId),
-                                  messageSystemContext.cacheAddress());
+      message = new GetStatsMessage(messageSystemContext,
+                                    Address.create(jsonRequest.id()),
+                                    messageSystemContext.cacheAddress());
+    }
+
+    if (message != null) {
+      LOG.info("Routed request {}", jsonRequest);
       messageSystemContext.messageSystem().addAddressee(
           new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
-      messageSystemContext.messageSystem().sendMessage(getStatsMessage);
+      messageSystemContext.messageSystem().sendMessage(message);
     }
   }
 }

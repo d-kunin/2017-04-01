@@ -1,5 +1,6 @@
-package ru.otus.kunin.app;
+package ru.otus.kunin.app.message;
 
+import ru.otus.kunin.app.AddressableCache;
 import ru.otus.messageSystem.AcyclicVisitorMessage;
 import ru.otus.messageSystem.Address;
 import ru.otus.messageSystem.MessageSystemContext;
@@ -21,7 +22,7 @@ public class GetStatsMessage extends AcyclicVisitorMessage<AddressableCache> {
   protected void visit(AddressableCache addressableCache) {
     final CacheStatisticsMXBean stats = addressableCache.getStats();
     messageSystemContext.messageSystem().sendMessage(
-        new ResultMessage(getTo(), getFrom(), stats, null));
+        new JsonResponseMessage(getTo(), getFrom(), stats, null));
   }
 
 }
