@@ -48,7 +48,7 @@ public class WebsocketConnection {
       final String value = jsonRequest.params().get("value").textValue();
       final String requestId = jsonRequest.id();
       final AddToCacheMessage addToCacheMessage =
-          new AddToCacheMessage(messageSystemContext, new Address(requestId),
+          new AddToCacheMessage(messageSystemContext, Address.create(requestId),
                                 messageSystemContext.cacheAddress(),
                                 key,
                                 value);
@@ -62,7 +62,7 @@ public class WebsocketConnection {
       final String requestId = jsonRequest.id();
       final GetFromCacheMessage getFromCacheMessage =
           new GetFromCacheMessage(messageSystemContext,
-                                  new Address(requestId),
+                                  Address.create(requestId),
                                   messageSystemContext.cacheAddress(),
                                   key);
       messageSystemContext.messageSystem().addAddressee(
@@ -74,7 +74,7 @@ public class WebsocketConnection {
       final String requestId = jsonRequest.id();
       final GetStatsMessage getStatsMessage =
           new GetStatsMessage(messageSystemContext,
-                                  new Address(requestId),
+                                  Address.create(requestId),
                                   messageSystemContext.cacheAddress());
       messageSystemContext.messageSystem().addAddressee(
           new AddressableJsonRequest(jsonRequest, session, messageSystemContext));

@@ -1,10 +1,10 @@
 package ru.otus.kunin.app;
 
+import ru.otus.messageSystem.AcyclicVisitorMessage;
 import ru.otus.messageSystem.Address;
-import ru.otus.messageSystem.Message;
 import ru.otus.messageSystem.MessageSystemContext;
 
-public class GetFromCacheMessage extends Message {
+public class GetFromCacheMessage extends AcyclicVisitorMessage<AddressableCache> {
 
   private final String key;
   private final MessageSystemContext messageSystemContext;
@@ -19,7 +19,7 @@ public class GetFromCacheMessage extends Message {
   }
 
   @Override
-  public void exec(AddressableCache addressableCache) {
+  protected void visit(AddressableCache addressableCache) {
     final String value = addressableCache.get(key);
     messageSystemContext.messageSystem().sendMessage(
         new ResultMessage(getTo(), getFrom(), value, null));

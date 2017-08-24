@@ -1,9 +1,9 @@
 package ru.otus.kunin.app;
 
+import ru.otus.messageSystem.AcyclicVisitorMessage;
 import ru.otus.messageSystem.Address;
-import ru.otus.messageSystem.Message;
 
-public class ResultMessage extends Message {
+public class ResultMessage extends AcyclicVisitorMessage<AddressableJsonRequest> {
 
   private final Object result;
   private final String error;
@@ -18,7 +18,7 @@ public class ResultMessage extends Message {
   }
 
   @Override
-  public void exec(final AddressableJsonRequest addressableJsonRequest) {
+  protected void visit(final AddressableJsonRequest addressableJsonRequest) {
     addressableJsonRequest.sendResponse(result, error);
   }
 }

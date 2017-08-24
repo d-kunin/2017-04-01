@@ -30,7 +30,7 @@ public class AddressableJsonRequest implements Addressee {
 
   @Override
   public Address getAddress() {
-    return new Address(jsonRequest.id());
+    return Address.create(jsonRequest.id());
   }
 
   @Override

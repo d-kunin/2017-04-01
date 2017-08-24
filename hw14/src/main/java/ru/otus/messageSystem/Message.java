@@ -1,8 +1,5 @@
 package ru.otus.messageSystem;
 
-import ru.otus.kunin.app.AddressableCache;
-import ru.otus.kunin.app.AddressableJsonRequest;
-
 /**
  * @author tully
  */
@@ -23,9 +20,5 @@ public abstract class Message {
     return to;
   }
 
-  public void exec(AddressableCache addressableCache) {
-  }
-
-  public void exec(final AddressableJsonRequest addressableJsonRequest) {
-  }
+  public abstract void exec(Addressee addressee);
 }

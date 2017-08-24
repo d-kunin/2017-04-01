@@ -13,13 +13,13 @@ public class MessagingServiceRunner {
 
   public static void main(String[] args) throws Exception {
     final Server server = new Server(8090);
+    final AddressableCache addressableCache = new AddressableCache();
 
     final ResourceHandler resourceHandler = new ResourceHandler();
     resourceHandler.setDirectoriesListed(true);
     resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
 
     final MessageSystem messageSystem = new MessageSystem();
-    final AddressableCache addressableCache = new AddressableCache();
     final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
         .messageSystem(messageSystem)
         .cacheAddress(addressableCache.getAddress())

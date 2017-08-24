@@ -7,7 +7,7 @@ import ru.otus.messageSystem.Message;
 
 public class AddressableCache extends DiCache<String, String> implements Addressee {
 
-  private final static Address ADDRESS = new Address(AddressableCache.class.getSimpleName());
+  private final static Address ADDRESS = Address.create(AddressableCache.class.getSimpleName());
 
   @Override
   public Address getAddress() {
