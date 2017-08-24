@@ -6,8 +6,8 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
-import ru.otus.messageSystem.MessageSystem;
-import ru.otus.messageSystem.MessageSystemContext;
+import ru.otus.kunin.messageSystem.MessageSystem;
+import ru.otus.kunin.messageSystem.MessageSystemContext;
 
 public class MessagingServiceRunner {
 

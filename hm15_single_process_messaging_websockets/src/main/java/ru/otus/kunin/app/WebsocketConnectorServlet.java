@@ -6,7 +6,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.messageSystem.MessageSystemContext;
+import ru.otus.kunin.messageSystem.MessageSystemContext;
 
 import java.util.concurrent.TimeUnit;
 

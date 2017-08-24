@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.api.Session;
 import ru.otus.kunin.jsonrpc.JsonRequest;
 import ru.otus.kunin.jsonrpc.JsonResponse;
-import ru.otus.messageSystem.Address;
-import ru.otus.messageSystem.Addressee;
-import ru.otus.messageSystem.Message;
-import ru.otus.messageSystem.MessageSystemContext;
+import ru.otus.kunin.messageSystem.Address;
+import ru.otus.kunin.messageSystem.Addressee;
+import ru.otus.kunin.messageSystem.Message;
+import ru.otus.kunin.messageSystem.MessageSystemContext;
 
 import java.io.IOException;
 

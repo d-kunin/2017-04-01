@@ -11,9 +11,9 @@ import ru.otus.kunin.app.message.AddToCacheMessage;
 import ru.otus.kunin.app.message.GetFromCacheMessage;
 import ru.otus.kunin.app.message.GetStatsMessage;
 import ru.otus.kunin.jsonrpc.JsonRequest;
-import ru.otus.messageSystem.Address;
-import ru.otus.messageSystem.Message;
-import ru.otus.messageSystem.MessageSystemContext;
+import ru.otus.kunin.messageSystem.Address;
+import ru.otus.kunin.messageSystem.Message;
+import ru.otus.kunin.messageSystem.MessageSystemContext;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package ru.otus.messageSystem;
+package ru.otus.kunin.messageSystem;
 
 public abstract class AcyclicVisitorMessage<T extends Addressee> extends Message {
 

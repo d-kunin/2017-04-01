@@ -1,4 +1,4 @@
-package ru.otus.messageSystem;
+package ru.otus.kunin.messageSystem;
 
 import java.io.Closeable;
 import java.io.IOException;

@@ -1,9 +1,9 @@
 package ru.otus.kunin.app.message;
 
 import ru.otus.kunin.app.AddressableCache;
-import ru.otus.messageSystem.AcyclicVisitorMessage;
-import ru.otus.messageSystem.Address;
-import ru.otus.messageSystem.MessageSystemContext;
+import ru.otus.kunin.messageSystem.AcyclicVisitorMessage;
+import ru.otus.kunin.messageSystem.Address;
+import ru.otus.kunin.messageSystem.MessageSystemContext;
 
 public class GetFromCacheMessage extends AcyclicVisitorMessage<AddressableCache> {
 

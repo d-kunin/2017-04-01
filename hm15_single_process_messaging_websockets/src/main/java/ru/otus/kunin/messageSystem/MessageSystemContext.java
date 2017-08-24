@@ -1,4 +1,4 @@
-package ru.otus.messageSystem;
+package ru.otus.kunin.messageSystem;
 
 import com.google.auto.value.AutoValue;
 

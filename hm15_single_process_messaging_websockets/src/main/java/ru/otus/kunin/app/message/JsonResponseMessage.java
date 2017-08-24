@@ -1,8 +1,8 @@
 package ru.otus.kunin.app.message;
 
 import ru.otus.kunin.app.AddressableJsonRequest;
-import ru.otus.messageSystem.AcyclicVisitorMessage;
-import ru.otus.messageSystem.Address;
+import ru.otus.kunin.messageSystem.AcyclicVisitorMessage;
+import ru.otus.kunin.messageSystem.Address;
 
 public class JsonResponseMessage extends AcyclicVisitorMessage<AddressableJsonRequest> {
 
