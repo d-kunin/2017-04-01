@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class MessageSystem implements Closeable {
 
   private static final long DEFAULT_STEP_TIME_MS = 10;
-  private final ConcurrentHashMap<Address, ConcurrentLinkedQueue<Message>> messagesMap = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Address, ConcurrentLinkedQueue<MessageOld>> messagesMap = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Address, Addressee> addresseeMap = new ConcurrentHashMap<>();
   private final AtomicBoolean isActive = new AtomicBoolean(true);
 
@@ -24,8 +24,8 @@ public final class MessageSystem implements Closeable {
     messagesMap.remove(addressee.getAddress());
   }
 
-  public void sendMessage(Message message) {
-    messagesMap.get(message.getTo()).add(message);
+  public void sendMessage(MessageOld messageOld) {
+    messagesMap.get(messageOld.getTo()).add(messageOld);
   }
 
   public void stop() {
@@ -38,7 +38,7 @@ public final class MessageSystem implements Closeable {
         for (Map.Entry<Address, Addressee> entry : addresseeMap.entrySet()) {
           final Addressee addressee = entry.getValue();
           final Address address = entry.getKey();
-          final ConcurrentLinkedQueue<Message> queue = messagesMap.get(address);
+          final ConcurrentLinkedQueue<MessageOld> queue = messagesMap.get(address);
           processQueue(addressee, queue);
           sleep();
         }
@@ -54,10 +54,10 @@ public final class MessageSystem implements Closeable {
     }
   }
 
-  private void processQueue(final Addressee addressee, final ConcurrentLinkedQueue<Message> queue) {
+  private void processQueue(final Addressee addressee, final ConcurrentLinkedQueue<MessageOld> queue) {
     while (!queue.isEmpty()) {
-      Message message = queue.poll();
-      addressee.accept(message);
+      MessageOld messageOld = queue.poll();
+      addressee.accept(messageOld);
     }
   }
 

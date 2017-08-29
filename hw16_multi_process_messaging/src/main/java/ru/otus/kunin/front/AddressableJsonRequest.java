@@ -6,7 +6,7 @@ import ru.otus.kunin.front.jsonrpc.JsonRequest;
 import ru.otus.kunin.front.jsonrpc.JsonResponse;
 import ru.otus.kunin.messageSystem.Address;
 import ru.otus.kunin.messageSystem.Addressee;
-import ru.otus.kunin.messageSystem.Message;
+import ru.otus.kunin.messageSystem.MessageOld;
 import ru.otus.kunin.messageSystem.MessageSystemContext;
 
 import java.io.IOException;
@@ -34,8 +34,8 @@ public class AddressableJsonRequest implements Addressee {
   }
 
   @Override
-  public void accept(final Message message) {
-    message.exec(this);
+  public void accept(final MessageOld messageOld) {
+    messageOld.exec(this);
   }
 
   public void sendResponse(Object result, String error) {

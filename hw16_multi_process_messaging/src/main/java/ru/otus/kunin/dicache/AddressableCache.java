@@ -2,7 +2,7 @@ package ru.otus.kunin.dicache;
 
 import ru.otus.kunin.messageSystem.Address;
 import ru.otus.kunin.messageSystem.Addressee;
-import ru.otus.kunin.messageSystem.Message;
+import ru.otus.kunin.messageSystem.MessageOld;
 
 public class AddressableCache extends DiCache<String, String> implements Addressee {
 
@@ -14,8 +14,8 @@ public class AddressableCache extends DiCache<String, String> implements Address
   }
 
   @Override
-  public void accept(final Message message) {
-    message.exec(this);
+  public void accept(final MessageOld messageOld) {
+    messageOld.exec(this);
   }
 
 }

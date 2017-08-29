@@ -3,11 +3,11 @@ package ru.otus.kunin.messageSystem;
 /**
  * @author tully
  */
-public abstract class Message {
+public abstract class MessageOld {
   private final Address from;
   private final Address to;
 
-  public Message(Address from, Address to) {
+  public MessageOld(Address from, Address to) {
     this.from = from;
     this.to = to;
   }

@@ -1,8 +1,8 @@
 package ru.otus.kunin.messageSystem;
 
-public abstract class AcyclicVisitorMessage<T extends Addressee> extends Message {
+public abstract class AcyclicVisitorMessageOld<T extends Addressee> extends MessageOld {
 
-  protected AcyclicVisitorMessage(Address from, Address to) {
+  protected AcyclicVisitorMessageOld(Address from, Address to) {
     super(from, to);
   }
 

@@ -1,18 +1,18 @@
 package ru.otus.kunin.message;
 
 import ru.otus.kunin.front.AddressableJsonRequest;
-import ru.otus.kunin.messageSystem.AcyclicVisitorMessage;
+import ru.otus.kunin.messageSystem.AcyclicVisitorMessageOld;
 import ru.otus.kunin.messageSystem.Address;
 
-public class JsonResponseMessage extends AcyclicVisitorMessage<AddressableJsonRequest> {
+public class JsonResponseMessageOld extends AcyclicVisitorMessageOld<AddressableJsonRequest> {
 
   private final Object result;
   private final String error;
 
-  public JsonResponseMessage(final Address from,
-                             final Address to,
-                             final Object result,
-                             final String error) {
+  public JsonResponseMessageOld(final Address from,
+                                final Address to,
+                                final Object result,
+                                final String error) {
     super(from, to);
     this.result = result;
     this.error = error;

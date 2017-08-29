@@ -6,5 +6,5 @@ package ru.otus.kunin.messageSystem;
 public interface Addressee {
     Address getAddress();
 
-    void accept(Message message);
+    void accept(MessageOld messageOld);
 }
