@@ -14,6 +14,14 @@ public final class MessageSystem implements Closeable {
   private final ConcurrentHashMap<Address, Addressee> addresseeMap = new ConcurrentHashMap<>();
   private final AtomicBoolean isActive = new AtomicBoolean(true);
 
+//  public void register(ClientConnection clientConnection) {
+//
+//  }
+//
+//  public void unregister();
+//
+//  public void route();
+
   public void addAddressee(Addressee addressee) {
     addresseeMap.put(addressee.getAddress(), addressee);
     messagesMap.put(addressee.getAddress(), new ConcurrentLinkedQueue<>());
