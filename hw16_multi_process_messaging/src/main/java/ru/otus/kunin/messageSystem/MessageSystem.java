@@ -4,6 +4,7 @@ import net.kundzi.socket.channels.server.ClientConnection;
 import net.kundzi.socket.channels.server.SimpleReactorServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.otus.kunin.message2.MessageTypes;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.message2.MessageV2Reader;
 import ru.otus.kunin.message2.MessageV2Writer;
@@ -42,10 +43,6 @@ public final class MessageSystem implements Closeable, SimpleReactorServer.Incom
     addresseeMap.remove(address);
   }
 
-  public void sendMessage(MessageV2 messageV2, @Nullable Address address) {
-    // TODO send to everyone or a single connection
-  }
-
   public void stop() {
     isActive.set(false);
     server.stop();
@@ -61,11 +58,42 @@ public final class MessageSystem implements Closeable, SimpleReactorServer.Incom
   }
 
   @Override
-  public void handle(final ClientConnection from, final MessageV2 message) {
+  public void handle(final ClientConnection connection, final MessageV2 message) {
     if (!isActive.get()) {
       LOG.info("Ignoring, not active: " + message.toString());
       return;
     }
-    // TODO do handle
+    final String type = message.type();
+    switch (type) {
+      case MessageTypes.TYPE_REGISTER:
+        // TODO validate address
+        addAddressee(connection, message.from());
+        LOG.info("{} registered as {}", connection.getRemoteAddress(), message.from());
+        break;
+      case MessageTypes.TYPE_UNREGISTER:
+        // TODO validate address
+        removeAddressee(message.from());
+        LOG.info("{} unregistered connection {}", connection.getRemoteAddress(), message.from());
+        break;
+      default:
+        dispatch(message);
+    }
+  }
+
+  private void dispatch(final MessageV2 message) {
+    final Address to = message.to();
+    final Address from = message.from();
+    // both should be registered
+    if (!addresseeMap.contains(to)) {
+      // TODO send back not_found
+      LOG.info("{} is not registered", to);
+    }
+    if (!addresseeMap.contains(from)) {
+      // TODO send back must be registered
+      LOG.info("{} must be registered first", from);
+    }
+    final ClientConnection<MessageV2> toConnection = addresseeMap.get(to);
+    toConnection.send(message);
+    LOG.info("Dispatched message to {}", toConnection.getRemoteAddress());
   }
 }

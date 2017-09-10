@@ -28,8 +28,12 @@ public class ClientConnection<M extends Message> {
     outgoingMessages.add(message);
   }
 
-  public SocketAddress getRemoteAddress() throws IOException {
-    return socketChannel.getRemoteAddress();
+  public SocketAddress getRemoteAddress() {
+    try {
+      return socketChannel.getRemoteAddress();
+    } catch (IOException e) {
+      return null;
+    }
   }
 
   SocketChannel getSocketChannel() {
