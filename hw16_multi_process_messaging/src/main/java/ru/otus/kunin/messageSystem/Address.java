@@ -8,7 +8,7 @@ import com.google.auto.value.AutoValue;
 public abstract class Address {
 
   @JsonCreator
-  public static Address create(String id) {
+  public static Address create(@JsonProperty("id") String id) {
     return new ru.otus.kunin.messageSystem.AutoValue_Address(id);
   }
 

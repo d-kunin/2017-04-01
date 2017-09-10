@@ -12,9 +12,22 @@ import net.kundzi.socket.channels.message.lvmessage.LvMessage;
 import ru.otus.kunin.messageSystem.Address;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.Optional;
 
 @AutoValue
 public abstract class MessageV2 implements LvMessage {
+
+  public static Optional<MessageV2> fromJsonBytes(byte[] data) {
+    final MessageV2 readValue;
+    try {
+      readValue = OBJECT_MAPPER.readValue(data, MessageV2.class);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return Optional.empty();
+    }
+    return Optional.of(readValue);
+  }
 
   @JsonCreator
   public static MessageV2 create(
@@ -29,8 +42,6 @@ public abstract class MessageV2 implements LvMessage {
   }
 
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-  private static final String VERSION = "v1";
 
   @JsonProperty("id")
   public abstract String id();
@@ -52,11 +63,6 @@ public abstract class MessageV2 implements LvMessage {
   @Nullable
   @JsonProperty("payload")
   public abstract JsonNode payload();
-
-  @JsonProperty("version")
-  public String version() {
-    return VERSION;
-  }
 
   @JsonIgnore
   @Override
