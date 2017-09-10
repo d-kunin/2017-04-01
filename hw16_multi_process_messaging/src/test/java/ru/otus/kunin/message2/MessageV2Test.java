@@ -16,12 +16,13 @@ public class MessageV2Test {
 
   @Test
   public void testSerializationOfEmptyPayloadObject() throws Exception {
-    final MessageV2 original = MessageV2.create("1", null, "type_1", Address.create("_from"), Address.create("_to"), null);
+    final MessageV2 original = MessageV2.create("1", null, 200, "type_1", Address.create("_from"), Address.create("_to"), null);
     final byte[] jsonBytes = original.data();
     final MessageV2 restored = MessageV2.fromJsonBytes(jsonBytes).get();
 
     assertEquals(original.id(), restored.id());
     assertEquals(original.inResponseTo(), restored.inResponseTo());
+    assertEquals(original.statusCode(), restored.statusCode());
     assertEquals(original.to(), restored.to());
     assertEquals(original.from(), restored.from());
     assertEquals(original.type(), restored.type());
@@ -34,12 +35,13 @@ public class MessageV2Test {
   public void testSerializationOfObjectWithPayload() throws Exception {
     final Map.Entry<String, ArrayList<String>> pojo = Maps.immutableEntry("key", Lists.newArrayList("value_list"));
     final JsonNode jsonNode = MessageV2.OBJECT_MAPPER.valueToTree(pojo);
-    final MessageV2 original = MessageV2.create("1", "2", "type_1", Address.create("_from"), Address.create("_to"), jsonNode);
+    final MessageV2 original = MessageV2.create("1", "2", 404, "type_1", Address.create("_from"), Address.create("_to"), jsonNode);
     final byte[] jsonBytes = original.data();
     final MessageV2 restored = MessageV2.fromJsonBytes(jsonBytes).get();
 
     assertEquals(original.id(), restored.id());
     assertEquals(original.inResponseTo(), restored.inResponseTo());
+    assertEquals(original.statusCode(), restored.statusCode());
     assertEquals(original.to(), restored.to());
     assertEquals(original.from(), restored.from());
     assertEquals(original.type(), restored.type());

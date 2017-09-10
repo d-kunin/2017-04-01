@@ -2,6 +2,7 @@ package ru.otus.kunin.messageSystem;
 
 import net.kundzi.socket.channels.server.ClientConnection;
 import net.kundzi.socket.channels.server.SimpleReactorServer;
+import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.kunin.message2.MessageTypes;
@@ -35,12 +36,16 @@ public final class MessageSystem implements Closeable, SimpleReactorServer.Incom
     server.setIncomingMessageHandler(this);
   }
 
-  public void addAddressee(ClientConnection<MessageV2> connection, Address address) {
-    addresseeMap.put(address, connection);
+  public void addAddressee(ClientConnection<MessageV2> connection, MessageV2 message) {
+    addresseeMap.put(message.from(), connection);
+    final MessageV2 response = message.createResponseMessage(HttpStatus.OK_200, null);
+    connection.send(response);
   }
 
-  public void removeAddressee(Address address) {
-    addresseeMap.remove(address);
+  public void removeAddressee(final ClientConnection connection, MessageV2 message) {
+    addresseeMap.remove(message.from());
+    final MessageV2 response = message.createResponseMessage(HttpStatus.OK_200, null);
+    connection.send(response);
   }
 
   public void stop() {
@@ -69,12 +74,12 @@ public final class MessageSystem implements Closeable, SimpleReactorServer.Incom
     switch (type) {
       case MessageTypes.TYPE_REGISTER:
         // TODO validate address
-        addAddressee(connection, message.from());
+        addAddressee(connection, message);
         LOG.info("{} registered as {}", connection.getRemoteAddress(), message.from());
         break;
       case MessageTypes.TYPE_UNREGISTER:
         // TODO validate address
-        removeAddressee(message.from());
+        removeAddressee(connection, message);
         LOG.info("{} unregistered connection {}", connection.getRemoteAddress(), message.from());
         break;
       default:

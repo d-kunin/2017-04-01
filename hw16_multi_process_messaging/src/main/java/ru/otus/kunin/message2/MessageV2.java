@@ -32,13 +32,14 @@ public abstract class MessageV2 implements LvMessage {
   @JsonCreator
   public static MessageV2 create(
       @JsonProperty("id") String id,
-      @JsonProperty("in_response_to") String inResponseTo,
+      @Nullable @JsonProperty("in_response_to") String inResponseTo,
+      @Nullable @JsonProperty("status_code") Integer statusCode,
       @JsonProperty("type") String type,
       @JsonProperty("from") Address from,
-      @JsonProperty("to") Address to,
-      @JsonProperty("payload") JsonNode payload
+      @Nullable @JsonProperty("to") Address to,
+      @Nullable @JsonProperty("payload") JsonNode payload
   ) {
-    return new ru.otus.kunin.message2.AutoValue_MessageV2(id, inResponseTo, type, from, to, payload);
+    return new ru.otus.kunin.message2.AutoValue_MessageV2(id, inResponseTo, statusCode, type, from, to, payload);
   }
 
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -49,6 +50,10 @@ public abstract class MessageV2 implements LvMessage {
   @Nullable
   @JsonProperty("in_response_to")
   public abstract String inResponseTo();
+
+  @Nullable
+  @JsonProperty("status_code")
+  public abstract Integer statusCode();
 
   @JsonProperty("type")
   public abstract String type();
@@ -80,5 +85,15 @@ public abstract class MessageV2 implements LvMessage {
     // This is not the most effective.
     // But since fields are not guaranteed to be immutable it is a safer option.
     return data().length;
+  }
+
+  public MessageV2 createResponseMessage(int statusCode, JsonNode payload) {
+    return create(UuidGenerator.nextUuid(),
+                  this.id(),
+                  statusCode,
+                  MessageTypes.TYPE_RESPONSE,
+                  to(),
+                  from(),
+                  payload);
   }
 }
