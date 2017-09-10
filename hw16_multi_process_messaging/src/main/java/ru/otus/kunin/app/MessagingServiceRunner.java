@@ -8,8 +8,10 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import ru.otus.kunin.dicache.AddressableCache;
 import ru.otus.kunin.front.WebsocketConnectorServlet;
+import ru.otus.kunin.messageSystem.Address;
 import ru.otus.kunin.messageSystem.MessageSystem;
 import ru.otus.kunin.messageSystem.MessageSystemContext;
+import ru.otus.kunin.messageSystem.MessagingSystemClient;
 
 import java.net.InetSocketAddress;
 
@@ -23,7 +25,8 @@ public class MessagingServiceRunner {
     resourceHandler.setDirectoriesListed(true);
     resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
 
-    final MessageSystem msgSystem = MessageSystem.create(new InetSocketAddress("localhost", 9100));
+    final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 9100);
+    final MessageSystem msgSystem = MessageSystem.create(serverAddress);
 
 //    final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
 //        .messageSystem(messageSystem)
@@ -37,6 +40,10 @@ public class MessagingServiceRunner {
 //    server.setHandler(new HandlerList(resourceHandler, servletContextHandler));
 
     msgSystem.start();
+
+    final MessagingSystemClient client = MessagingSystemClient.start(serverAddress, Address.create("dummy"));
+    client.start();
+
     server.start();
     server.join();
   }

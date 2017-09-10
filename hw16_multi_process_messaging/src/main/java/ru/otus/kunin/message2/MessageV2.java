@@ -1,13 +1,12 @@
 package ru.otus.kunin.message2;
 
-import com.google.auto.value.AutoValue;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.auto.value.AutoValue;
 import net.kundzi.socket.channels.message.lvmessage.LvMessage;
 import ru.otus.kunin.messageSystem.Address;
 
@@ -29,6 +28,28 @@ public abstract class MessageV2 implements LvMessage {
     return Optional.of(readValue);
   }
 
+  public static MessageV2 create(
+      @Nullable String inResponseTo,
+      @Nullable Integer statusCode,
+      String type,
+      Address from,
+      Address to,
+      @Nullable JsonNode payload
+  ) {
+    return new ru.otus.kunin.message2.AutoValue_MessageV2(
+        UuidGenerator.nextUuid(), inResponseTo, statusCode, type, from, to, payload);
+  }
+
+  public static MessageV2 createRequest(
+      String type,
+      Address from,
+      Address to,
+      @Nullable JsonNode payload
+  ) {
+    return new ru.otus.kunin.message2.AutoValue_MessageV2(
+        UuidGenerator.nextUuid(), null, null, type, from, to, payload);
+  }
+
   @JsonCreator
   public static MessageV2 create(
       @JsonProperty("id") String id,
@@ -36,7 +57,7 @@ public abstract class MessageV2 implements LvMessage {
       @Nullable @JsonProperty("status_code") Integer statusCode,
       @JsonProperty("type") String type,
       @JsonProperty("from") Address from,
-      @Nullable @JsonProperty("to") Address to,
+      @JsonProperty("to") Address to,
       @Nullable @JsonProperty("payload") JsonNode payload
   ) {
     return new ru.otus.kunin.message2.AutoValue_MessageV2(id, inResponseTo, statusCode, type, from, to, payload);
@@ -61,7 +82,6 @@ public abstract class MessageV2 implements LvMessage {
   @JsonProperty("from")
   public abstract Address from();
 
-  @Nullable
   @JsonProperty("to")
   public abstract Address to();
 
@@ -88,8 +108,7 @@ public abstract class MessageV2 implements LvMessage {
   }
 
   public MessageV2 createResponseMessage(int statusCode, JsonNode payload) {
-    return create(UuidGenerator.nextUuid(),
-                  this.id(),
+    return create(this.id(),
                   statusCode,
                   MessageTypes.TYPE_RESPONSE,
                   to(),

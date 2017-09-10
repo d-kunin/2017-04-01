@@ -88,6 +88,10 @@ public final class MessageSystem implements Closeable, SimpleReactorServer.Incom
   }
 
   private void dispatch(final MessageV2 message) {
+    // TODO
+    // What should we do when a client
+    // is dead, but has not send "unregister" message?
+
     final Address to = message.to();
     final Address from = message.from();
     // both should be registered
