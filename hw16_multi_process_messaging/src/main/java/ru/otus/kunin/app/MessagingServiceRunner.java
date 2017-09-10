@@ -21,21 +21,21 @@ public class MessagingServiceRunner {
     resourceHandler.setDirectoriesListed(true);
     resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
 
-    final MessageSystem messageSystem = new MessageSystem();
-    final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
-        .messageSystem(messageSystem)
-        .cacheAddress(addressableCache.getAddress())
-        .build();
-    messageSystem.addAddressee(addressableCache);
-
-    final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-    final ServletHolder servletHolder = new ServletHolder(new WebsocketConnectorServlet(messageSystemContext));
-    servletContextHandler.addServlet(servletHolder, "/cache/websocket");
-    server.setHandler(new HandlerList(resourceHandler, servletContextHandler));
-
-    messageSystem.start();
-    server.start();
-    server.join();
+//    final MessageSystem messageSystem = new MessageSystem(server);
+//    final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
+//        .messageSystem(messageSystem)
+//        .cacheAddress(addressableCache.getAddress())
+//        .build();
+//    messageSystem.addAddressee(addressableCache);
+//
+//    final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+//    final ServletHolder servletHolder = new ServletHolder(new WebsocketConnectorServlet(messageSystemContext));
+//    servletContextHandler.addServlet(servletHolder, "/cache/websocket");
+//    server.setHandler(new HandlerList(resourceHandler, servletContextHandler));
+//
+//    messageSystem.start();
+//    server.start();
+//    server.join();
   }
 
 }

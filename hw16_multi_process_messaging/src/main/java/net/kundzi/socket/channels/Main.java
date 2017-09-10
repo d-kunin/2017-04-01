@@ -1,11 +1,13 @@
 package net.kundzi.socket.channels;
 
 import net.kundzi.socket.channels.client.NonBlockingClient;
+import net.kundzi.socket.channels.message.MessageReader;
 import net.kundzi.socket.channels.message.lvmessage.DefaultLvMessage;
 import net.kundzi.socket.channels.message.lvmessage.LvMessage;
 import net.kundzi.socket.channels.message.lvmessage.LvMessageReader;
 import net.kundzi.socket.channels.message.lvmessage.LvMessageWriter;
 import net.kundzi.socket.channels.server.SimpleReactorServer;
+import net.kundzi.socket.channels.server.SimpleReactorServer.IncomingMessageHandler;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -25,21 +27,23 @@ public class Main {
     final int port = 6677;
     final InetSocketAddress serverSockAddress = new InetSocketAddress(host, port);
 
+    final IncomingMessageHandler<LvMessage> handler = (from, message) -> {
+      try {
+        final String inMessage = new String(message.data());
+        out.println(from.getRemoteAddress() + " " + message.length() + " " + inMessage);
+        final String outMessage = inMessage + " pong";
+        out.println("responding to " + from.getRemoteAddress());
+        from.send(new DefaultLvMessage(outMessage.getBytes()));
+      } catch (IOException e) {
+      }
+    };
+
     final SimpleReactorServer<LvMessage> simpleReactorServer = SimpleReactorServer.start(
         serverSockAddress,
-        (from, message) -> {
-          try {
-            final String inMessage = new String(message.data());
-            out.println(from.getRemoteAddress() + " " + message.length() + " " + inMessage);
-            final String outMessage = inMessage + " pong";
-            out.println("responding to " + from.getRemoteAddress());
-            from.send(new DefaultLvMessage(outMessage.getBytes()));
-          } catch (IOException e) {
-          }
-        },
         new LvMessageReader(),
         new LvMessageWriter()
     );
+    simpleReactorServer.setIncomingMessageHandler(handler);
 
 
     final ArrayList<Closeable> closeables = new ArrayList<>();

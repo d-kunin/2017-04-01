@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -51,7 +50,6 @@ public class SimpleReactorServer<M extends Message> {
   }
 
   public static <M extends Message> SimpleReactorServer<M> start(final InetSocketAddress bindAddress,
-                                                                 final IncomingMessageHandler<M> incomingMessageHandler,
                                                                  final MessageReader<M> messageReader,
                                                                  final MessageWriter<M> messageWriter) throws IOException {
 
@@ -62,7 +60,6 @@ public class SimpleReactorServer<M extends Message> {
 
     return new SimpleReactorServer<>(selector,
                                      socketChannel,
-                                     incomingMessageHandler,
                                      messageReader,
                                      messageWriter,
                                      Executors.newSingleThreadExecutor(),
@@ -74,7 +71,6 @@ public class SimpleReactorServer<M extends Message> {
 
   public SimpleReactorServer(final Selector selector,
                              final ServerSocketChannel boundServerChannel,
-                             final IncomingMessageHandler incomingMessageHandler,
                              final MessageReader<M> messageReader,
                              final MessageWriter<M> messageWriter,
                              final ExecutorService selectExecutor,
@@ -83,7 +79,6 @@ public class SimpleReactorServer<M extends Message> {
                              final ScheduledExecutorService reaperExecutor) {
     this.selector = selector;
     this.boundServerChannel = boundServerChannel;
-    this.incomingMessageHandler = Objects.requireNonNull(incomingMessageHandler);
     this.messageReader = messageReader;
     this.messageWriter = messageWriter;
     this.selectExecutor = selectExecutor;
@@ -106,7 +101,7 @@ public class SimpleReactorServer<M extends Message> {
 
   private final MessageReader<M> messageReader;
   private final MessageWriter<M> messageWriter;
-  private final IncomingMessageHandler<M> incomingMessageHandler;
+  private final AtomicReference<IncomingMessageHandler<M>> incomingMessageHandlerRef = new AtomicReference<>();
 
   private final AtomicReference<State> state = new AtomicReference<>(State.NOT_STARTED);
   private final CopyOnWriteArrayList<ClientConnection> clients = new CopyOnWriteArrayList<>();
@@ -132,6 +127,10 @@ public class SimpleReactorServer<M extends Message> {
       });
       clients.removeAll(deadConnections);
     }
+  }
+
+  public void setIncomingMessageHandler(IncomingMessageHandler<M> messageHandler) {
+    this.incomingMessageHandlerRef.set(messageHandler);
   }
 
   public void stop() {
@@ -276,10 +275,14 @@ public class SimpleReactorServer<M extends Message> {
   }
 
   private void deliverNewMessages(final List<MessageEvent<M>> newMessages) {
+    final IncomingMessageHandler<M> messageHandler = incomingMessageHandlerRef.get();
+    if (null == messageHandler) {
+      return;
+    }
     incomingMessagesDeliveryExecutor.execute(() -> {
       for (final MessageEvent<M> newMessage : newMessages) {
         try {
-          incomingMessageHandler.handle(newMessage.from, newMessage.message);
+          messageHandler.handle(newMessage.from, newMessage.message);
         } catch (Exception e) {
           e.printStackTrace();
         }

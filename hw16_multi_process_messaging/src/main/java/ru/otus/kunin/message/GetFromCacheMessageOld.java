@@ -21,9 +21,9 @@ public class GetFromCacheMessageOld extends AcyclicVisitorMessageOld<Addressable
 
   @Override
   protected void visit(AddressableCache addressableCache) {
-    final String value = addressableCache.get(key);
-    messageSystemContext.messageSystem().sendMessage(
-        new JsonResponseMessageOld(getTo(), getFrom(), value, null));
+//    final String value = addressableCache.get(key);
+//    messageSystemContext.messageSystem().sendMessage(
+//        new JsonResponseMessageOld(getTo(), getFrom(), value, null));
   }
 
 }

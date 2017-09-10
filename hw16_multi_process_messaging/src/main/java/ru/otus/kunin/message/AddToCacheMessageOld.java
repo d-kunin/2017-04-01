@@ -24,9 +24,9 @@ public class AddToCacheMessageOld extends AcyclicVisitorMessageOld<AddressableCa
 
   @Override
   protected void visit(AddressableCache addressableCache) {
-    addressableCache.put(key, value);
-    messageSystemContext.messageSystem().sendMessage(
-        new JsonResponseMessageOld(getTo(), getFrom(), String.format("added {%s:%s}", key, value), null));
+//    addressableCache.put(key, value);
+//    messageSystemContext.messageSystem().sendMessage(
+//        new JsonResponseMessageOld(getTo(), getFrom(), String.format("added {%s:%s}", key, value), null));
   }
 
 }

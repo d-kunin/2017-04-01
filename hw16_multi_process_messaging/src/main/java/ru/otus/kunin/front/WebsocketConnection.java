@@ -78,9 +78,9 @@ public class WebsocketConnection {
 
     if (messageOld != null) {
       LOG.info("Routed request {}", jsonRequest);
-      messageSystemContext.messageSystem().addAddressee(
-          new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
-      messageSystemContext.messageSystem().sendMessage(messageOld);
+//      messageSystemContext.messageSystem().addAddressee(
+//          new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
+//      messageSystemContext.messageSystem().sendMessage(messageOld);
     }
   }
 }

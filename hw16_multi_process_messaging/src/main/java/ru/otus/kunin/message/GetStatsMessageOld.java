@@ -20,9 +20,9 @@ public class GetStatsMessageOld extends AcyclicVisitorMessageOld<AddressableCach
 
   @Override
   protected void visit(AddressableCache addressableCache) {
-    final CacheStatisticsMXBean stats = addressableCache.getStats();
-    messageSystemContext.messageSystem().sendMessage(
-        new JsonResponseMessageOld(getTo(), getFrom(), stats, null));
+//    final CacheStatisticsMXBean stats = addressableCache.getStats();
+//    messageSystemContext.messageSystem().sendMessage(
+//        new JsonResponseMessageOld(getTo(), getFrom(), stats, null));
   }
 
 }

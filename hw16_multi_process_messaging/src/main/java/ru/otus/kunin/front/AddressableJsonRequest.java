@@ -46,7 +46,7 @@ public class AddressableJsonRequest implements Addressee {
     } catch (IOException e) {
       throw new RuntimeException(e);
     } finally {
-      messageSystemContext.messageSystem().removeAddressee(this);
+//      messageSystemContext.messageSystem().removeAddressee(this);
     }
   }
 }
