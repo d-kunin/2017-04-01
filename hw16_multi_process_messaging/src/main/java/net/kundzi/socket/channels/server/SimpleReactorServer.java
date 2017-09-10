@@ -226,26 +226,22 @@ public class SimpleReactorServer<M extends Message> {
       return;
     }
     outgoingMessagesDeliveryExecutor.execute(() -> {
-      try {
-        int numSent = 0;
-        int pending = clientConnection.getNumberOfOutgoingMessages();
-        if (clientConnection.getSocketChannel().isConnected()) {
-          final M outgoingMessage = clientConnection.getOutgoingMessages().poll();
-          if (outgoingMessage != null) {
-            try {
-              messageWriter.write(clientConnection.getSocketChannel(), outgoingMessage);
-              numSent++;
-            } catch (IOException e) {
-            }
+      int numSent = 0;
+      int pending = clientConnection.getNumberOfOutgoingMessages();
+      if (clientConnection.getSocketChannel().isConnected()) {
+        final M outgoingMessage = clientConnection.getOutgoingMessages().poll();
+        if (outgoingMessage != null) {
+          try {
+            messageWriter.write(clientConnection.getSocketChannel(), outgoingMessage);
+            numSent++;
+          } catch (IOException e) {
           }
         }
-        if (numSent + pending != 0) {
-          out.println("Sent=" + numSent +
-                          " pending=" + pending +
-                          " addr=" + clientConnection.getRemoteAddress());
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
+      }
+      if (numSent + pending != 0) {
+        out.println("Sent=" + numSent +
+                        " pending=" + pending +
+                        " addr=" + clientConnection.getRemoteAddress());
       }
     });
   }

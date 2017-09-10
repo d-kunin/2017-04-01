@@ -28,14 +28,11 @@ public class Main {
     final InetSocketAddress serverSockAddress = new InetSocketAddress(host, port);
 
     final IncomingMessageHandler<LvMessage> handler = (from, message) -> {
-      try {
-        final String inMessage = new String(message.data());
-        out.println(from.getRemoteAddress() + " " + message.length() + " " + inMessage);
-        final String outMessage = inMessage + " pong";
-        out.println("responding to " + from.getRemoteAddress());
-        from.send(new DefaultLvMessage(outMessage.getBytes()));
-      } catch (IOException e) {
-      }
+      final String inMessage = new String(message.data());
+      out.println(from.getRemoteAddress() + " " + message.length() + " " + inMessage);
+      final String outMessage = inMessage + " pong";
+      out.println("responding to " + from.getRemoteAddress());
+      from.send(new DefaultLvMessage(outMessage.getBytes()));
     };
 
     final SimpleReactorServer<LvMessage> simpleReactorServer = SimpleReactorServer.start(
