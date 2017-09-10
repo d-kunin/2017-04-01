@@ -11,6 +11,8 @@ import ru.otus.kunin.front.WebsocketConnectorServlet;
 import ru.otus.kunin.messageSystem.MessageSystem;
 import ru.otus.kunin.messageSystem.MessageSystemContext;
 
+import java.net.InetSocketAddress;
+
 public class MessagingServiceRunner {
 
   public static void main(String[] args) throws Exception {
@@ -21,21 +23,22 @@ public class MessagingServiceRunner {
     resourceHandler.setDirectoriesListed(true);
     resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
 
-//    final MessageSystem messageSystem = new MessageSystem(server);
+    final MessageSystem msgSystem = MessageSystem.create(new InetSocketAddress("localhost", 9100));
+
 //    final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
 //        .messageSystem(messageSystem)
 //        .cacheAddress(addressableCache.getAddress())
 //        .build();
 //    messageSystem.addAddressee(addressableCache);
-//
+
 //    final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
 //    final ServletHolder servletHolder = new ServletHolder(new WebsocketConnectorServlet(messageSystemContext));
 //    servletContextHandler.addServlet(servletHolder, "/cache/websocket");
 //    server.setHandler(new HandlerList(resourceHandler, servletContextHandler));
-//
-//    messageSystem.start();
-//    server.start();
-//    server.join();
+
+    msgSystem.start();
+    server.start();
+    server.join();
   }
 
 }

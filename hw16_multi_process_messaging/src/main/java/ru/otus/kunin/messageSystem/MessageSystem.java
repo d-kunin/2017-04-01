@@ -45,11 +45,13 @@ public final class MessageSystem implements Closeable, SimpleReactorServer.Incom
 
   public void stop() {
     isActive.set(false);
+    LOG.info("Messaging System is shutting down");
     server.stop();
   }
 
   public void start() {
     isActive.set(true);
+    LOG.info("Messaging System is active");
   }
 
   @Override

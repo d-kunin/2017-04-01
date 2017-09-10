@@ -3,6 +3,8 @@ package net.kundzi.socket.channels.server;
 import net.kundzi.socket.channels.message.Message;
 import net.kundzi.socket.channels.message.MessageReader;
 import net.kundzi.socket.channels.message.MessageWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -27,6 +29,8 @@ import static java.lang.System.out;
 import static java.util.stream.Collectors.toList;
 
 public class SimpleReactorServer<M extends Message> {
+  
+  private static final Logger LOG = LoggerFactory.getLogger(SimpleReactorServer.class); 
 
   @FunctionalInterface
   public interface IncomingMessageHandler<M extends Message> {
@@ -54,6 +58,7 @@ public class SimpleReactorServer<M extends Message> {
                                                                  final MessageWriter<M> messageWriter) throws IOException {
 
     final ServerSocketChannel socketChannel = ServerSocketChannel.open().bind(bindAddress);
+    LOG.info("Listening to address {}", socketChannel.getLocalAddress());
     socketChannel.configureBlocking(false);
     final Selector selector = Selector.open();
     socketChannel.register(selector, SelectionKey.OP_ACCEPT, null);
@@ -116,10 +121,10 @@ public class SimpleReactorServer<M extends Message> {
         return;
       }
 
-      out.println("Harvested clients: " + deadConnections.size());
+      LOG.info("Harvested clients: " + deadConnections.size());
       deadConnections.stream().forEach(clientConnection -> {
         try {
-          out.println("removing: " + clientConnection.getRemoteAddress());
+          LOG.info("removing: " + clientConnection.getRemoteAddress());
           clientConnection.unregister();
           clientConnection.getSocketChannel().close();
         } catch (IOException e) {
@@ -141,10 +146,10 @@ public class SimpleReactorServer<M extends Message> {
     }
     getClients().forEach(client -> {
       try {
-        out.println("server closing :" + client.getRemoteAddress());
+        LOG.info("server closing :" + client.getRemoteAddress());
         client.unregister();
         client.getSocketChannel().close();
-        out.println("server closed :" + client.getRemoteAddress());
+        LOG.info("server closed :" + client.getRemoteAddress());
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -239,7 +244,7 @@ public class SimpleReactorServer<M extends Message> {
         }
       }
       if (numSent + pending != 0) {
-        out.println("Sent=" + numSent +
+        LOG.info("Sent=" + numSent +
                         " pending=" + pending +
                         " addr=" + clientConnection.getRemoteAddress());
       }
@@ -254,6 +259,7 @@ public class SimpleReactorServer<M extends Message> {
     client.getSocketChannel().configureBlocking(false);
     client.register(selector);
     clients.add(client);
+    LOG.info("New connection established {}", client.getRemoteAddress());
   }
 
   Optional<M> onReading(ClientConnection client) {
