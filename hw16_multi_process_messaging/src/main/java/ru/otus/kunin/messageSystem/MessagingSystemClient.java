@@ -1,5 +1,6 @@
 package ru.otus.kunin.messageSystem;
 
+import com.google.common.base.Preconditions;
 import net.kundzi.socket.channels.client.NonBlockingClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,22 +14,33 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MessagingSystemClient implements NonBlockingClient.IncomingMessageHandler<MessageV2>, Closeable {
+
+  public interface MessageListener {
+    void onNewMessage(MessagingSystemClient client, MessageV2 message);
+  }
 
   private static final Logger LOG = LoggerFactory.getLogger(MessageSystemContext.class);
 
   private final NonBlockingClient<MessageV2> client;
   private final AtomicBoolean isActive = new AtomicBoolean(false);
   private final Address address;
+  private final AtomicReference<MessageListener> messageListenerRef = new AtomicReference<>();
 
-  public static MessagingSystemClient start(InetSocketAddress serverAddress, Address thisClientAddress) throws IOException {
+  public static MessagingSystemClient connect(InetSocketAddress serverAddress, Address thisClientAddress) throws IOException {
     Objects.nonNull(thisClientAddress);
     final NonBlockingClient<MessageV2> nonBlockingClient = NonBlockingClient.open(
         serverAddress,
         new MessageV2Reader(),
         new MessageV2Writer());
-    return new MessagingSystemClient(nonBlockingClient, thisClientAddress);
+
+    final MessagingSystemClient messagingSystemClient = new MessagingSystemClient(nonBlockingClient, thisClientAddress);
+    messagingSystemClient.isActive.set(true);
+    final MessageV2 registerMessage = MessageV2.createRequest(MessageTypes.TYPE_REGISTER, thisClientAddress, Address.UPSTREAM, null);
+    messagingSystemClient.client.send(registerMessage);
+    return messagingSystemClient;
   }
 
   private MessagingSystemClient(final NonBlockingClient<MessageV2> client, final Address address) {
@@ -37,14 +49,17 @@ public class MessagingSystemClient implements NonBlockingClient.IncomingMessageH
     client.setIncomingMessageListener(this);
   }
 
-  public void start() {
-    isActive.set(true);
-    // TODO do we care about the response?
-    client.send(MessageV2.createRequest(MessageTypes.TYPE_REGISTER, address, Address.UPSTREAM, null));
+  public void setMessageListener(MessageListener messageListener) {
+    messageListenerRef.set(messageListener);
   }
 
   void stop() {
     isActive.set(false);
+  }
+
+  public void send(MessageV2 messageV2) {
+    Preconditions.checkArgument(messageV2.from().equals(address), messageV2.from() + "!=" + address);
+    client.send(messageV2);
   }
 
   @Override
@@ -54,7 +69,8 @@ public class MessagingSystemClient implements NonBlockingClient.IncomingMessageH
       LOG.info("Client ignore the message");
       return;
     }
-
+    final MessageListener messageListener = messageListenerRef.get();
+    messageListener.onNewMessage(this, message);
   }
 
   @Override

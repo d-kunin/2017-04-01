@@ -1,11 +1,9 @@
 package ru.otus.kunin.message2;
 
-import net.kundzi.socket.channels.message.MessageReader;
 import net.kundzi.socket.channels.message.MessageWriter;
 import net.kundzi.socket.channels.message.lvmessage.LvMessageWriter;
 
 import java.io.IOException;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
 public class MessageV2Writer implements MessageWriter<MessageV2> {

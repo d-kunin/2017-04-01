@@ -10,7 +10,6 @@ import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.message2.MessageV2Reader;
 import ru.otus.kunin.message2.MessageV2Writer;
 
-import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -95,13 +94,15 @@ public final class MessageSystem implements Closeable, SimpleReactorServer.Incom
     final Address to = message.to();
     final Address from = message.from();
     // both should be registered
-    if (!addresseeMap.contains(to)) {
+    if (!addresseeMap.containsKey(to)) {
       // TODO send back not_found
       LOG.info("{} is not registered", to);
+      return;
     }
-    if (!addresseeMap.contains(from)) {
+    if (!addresseeMap.containsKey(from)) {
       // TODO send back must be registered
       LOG.info("{} must be registered first", from);
+      return;
     }
     final ClientConnection<MessageV2> toConnection = addresseeMap.get(to);
     toConnection.send(message);

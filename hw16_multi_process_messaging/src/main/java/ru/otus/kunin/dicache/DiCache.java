@@ -293,7 +293,9 @@ public class DiCache<K, V> implements Cache<K, V> {
         final T result = invoke(key, entryProcessor, objects);
         builder.put(key, () -> result);
       } catch (Exception passed) {
-        builder.put(key, () -> { throw new EntryProcessorException(passed); });
+        builder.put(key, () -> {
+          throw new EntryProcessorException(passed);
+        });
       }
     }
     return builder.build();

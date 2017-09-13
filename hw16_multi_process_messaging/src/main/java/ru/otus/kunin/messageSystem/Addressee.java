@@ -4,7 +4,7 @@ package ru.otus.kunin.messageSystem;
  * @author tully
  */
 public interface Addressee {
-    Address getAddress();
+  Address getAddress();
 
-    void accept(MessageOld messageOld);
+  void accept(MessageOld messageOld);
 }

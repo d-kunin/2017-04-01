@@ -53,7 +53,7 @@ public class SoftEntry<K, V> extends SoftReference<V> implements Cache.Entry<K, 
     if (o == null || getClass() != o.getClass()) return false;
     final SoftEntry<?, ?> that = (SoftEntry<?, ?>) o;
     return Objects.equals(key, that.key) &&
-           Objects.equals(getValue(), that.getValue());
+        Objects.equals(getValue(), that.getValue());
   }
 
   @Override

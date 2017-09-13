@@ -5,8 +5,6 @@ import ru.otus.kunin.messageSystem.AcyclicVisitorMessageOld;
 import ru.otus.kunin.messageSystem.Address;
 import ru.otus.kunin.messageSystem.MessageSystemContext;
 
-import javax.cache.management.CacheStatisticsMXBean;
-
 public class GetStatsMessageOld extends AcyclicVisitorMessageOld<AddressableCache> {
 
   private final MessageSystemContext messageSystemContext;

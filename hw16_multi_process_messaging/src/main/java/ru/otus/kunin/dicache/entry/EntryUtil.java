@@ -4,7 +4,8 @@ import javax.cache.Cache;
 
 public class EntryUtil {
 
-  private EntryUtil() {}
+  private EntryUtil() {
+  }
 
   public static <K, V> StrongEntry<K, V> strongify(Cache.Entry<K, V> entry) {
     return StrongEntry.create(entry.getKey(), entry.getValue());

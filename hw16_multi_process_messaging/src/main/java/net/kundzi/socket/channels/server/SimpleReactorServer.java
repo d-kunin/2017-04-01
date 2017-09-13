@@ -25,12 +25,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static java.lang.System.out;
 import static java.util.stream.Collectors.toList;
 
 public class SimpleReactorServer<M extends Message> {
-  
-  private static final Logger LOG = LoggerFactory.getLogger(SimpleReactorServer.class); 
+
+  private static final Logger LOG = LoggerFactory.getLogger(SimpleReactorServer.class);
 
   @FunctionalInterface
   public interface IncomingMessageHandler<M extends Message> {
@@ -245,8 +244,8 @@ public class SimpleReactorServer<M extends Message> {
       }
       if (numSent + pending != 0) {
         LOG.info("Sent=" + numSent +
-                        " pending=" + pending +
-                        " addr=" + clientConnection.getRemoteAddress());
+                     " pending=" + pending +
+                     " addr=" + clientConnection.getRemoteAddress());
       }
     });
   }

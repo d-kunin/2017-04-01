@@ -1,7 +1,6 @@
 package net.kundzi.socket.channels;
 
 import net.kundzi.socket.channels.client.NonBlockingClient;
-import net.kundzi.socket.channels.message.MessageReader;
 import net.kundzi.socket.channels.message.lvmessage.DefaultLvMessage;
 import net.kundzi.socket.channels.message.lvmessage.LvMessage;
 import net.kundzi.socket.channels.message.lvmessage.LvMessageReader;

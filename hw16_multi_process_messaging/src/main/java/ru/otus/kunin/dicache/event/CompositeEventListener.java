@@ -7,11 +7,10 @@ import javax.cache.event.CacheEntryUpdatedListener;
 
 public interface CompositeEventListener<K, V>
     extends
-      CacheEntryCreatedListener<K, V>,
-      CacheEntryUpdatedListener<K, V>,
-      CacheEntryRemovedListener<K, V>,
-      CacheEntryExpiredListener<K, V>
-{
+    CacheEntryCreatedListener<K, V>,
+    CacheEntryUpdatedListener<K, V>,
+    CacheEntryRemovedListener<K, V>,
+    CacheEntryExpiredListener<K, V> {
 
   void addListener(CacheListenerAdapter<K, V> listener);
 

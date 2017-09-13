@@ -39,8 +39,7 @@ public abstract class JsonRequest {
   @JsonCreator
   public static JsonRequest create(@JsonProperty("id") String id,
                                    @JsonProperty("method") String method,
-                                   @JsonProperty("params") ObjectNode params)
-  {
+                                   @JsonProperty("params") ObjectNode params) {
     return new AutoValue_JsonRequest(id, method, params);
   }
 }
