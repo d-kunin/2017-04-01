@@ -44,8 +44,8 @@ public class ClientConnection<M extends Message> {
     return outgoingMessages;
   }
 
-  int getNumberOfOutgoingMessages() {
-    return outgoingMessages.size();
+  boolean hasOutgoingMessages() {
+    return !outgoingMessages.isEmpty();
   }
 
   void register(Selector selector) throws ClosedChannelException {

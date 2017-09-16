@@ -121,7 +121,7 @@ public class NonBlockingClient<M extends Message> implements Closeable {
   }
 
   private void onWriting() {
-    while (!outgoingMessages.isEmpty()) {
+    if (!outgoingMessages.isEmpty()) {
       final M message = outgoingMessages.poll();
       try {
         messageWriter.write(socketChannel, message);
