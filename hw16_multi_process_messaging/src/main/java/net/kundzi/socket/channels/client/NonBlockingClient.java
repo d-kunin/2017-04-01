@@ -15,7 +15,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
@@ -44,46 +43,47 @@ public class NonBlockingClient<M extends Message> implements Closeable {
     socketChannel.register(selector, SelectionKey.OP_READ);
     return new NonBlockingClient<>(messageReader,
                                    messageWriter,
-                                   Executors.newSingleThreadExecutor(),
-                                   Executors.newSingleThreadExecutor(),
                                    selector,
                                    socketChannel);
   }
 
-  final MessageReader<M> messageReader;
-  final MessageWriter<M> messageWriter;
-  final ExecutorService selectExecutor;
-  final Selector selector;
-  final SocketChannel socketChannel;
+  private final MessageReader<M> messageReader;
+  private final MessageWriter<M> messageWriter;
+  private final Selector selector;
+  private final SocketChannel socketChannel;
 
-  final BlockingDeque<M> outMessages = new LinkedBlockingDeque<>();
-  final ExecutorService outMessagesExecutor = Executors.newSingleThreadExecutor(
+  private final ExecutorService selectExecutor = Executors.newSingleThreadExecutor(
+      new ThreadFactoryBuilder()
+          .setDaemon(true)
+          .setNameFormat("client-select-read-%d")
+          .build()
+  );
+
+  private final BlockingDeque<M> outMessages = new LinkedBlockingDeque<>();
+  private final ExecutorService outMessagesExecutor = Executors.newSingleThreadExecutor(
       new ThreadFactoryBuilder()
           .setDaemon(true)
           .setNameFormat("client-out-messages-%d")
           .build()
   );
 
-  final BlockingDeque<M> inMessages = new LinkedBlockingDeque<>();
-  final ExecutorService inMessagesExecutor = Executors.newSingleThreadExecutor(
+  private final BlockingDeque<M> inMessages = new LinkedBlockingDeque<>();
+  private final ExecutorService inMessagesExecutor = Executors.newSingleThreadExecutor(
       new ThreadFactoryBuilder()
           .setDaemon(true)
           .setNameFormat("client-in-messages-%d")
           .build()
   );
 
-  final AtomicBoolean isActive = new AtomicBoolean(true);
-  final AtomicReference<IncomingMessageHandler<M>> incomingMessageListener = new AtomicReference<>();
+  private final AtomicBoolean isActive = new AtomicBoolean(true);
+  private final AtomicReference<IncomingMessageHandler<M>> incomingMessageListener = new AtomicReference<>();
 
-  NonBlockingClient(final MessageReader<M> messageReader,
-                    final MessageWriter<M> messageWriter,
-                    final ExecutorService selectExecutor,
-                    final ExecutorService deliveryExecutor, // TODO remove
-                    final Selector selector,
-                    final SocketChannel socketChannel) {
+  private NonBlockingClient(final MessageReader<M> messageReader,
+                            final MessageWriter<M> messageWriter,
+                            final Selector selector,
+                            final SocketChannel socketChannel) {
     this.messageReader = messageReader;
     this.messageWriter = messageWriter;
-    this.selectExecutor = selectExecutor;
     this.selector = selector;
     this.socketChannel = socketChannel;
     this.selectExecutor.execute(this::readSelectLoop);
@@ -100,7 +100,7 @@ public class NonBlockingClient<M extends Message> implements Closeable {
     this.incomingMessageListener.set(incomingMessageHandler);
   }
 
-  void readSelectLoop() {
+  private void readSelectLoop() {
     while (isActive.get()) {
       try {
         final int numSelected = selector.select(1000); // TODO const
@@ -120,7 +120,6 @@ public class NonBlockingClient<M extends Message> implements Closeable {
           } finally {
             iterator.remove();
           }
-          LOG.info("new messages count {}", newMessages.size());
           newMessages.forEach(inMessages::addLast);
         }
 
@@ -132,7 +131,7 @@ public class NonBlockingClient<M extends Message> implements Closeable {
 
   private void outMessagesLoop() {
     try {
-      for (; ; ) {
+      for (; isActive.get(); ) {
         final M msg = outMessages.takeFirst();
         if (!socketChannel.finishConnect()) {
           LOG.info("Not ready, putting message back");
@@ -148,7 +147,7 @@ public class NonBlockingClient<M extends Message> implements Closeable {
   }
 
   private void inMessagesLoop() {
-    for (;;) {
+    for (; isActive.get(); ) {
       try {
         final M msg = inMessages.takeFirst();
         final IncomingMessageHandler<M> handler = incomingMessageListener.get();
@@ -175,12 +174,14 @@ public class NonBlockingClient<M extends Message> implements Closeable {
 
   @Override
   public void close() throws IOException {
+    LOG.info("Client is shutting down");
     isActive.set(false);
     closeExecutorService(selectExecutor);
     closeExecutorService(inMessagesExecutor);
     closeExecutorService(outMessagesExecutor);
     selector.close();
     socketChannel.close();
+    LOG.info("Client is shut down");
   }
 
 }

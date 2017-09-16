@@ -8,24 +8,23 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Deque;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClientConnection<M extends Message> {
 
+  private final SimpleReactorServer<M> simpleReactorServer;
   private final SocketChannel socketChannel;
-  private final ConcurrentLinkedDeque<M> outgoingMessages = new ConcurrentLinkedDeque<>();
   private SelectionKey key;
   private AtomicBoolean isMarkedDead = new AtomicBoolean(false);
 
-  ClientConnection(final SocketChannel socketChannel) {
+  ClientConnection(final SimpleReactorServer<M> simpleReactorServer, final SocketChannel socketChannel) {
+    this.simpleReactorServer = simpleReactorServer;
     this.socketChannel = Objects.requireNonNull(socketChannel);
   }
 
   public void send(M message) {
-    outgoingMessages.add(message);
+    simpleReactorServer.sendToClient(this, message);
   }
 
   public SocketAddress getRemoteAddress() {
@@ -40,19 +39,11 @@ public class ClientConnection<M extends Message> {
     return socketChannel;
   }
 
-  Deque<M> getOutgoingMessages() {
-    return outgoingMessages;
-  }
-
-  boolean hasOutgoingMessages() {
-    return !outgoingMessages.isEmpty();
-  }
-
   void register(Selector selector) throws ClosedChannelException {
     if (key != null) {
       throw new IllegalStateException();
     }
-    key = getSocketChannel().register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, this);
+    key = getSocketChannel().register(selector, SelectionKey.OP_READ, this);
   }
 
   void unregister() {

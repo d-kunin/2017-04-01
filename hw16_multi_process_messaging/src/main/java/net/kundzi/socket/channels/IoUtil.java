@@ -3,6 +3,7 @@ package net.kundzi.socket.channels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +16,11 @@ public class IoUtil {
       executorService.shutdown();
       final boolean goodTermination = executorService.awaitTermination(5000, TimeUnit.MILLISECONDS);
       LOG.info("Termination {} for executor {}", goodTermination, executorService);
+      if (!goodTermination) {
+        final List<Runnable> runnables = executorService.shutdownNow();
+        LOG.info("Could not shutdown {}", runnables);
+        executorService.awaitTermination(5000, TimeUnit.MILLISECONDS);
+      }
     } catch (InterruptedException e) {
       LOG.error("Failed to shutdown ExecutorService {}", executorService.toString(), e);
     }

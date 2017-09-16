@@ -106,6 +106,9 @@ public final class MessageSystem implements Closeable, SimpleReactorServer.Incom
     }
     final ClientConnection<MessageV2> toConnection = addresseeMap.get(to);
     toConnection.send(message);
-    LOG.info("Dispatched message to {}", toConnection.getRemoteAddress());
+  }
+
+  public void join() {
+    server.join();
   }
 }

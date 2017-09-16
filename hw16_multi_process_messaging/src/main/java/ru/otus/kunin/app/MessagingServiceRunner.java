@@ -1,9 +1,5 @@
 package ru.otus.kunin.app;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.util.resource.Resource;
-import ru.otus.kunin.dicache.AddressableCache;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.messageSystem.Address;
 import ru.otus.kunin.messageSystem.MessageSystem;
@@ -14,13 +10,13 @@ import java.net.InetSocketAddress;
 public class MessagingServiceRunner {
 
   public static void main(String[] args) throws Exception {
-    final Server server = new Server(8090);
-    final AddressableCache addressableCache = new AddressableCache();
-
-    final ResourceHandler resourceHandler = new ResourceHandler();
-    resourceHandler.setDirectoriesListed(true);
-    resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
-
+//    final Server server = new Server(8090);
+//    final AddressableCache addressableCache = new AddressableCache();
+//
+//    final ResourceHandler resourceHandler = new ResourceHandler();
+//    resourceHandler.setDirectoriesListed(true);
+//    resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
+//
     final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 9100);
     final MessageSystem msgSystem = MessageSystem.create(serverAddress);
     msgSystem.start();
@@ -35,6 +31,7 @@ public class MessagingServiceRunner {
 //    final ServletHolder servletHolder = new ServletHolder(new WebsocketConnectorServlet(messageSystemContext));
 //    servletContextHandler.addServlet(servletHolder, "/cache/websocket");
 //    server.setHandler(new HandlerList(resourceHandler, servletContextHandler));
+//    server.start();
 
 
     final MessagingSystemClient clientFoo = MessagingSystemClient.connect(serverAddress, Address.create("foo"));
@@ -45,12 +42,20 @@ public class MessagingServiceRunner {
     clientBar.setMessageListener((client, message) ->
                                      System.out.println("bar got " + message.type() + " from " + message.from()));
 
-    // TODO fix race condition, there must be one
-    clientFoo.send(MessageV2.createRequest("love message to [bar]", Address.create("foo"), Address.create("bar"), null));
-    clientBar.send(MessageV2.createRequest("love message to [foo]", Address.create("bar"), Address.create("foo"), null));
+    for (int i = 1; i < 1_000; i++) {
+      System.out.println("step=" + i);
+      clientFoo.send(MessageV2.createRequest(i + " love message to [bar]", Address.create("foo"), Address.create("bar"), null));
+      clientBar.send(MessageV2.createRequest(i + " love message to [foo]", Address.create("bar"), Address.create("foo"), null));
+    }
 
-    server.start();
-    server.join();
+//    msgSystem.join();
+    clientFoo.close();
+    clientBar.close();
+    msgSystem.close();
+
+//    server.stop();
+//    server.join();
+    System.out.println("Done!");
   }
 
 }

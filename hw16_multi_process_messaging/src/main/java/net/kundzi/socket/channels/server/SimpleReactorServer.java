@@ -1,11 +1,14 @@
 package net.kundzi.socket.channels.server;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import net.kundzi.socket.channels.IoUtil;
 import net.kundzi.socket.channels.message.Message;
 import net.kundzi.socket.channels.message.MessageReader;
 import net.kundzi.socket.channels.message.MessageWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.CancelledKeyException;
@@ -18,16 +21,18 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.stream.Collectors.toList;
 
-public class SimpleReactorServer<M extends Message> {
+public class SimpleReactorServer<M extends Message> implements Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(SimpleReactorServer.class);
 
@@ -44,11 +49,11 @@ public class SimpleReactorServer<M extends Message> {
 
   private static class MessageEvent<M> {
     final M message;
-    final ClientConnection from;
+    final ClientConnection connection;
 
-    MessageEvent(final M message, final ClientConnection from) {
+    MessageEvent(final ClientConnection connection, final M message) {
       this.message = message;
-      this.from = from;
+      this.connection = connection;
     }
   }
 
@@ -65,40 +70,25 @@ public class SimpleReactorServer<M extends Message> {
     return new SimpleReactorServer<>(selector,
                                      socketChannel,
                                      messageReader,
-                                     messageWriter,
-                                     Executors.newSingleThreadExecutor(),
-                                     Executors.newSingleThreadExecutor(),
-                                     Executors.newSingleThreadExecutor(),
-                                     Executors.newSingleThreadScheduledExecutor());
+                                     messageWriter);
 
   }
 
   public SimpleReactorServer(final Selector selector,
                              final ServerSocketChannel boundServerChannel,
                              final MessageReader<M> messageReader,
-                             final MessageWriter<M> messageWriter,
-                             final ExecutorService selectExecutor,
-                             final ExecutorService incomingMessagesDeliveryExecutor,
-                             final ExecutorService outgoingMessagesDeliveryExecutor,
-                             final ScheduledExecutorService reaperExecutor) {
+                             final MessageWriter<M> messageWriter) {
     this.selector = selector;
     this.boundServerChannel = boundServerChannel;
     this.messageReader = messageReader;
     this.messageWriter = messageWriter;
-    this.selectExecutor = selectExecutor;
-    this.incomingMessagesDeliveryExecutor = incomingMessagesDeliveryExecutor;
-    this.outgoingMessagesDeliveryExecutor = outgoingMessagesDeliveryExecutor;
-    this.reaperExecutor = reaperExecutor;
 
     state.set(State.STARTED);
-    selectExecutor.execute(this::loop);
+    selectExecutor.execute(this::readAcceptSelectLoop);
+    inMessagesExecutor.execute(this::inMessagesLoop);
+    outMessagesExecutor.execute(this::outMessagesLoop);
     reaperExecutor.scheduleAtFixedRate(this::harvestDeadConnections, 100, 100, TimeUnit.MILLISECONDS);
   }
-
-  private final ExecutorService selectExecutor;
-  private final ExecutorService incomingMessagesDeliveryExecutor;
-  private final ExecutorService outgoingMessagesDeliveryExecutor;
-  private final ScheduledExecutorService reaperExecutor;
 
   private final Selector selector;
   private final ServerSocketChannel boundServerChannel;
@@ -106,42 +96,52 @@ public class SimpleReactorServer<M extends Message> {
   private final MessageReader<M> messageReader;
   private final MessageWriter<M> messageWriter;
   private final AtomicReference<IncomingMessageHandler<M>> incomingMessageHandlerRef = new AtomicReference<>();
-
   private final AtomicReference<State> state = new AtomicReference<>(State.NOT_STARTED);
   private final CopyOnWriteArrayList<ClientConnection> clients = new CopyOnWriteArrayList<>();
 
-  private void harvestDeadConnections() {
-    if (isNotStopped()) {
-      final List<ClientConnection> deadConnections = clients.stream()
-          .filter(ClientConnection::isMarkedDead)
-          .collect(toList());
+  private final ExecutorService selectExecutor = Executors.newSingleThreadExecutor(
+      new ThreadFactoryBuilder()
+          .setDaemon(true)
+          .setNameFormat("server-read-accept-select-%d")
+          .build()
+  );
+  private final ScheduledExecutorService reaperExecutor =
+      Executors.newScheduledThreadPool(1,
+                                       new ThreadFactoryBuilder()
+                                           .setDaemon(true)
+                                           .setNameFormat("server-reaper-%d")
+                                           .build());
 
-      if (deadConnections.isEmpty()) {
-        return;
-      }
-
-      LOG.info("Harvested clients: " + deadConnections.size());
-      deadConnections.stream().forEach(clientConnection -> {
-        try {
-          LOG.info("removing: " + clientConnection.getRemoteAddress());
-          clientConnection.unregister();
-          clientConnection.getSocketChannel().close();
-        } catch (IOException e) {
-        }
-      });
-      clients.removeAll(deadConnections);
-    }
-  }
+  private final BlockingDeque<MessageEvent<M>> outMessages = new LinkedBlockingDeque<>();
+  private final ExecutorService outMessagesExecutor = Executors.newSingleThreadExecutor(
+      new ThreadFactoryBuilder()
+          .setDaemon(true)
+          .setNameFormat("server-out-messages-%d")
+          .build()
+  );
+  private final BlockingDeque<MessageEvent<M>> inMessages = new LinkedBlockingDeque<>();
+  private final ExecutorService inMessagesExecutor = Executors.newSingleThreadExecutor(
+      new ThreadFactoryBuilder()
+          .setDaemon(true)
+          .setNameFormat("server-in-messages-%d")
+          .build()
+  );
 
   public void setIncomingMessageHandler(IncomingMessageHandler<M> messageHandler) {
     this.incomingMessageHandlerRef.set(messageHandler);
   }
 
   public void stop() {
+    LOG.info("Stopping server");
     state.set(State.STOPPED);
+    IoUtil.closeExecutorService(inMessagesExecutor);
+    IoUtil.closeExecutorService(outMessagesExecutor);
+    IoUtil.closeExecutorService(selectExecutor);
+    IoUtil.closeExecutorService(reaperExecutor);
     try {
       selector.close();
     } catch (IOException e) {
+      LOG.error("Error stopping", e);
     }
     getClients().forEach(client -> {
       try {
@@ -153,10 +153,7 @@ public class SimpleReactorServer<M extends Message> {
         e.printStackTrace();
       }
     });
-    selectExecutor.shutdown();
-    incomingMessagesDeliveryExecutor.shutdown();
-    outgoingMessagesDeliveryExecutor.shutdown();
-    reaperExecutor.shutdown();
+    LOG.info("Stopped server");
   }
 
   public void join() {
@@ -165,19 +162,23 @@ public class SimpleReactorServer<M extends Message> {
     }
     try {
       selectExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
-      incomingMessagesDeliveryExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
-      outgoingMessagesDeliveryExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
       reaperExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
+      inMessagesExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
+      outMessagesExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      LOG.error("Error joining {}", e);
     }
   }
 
-  List<ClientConnection> getClients() {
+  void sendToClient(final ClientConnection<M> clientConnection, final M message) {
+    outMessages.addLast(new MessageEvent<>(clientConnection, message));
+  }
+
+  private List<ClientConnection> getClients() {
     return Collections.unmodifiableList(clients);
   }
 
-  private void loop() {
+  private void readAcceptSelectLoop() {
     try {
       _loop();
     } catch (IOException e) {
@@ -200,20 +201,15 @@ public class SimpleReactorServer<M extends Message> {
         try {
           if (key.isAcceptable()) {
             final SocketChannel socketChannel = boundServerChannel.accept();
-            final ClientConnection newClient = new ClientConnection(socketChannel);
+            final ClientConnection<M> newClient = new ClientConnection<>(this, socketChannel);
             onAccepting(newClient);
           }
 
           if (key.isReadable()) {
             final ClientConnection client = (ClientConnection) key.attachment();
-            onReading(client).ifPresent(message -> newMessages.add(new MessageEvent<>(message, client)));
+            onReading(client).ifPresent(message -> newMessages.add(new MessageEvent<>(client, message)));
           }
-
-          if (key.isWritable()) {
-            onWriting((ClientConnection) key.attachment());
-          }
-
-          deliverNewMessages(newMessages);
+          newMessages.forEach(inMessages::addLast);
         } catch (CancelledKeyException e) {
           e.printStackTrace();
           // carry on
@@ -225,41 +221,18 @@ public class SimpleReactorServer<M extends Message> {
 
   }
 
-  private void sendOutgoingMessages(ClientConnection<M> clientConnection) {
-    if (!clientConnection.hasOutgoingMessages()) {
-      return;
-    }
-    outgoingMessagesDeliveryExecutor.execute(() -> {
-      if (!clientConnection.hasOutgoingMessages()) {
-        return;
-      }
-      int numSent = 0;
-      if (clientConnection.getSocketChannel().isConnected()) {
-        final M outgoingMessage = clientConnection.getOutgoingMessages().poll();
-        if (outgoingMessage != null) {
-          try {
-            messageWriter.write(clientConnection.getSocketChannel(), outgoingMessage);
-            numSent++;
-          } catch (IOException e) {
-          }
-        }
-      }
-      LOG.info("Sent=" + numSent + " addr=" + clientConnection.getRemoteAddress());
-    });
-  }
-
   private boolean isNotStopped() {
     return state.get() != State.STOPPED;
   }
 
-  void onAccepting(ClientConnection client) throws IOException {
+  private void onAccepting(ClientConnection client) throws IOException {
     client.getSocketChannel().configureBlocking(false);
     client.register(selector);
     clients.add(client);
     LOG.info("New connection established {}", client.getRemoteAddress());
   }
 
-  Optional<M> onReading(ClientConnection client) {
+  private Optional<M> onReading(ClientConnection client) {
     try {
       final M message = messageReader.read(client.getSocketChannel());
       return Optional.of(message);
@@ -269,24 +242,62 @@ public class SimpleReactorServer<M extends Message> {
     }
   }
 
-  void onWriting(ClientConnection client) {
-    sendOutgoingMessages(client);
+  private void inMessagesLoop() {
+    for (; isNotStopped(); ) {
+      try {
+        final MessageEvent<M> mEvent = inMessages.takeFirst();
+        final IncomingMessageHandler<M> messageHandler = incomingMessageHandlerRef.get();
+        if (null == messageHandler) {
+          continue;
+        }
+        messageHandler.handle(mEvent.connection, mEvent.message);
+      } catch (InterruptedException e) {
+        LOG.error("Error in IN message readAcceptSelectLoop", e);
+      }
+    }
   }
 
-  private void deliverNewMessages(final List<MessageEvent<M>> newMessages) {
-    final IncomingMessageHandler<M> messageHandler = incomingMessageHandlerRef.get();
-    if (null == messageHandler) {
-      return;
-    }
-    incomingMessagesDeliveryExecutor.execute(() -> {
-      for (final MessageEvent<M> newMessage : newMessages) {
-        try {
-          messageHandler.handle(newMessage.from, newMessage.message);
-        } catch (Exception e) {
-          e.printStackTrace();
+  private void outMessagesLoop() {
+    for (; isNotStopped(); ) {
+      try {
+        final MessageEvent<M> mEvent = outMessages.takeFirst();
+        if (mEvent.connection.isMarkedDead()) {
+          LOG.info("Dead client, skipping message");
+          continue;
         }
+        messageWriter.write(mEvent.connection.getSocketChannel(), mEvent.message);
+      } catch (InterruptedException | IOException e) {
+        LOG.error("Error in OUT message", e);
       }
-    });
+    }
+  }
+
+  private void harvestDeadConnections() {
+    if (isNotStopped()) {
+      final List<ClientConnection> deadConnections = clients.stream()
+          .filter(ClientConnection::isMarkedDead)
+          .collect(toList());
+
+      if (deadConnections.isEmpty()) {
+        return;
+      }
+
+      LOG.info("Harvested clients: " + deadConnections.size());
+      deadConnections.forEach(clientConnection -> {
+        try {
+          LOG.info("removing: " + clientConnection.getRemoteAddress());
+          clientConnection.unregister();
+          clientConnection.getSocketChannel().close();
+        } catch (IOException e) {
+        }
+      });
+      clients.removeAll(deadConnections);
+    }
+  }
+
+  @Override
+  public void close() throws IOException {
+    stop();
   }
 
 }
