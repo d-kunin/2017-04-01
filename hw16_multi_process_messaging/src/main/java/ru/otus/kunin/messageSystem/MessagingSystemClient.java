@@ -64,7 +64,6 @@ public class MessagingSystemClient implements NonBlockingClient.IncomingMessageH
 
   @Override
   public void handle(final NonBlockingClient client, final MessageV2 message) {
-    LOG.info("Client is getting a message {}", message);
     if (!isActive.get()) {
       LOG.info("Client ignore the message");
       return;
