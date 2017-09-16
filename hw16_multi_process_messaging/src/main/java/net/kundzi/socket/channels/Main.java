@@ -43,16 +43,11 @@ public class Main {
 
 
     final ArrayList<Closeable> closeables = new ArrayList<>();
-    closeables.add(startClient(serverSockAddress));
-    closeables.add(startClient(serverSockAddress));
-    closeables.add(startClient(serverSockAddress));
-    closeables.add(startClient(serverSockAddress));
-    closeables.add(startClient(serverSockAddress));
-    closeables.add(startClient(serverSockAddress));
-    closeables.add(startClient(serverSockAddress));
-    closeables.add(startClient(serverSockAddress));
-    closeables.add(startClient(serverSockAddress));
-    closeables.add(startClient(serverSockAddress));
+
+    for (int i = 0; i < 650; i++) {
+      System.out.println("Step " + i);
+      closeables.add(startClient(serverSockAddress));
+    }
 
     Thread.sleep(10000);
     out.println("stopping ...");
