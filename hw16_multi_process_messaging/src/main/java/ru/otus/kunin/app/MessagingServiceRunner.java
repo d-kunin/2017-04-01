@@ -20,7 +20,6 @@ import java.net.InetSocketAddress;
 public class MessagingServiceRunner {
 
   public static void main(String[] args) throws Exception {
-    final Server server = new Server(8090);
 
     final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 9100);
     final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
@@ -32,7 +31,17 @@ public class MessagingServiceRunner {
     final MessageSystemServer msgSystem = MessageSystemServer.create(serverAddress);
     msgSystem.start();
 
-    // front
+    final Server server = createFrontend(messageSystemContext);
+    createBackend(messageSystemContext);
+
+
+    server.join();
+    msgSystem.join();
+
+    System.out.println("Done!");
+  }
+
+  private static Server createFrontend(final MessageSystemContext messageSystemContext) throws Exception {
     final ResourceHandler resourceHandler = new ResourceHandler();
     resourceHandler.setDirectoriesListed(true);
     resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
@@ -40,23 +49,15 @@ public class MessagingServiceRunner {
     final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
     final ServletHolder servletHolder = new ServletHolder(WebsocketConnectorServlet.create(messageSystemContext));
     servletContextHandler.addServlet(servletHolder, "/cache/websocket");
-
+    final Server server = new Server(8090);
     server.setHandler(new HandlerList(resourceHandler,
                                       servletContextHandler));
     server.start();
-    // !front
+    return server;
+  }
 
-    // backend
+  private static void createBackend(final MessageSystemContext messageSystemContext) throws IOException {
     final BackendComponent backendComponent = BackendComponent.create(messageSystemContext);
-    // !backend
-
-
-    //experiment(serverAddress);
-
-    server.join();
-    msgSystem.join();
-
-    System.out.println("Done!");
   }
 
   private static void experiment(final InetSocketAddress serverAddress) throws IOException {

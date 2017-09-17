@@ -46,7 +46,7 @@ public class WebsocketConnection {
   @OnWebSocketMessage
   public void onMessage(Session session, String text) {
     final JsonRequest jsonRequest = JsonRequest.fromJson(text);
-    LOG.info("MessageOld {}", jsonRequest);
+    LOG.info("JsonRequest {}", jsonRequest);
     if (jsonRequest != null) {
       onRequest(jsonRequest, session);
     } else {
