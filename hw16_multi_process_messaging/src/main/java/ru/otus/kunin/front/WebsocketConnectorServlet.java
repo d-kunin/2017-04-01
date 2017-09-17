@@ -6,9 +6,9 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.kunin.message2.MessageV2;
-import ru.otus.kunin.messageSystem.MessageSystemClient;
-import ru.otus.kunin.messageSystem.MessageSystemContext;
+import net.kundzi.messagesystem.protocol.MessageV2;
+import net.kundzi.messagesystem.MessageSystemClient;
+import net.kundzi.messagesystem.MessageSystemContext;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

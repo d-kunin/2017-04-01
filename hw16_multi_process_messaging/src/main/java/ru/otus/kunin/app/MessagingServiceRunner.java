@@ -6,13 +6,13 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
-import ru.otus.kunin.dicache.BackendComponent;
+import ru.otus.kunin.backend.BackendComponent;
 import ru.otus.kunin.front.WebsocketConnectorServlet;
-import ru.otus.kunin.message2.MessageV2;
-import ru.otus.kunin.messageSystem.Address;
-import ru.otus.kunin.messageSystem.MessageSystemClient;
-import ru.otus.kunin.messageSystem.MessageSystemContext;
-import ru.otus.kunin.messageSystem.MessageSystemServer;
+import net.kundzi.messagesystem.protocol.MessageV2;
+import net.kundzi.messagesystem.protocol.Address;
+import net.kundzi.messagesystem.MessageSystemClient;
+import net.kundzi.messagesystem.MessageSystemContext;
+import net.kundzi.messagesystem.MessageSystemServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -33,7 +33,6 @@ public class MessagingServiceRunner {
 
     final Server server = createFrontend(messageSystemContext);
     createBackend(messageSystemContext);
-
 
     server.join();
     msgSystem.join();
@@ -57,7 +56,7 @@ public class MessagingServiceRunner {
   }
 
   private static void createBackend(final MessageSystemContext messageSystemContext) throws IOException {
-    final BackendComponent backendComponent = BackendComponent.create(messageSystemContext);
+    BackendComponent.create(messageSystemContext);
   }
 
   private static void experiment(final InetSocketAddress serverAddress) throws IOException {

@@ -3,8 +3,8 @@ package ru.otus.kunin.message;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
-import ru.otus.kunin.message2.MessageV2;
-import ru.otus.kunin.messageSystem.Address;
+import net.kundzi.messagesystem.protocol.MessageV2;
+import net.kundzi.messagesystem.protocol.Address;
 
 import javax.cache.management.CacheStatisticsMXBean;
 

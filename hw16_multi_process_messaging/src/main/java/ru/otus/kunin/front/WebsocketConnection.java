@@ -12,9 +12,9 @@ import ru.otus.kunin.front.jsonrpc.JsonResponse;
 import ru.otus.kunin.message.AddToCacheMessage;
 import ru.otus.kunin.message.GetFromCacheMessage;
 import ru.otus.kunin.message.GetStatsMessage;
-import ru.otus.kunin.message2.MessageV2;
-import ru.otus.kunin.messageSystem.MessageSystemClient;
-import ru.otus.kunin.messageSystem.MessageSystemContext;
+import net.kundzi.messagesystem.protocol.MessageV2;
+import net.kundzi.messagesystem.MessageSystemClient;
+import net.kundzi.messagesystem.MessageSystemContext;
 
 import java.io.IOException;
 
