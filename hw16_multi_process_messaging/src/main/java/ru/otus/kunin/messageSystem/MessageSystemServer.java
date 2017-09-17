@@ -5,7 +5,7 @@ import net.kundzi.socket.channels.server.SimpleReactorServer;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.kunin.message2.MessageTypes;
+import ru.otus.kunin.message2.MessageTopic;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.message2.MessageV2Reader;
 import ru.otus.kunin.message2.MessageV2Writer;
@@ -16,21 +16,21 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class MessageSystem implements Closeable, SimpleReactorServer.IncomingMessageHandler<MessageV2> {
+public final class MessageSystemServer implements Closeable, SimpleReactorServer.IncomingMessageHandler<MessageV2> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MessageSystem.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MessageSystemServer.class);
 
   private final ConcurrentHashMap<Address, ClientConnection<MessageV2>> addresseeMap = new ConcurrentHashMap<>();
   private final AtomicBoolean isActive = new AtomicBoolean(true);
   private final SimpleReactorServer<MessageV2> server;
 
-  public static MessageSystem create(InetSocketAddress bindAddress) throws IOException {
+  public static MessageSystemServer create(InetSocketAddress bindAddress) throws IOException {
     final SimpleReactorServer<MessageV2> server =
         SimpleReactorServer.start(bindAddress, new MessageV2Reader(), new MessageV2Writer());
-    return new MessageSystem(server);
+    return new MessageSystemServer(server);
   }
 
-  private MessageSystem(final SimpleReactorServer<MessageV2> server) {
+  private MessageSystemServer(final SimpleReactorServer<MessageV2> server) {
     this.server = server;
     server.setIncomingMessageHandler(this);
   }
@@ -69,14 +69,14 @@ public final class MessageSystem implements Closeable, SimpleReactorServer.Incom
       LOG.info("Ignoring, not active: " + message.toString());
       return;
     }
-    final String type = message.type();
-    switch (type) {
-      case MessageTypes.TYPE_REGISTER:
+    final String topic = message.topic();
+    switch (topic) {
+      case MessageTopic.TYPE_REGISTER:
         // TODO validate address
         addAddressee(connection, message);
         LOG.info("{} registered as {}", connection.getRemoteAddress(), message.from());
         break;
-      case MessageTypes.TYPE_UNREGISTER:
+      case MessageTopic.TYPE_UNREGISTER:
         // TODO validate address
         removeAddressee(connection, message);
         LOG.info("{} unregistered connection {}", connection.getRemoteAddress(), message.from());

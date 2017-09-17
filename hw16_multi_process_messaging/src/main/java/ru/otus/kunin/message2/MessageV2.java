@@ -55,12 +55,12 @@ public abstract class MessageV2 implements LvMessage {
       @JsonProperty("id") String id,
       @Nullable @JsonProperty("in_response_to") String inResponseTo,
       @Nullable @JsonProperty("status_code") Integer statusCode,
-      @JsonProperty("type") String type,
+      @JsonProperty("topic") String topic,
       @JsonProperty("from") Address from,
       @JsonProperty("to") Address to,
       @Nullable @JsonProperty("payload") JsonNode payload
   ) {
-    return new ru.otus.kunin.message2.AutoValue_MessageV2(id, inResponseTo, statusCode, type, from, to, payload);
+    return new ru.otus.kunin.message2.AutoValue_MessageV2(id, inResponseTo, statusCode, topic, from, to, payload);
   }
 
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -76,8 +76,8 @@ public abstract class MessageV2 implements LvMessage {
   @JsonProperty("status_code")
   public abstract Integer statusCode();
 
-  @JsonProperty("type")
-  public abstract String type();
+  @JsonProperty("topic")
+  public abstract String topic();
 
   @JsonProperty("from")
   public abstract Address from();
@@ -110,9 +110,22 @@ public abstract class MessageV2 implements LvMessage {
   public MessageV2 createResponseMessage(int statusCode, JsonNode payload) {
     return create(this.id(),
                   statusCode,
-                  MessageTypes.TYPE_RESPONSE,
+                  topic(),
                   to(),
                   from(),
                   payload);
+  }
+
+  public static JsonNode asPayload(Object object) {
+    return OBJECT_MAPPER.valueToTree(object);
+  }
+
+  public static <T> T fromPayload(JsonNode payload, Class<T> payloadClass) {
+    try {
+      return OBJECT_MAPPER.treeToValue(payload, payloadClass);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 }

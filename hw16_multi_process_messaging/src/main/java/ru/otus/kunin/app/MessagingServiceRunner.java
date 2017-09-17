@@ -2,8 +2,8 @@ package ru.otus.kunin.app;
 
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.messageSystem.Address;
-import ru.otus.kunin.messageSystem.MessageSystem;
-import ru.otus.kunin.messageSystem.MessagingSystemClient;
+import ru.otus.kunin.messageSystem.MessageSystemServer;
+import ru.otus.kunin.messageSystem.MessageSystemClient;
 
 import java.net.InetSocketAddress;
 
@@ -18,7 +18,7 @@ public class MessagingServiceRunner {
 //    resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
 //
     final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 9100);
-    final MessageSystem msgSystem = MessageSystem.create(serverAddress);
+    final MessageSystemServer msgSystem = MessageSystemServer.create(serverAddress);
     msgSystem.start();
 
 //    final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
@@ -34,15 +34,15 @@ public class MessagingServiceRunner {
 //    server.start();
 
 
-    final MessagingSystemClient clientFoo = MessagingSystemClient.connect(serverAddress, Address.create("foo"));
-    final MessagingSystemClient clientBar = MessagingSystemClient.connect(serverAddress, Address.create("bar"));
+    final MessageSystemClient clientFoo = MessageSystemClient.connect(serverAddress, Address.create("foo"));
+    final MessageSystemClient clientBar = MessageSystemClient.connect(serverAddress, Address.create("bar"));
 
     clientFoo.setMessageListener((client, message) ->
-                                     System.out.println("foo got " + message.type() + " from " + message.from()));
+                                     System.out.println("foo got " + message.topic() + " from " + message.from()));
     clientBar.setMessageListener((client, message) ->
-                                     System.out.println("bar got " + message.type() + " from " + message.from()));
+                                     System.out.println("bar got " + message.topic() + " from " + message.from()));
 
-    for (int i = 1; i < 1_000; i++) {
+    for (int i = 1; i < 1_000_000; i++) {
       System.out.println("step=" + i);
       clientFoo.send(MessageV2.createRequest(i + " love message to [bar]", Address.create("foo"), Address.create("bar"), null));
       clientBar.send(MessageV2.createRequest(i + " love message to [foo]", Address.create("bar"), Address.create("foo"), null));

@@ -25,7 +25,7 @@ public class MessageV2Test {
     assertEquals(original.statusCode(), restored.statusCode());
     assertEquals(original.to(), restored.to());
     assertEquals(original.from(), restored.from());
-    assertEquals(original.type(), restored.type());
+    assertEquals(original.topic(), restored.topic());
 
     assertEquals(original.length(), restored.length());
     assertArrayEquals(original.data(), restored.data());
@@ -44,7 +44,7 @@ public class MessageV2Test {
     assertEquals(original.statusCode(), restored.statusCode());
     assertEquals(original.to(), restored.to());
     assertEquals(original.from(), restored.from());
-    assertEquals(original.type(), restored.type());
+    assertEquals(original.topic(), restored.topic());
     assertEquals(original.payload(), restored.payload());
 
     assertEquals(original.length(), restored.length());

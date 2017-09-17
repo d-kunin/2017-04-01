@@ -8,11 +8,9 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.kunin.front.jsonrpc.JsonRequest;
-import ru.otus.kunin.message.AddToCacheMessageOld;
-import ru.otus.kunin.message.GetFromCacheMessageOld;
-import ru.otus.kunin.message.GetStatsMessageOld;
-import ru.otus.kunin.messageSystem.Address;
-import ru.otus.kunin.messageSystem.MessageOld;
+import ru.otus.kunin.message.GetFromCacheMessage;
+import ru.otus.kunin.message2.MessageV2;
+import ru.otus.kunin.messageSystem.MessageSystemClient;
 import ru.otus.kunin.messageSystem.MessageSystemContext;
 
 import java.io.IOException;
@@ -23,9 +21,12 @@ public class WebsocketConnection {
   private static final Logger LOG = LoggerFactory.getLogger(WebsocketConnection.class);
 
   private final MessageSystemContext messageSystemContext;
+  private final MessageSystemClient messageSystemClient;
 
-  public WebsocketConnection(final MessageSystemContext messageSystemContext) {
+  public WebsocketConnection(final MessageSystemContext messageSystemContext,
+                             final MessageSystemClient messageSystemClient) {
     this.messageSystemContext = messageSystemContext;
+    this.messageSystemClient = messageSystemClient;
   }
 
   @OnWebSocketConnect
@@ -51,36 +52,37 @@ public class WebsocketConnection {
   }
 
   public void onRequest(JsonRequest jsonRequest, Session session) {
-    MessageOld messageOld = null;
+    MessageV2 messageV2 = null;
 
     if ("add".equals(jsonRequest.method())) {
       final String key = jsonRequest.params().get("key").textValue();
       final String value = jsonRequest.params().get("value").textValue();
-      messageOld = new AddToCacheMessageOld(messageSystemContext, Address.create(jsonRequest.id()),
-                                            messageSystemContext.cacheAddress(),
-                                            key,
-                                            value);
+//      messageV2 = new AddToCacheMessageOld(messageSystemContext,
+//                                            messageSystemContext.frontendAddress(),
+//                                            messageSystemContext.cacheAddress(),
+//                                            key,
+//                                            value);
     }
 
     if ("get".equals(jsonRequest.method())) {
       final String key = jsonRequest.params().get("key").textValue();
-      messageOld = new GetFromCacheMessageOld(messageSystemContext,
-                                              Address.create(jsonRequest.id()),
-                                              messageSystemContext.cacheAddress(),
-                                              key);
+      messageV2 = GetFromCacheMessage.createRequest(messageSystemContext.frontendAddress(),
+                                                    messageSystemContext.cacheAddress(),
+                                                    key);
     }
 
     if ("stats".equals(jsonRequest.method())) {
-      messageOld = new GetStatsMessageOld(messageSystemContext,
-                                          Address.create(jsonRequest.id()),
-                                          messageSystemContext.cacheAddress());
+//      messageV2 = new GetStatsMessageOld(messageSystemContext,
+//                                          messageSystemContext.frontendAddress(),
+//                                          messageSystemContext.cacheAddress());
     }
 
-    if (messageOld != null) {
+    if (messageV2 != null) {
       LOG.info("Routed request {}", jsonRequest);
-//      messageSystemContext.messageSystem().addAddressee(
-//          new AddressableJsonRequest(jsonRequest, session, messageSystemContext));
-//      messageSystemContext.messageSystem().sendMessage(messageOld);
+      messageSystemClient.send(messageV2); // TODO add callback
+//      messageSystemClient.messageSystem().addAddressee(
+//          new AddressableJsonRequest(jsonRequest, session, messageSystemClient));
+//      messageSystemClient.messageSystem().sendMessage(messageOld);
     }
   }
 }

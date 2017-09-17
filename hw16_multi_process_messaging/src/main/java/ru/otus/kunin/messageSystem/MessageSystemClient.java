@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import net.kundzi.socket.channels.client.NonBlockingClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.kunin.message2.MessageTypes;
+import ru.otus.kunin.message2.MessageTopic;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.message2.MessageV2Reader;
 import ru.otus.kunin.message2.MessageV2Writer;
@@ -16,10 +16,10 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MessagingSystemClient implements NonBlockingClient.IncomingMessageHandler<MessageV2>, Closeable {
+public class MessageSystemClient implements NonBlockingClient.IncomingMessageHandler<MessageV2>, Closeable {
 
   public interface MessageListener {
-    void onNewMessage(MessagingSystemClient client, MessageV2 message);
+    void onNewMessage(MessageSystemClient client, MessageV2 message);
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(MessageSystemContext.class);
@@ -29,21 +29,21 @@ public class MessagingSystemClient implements NonBlockingClient.IncomingMessageH
   private final Address address;
   private final AtomicReference<MessageListener> messageListenerRef = new AtomicReference<>();
 
-  public static MessagingSystemClient connect(InetSocketAddress serverAddress, Address thisClientAddress) throws IOException {
+  public static MessageSystemClient connect(InetSocketAddress serverAddress, Address thisClientAddress) throws IOException {
     Objects.nonNull(thisClientAddress);
     final NonBlockingClient<MessageV2> nonBlockingClient = NonBlockingClient.open(
         serverAddress,
         new MessageV2Reader(),
         new MessageV2Writer());
 
-    final MessagingSystemClient messagingSystemClient = new MessagingSystemClient(nonBlockingClient, thisClientAddress);
-    messagingSystemClient.isActive.set(true);
-    final MessageV2 registerMessage = MessageV2.createRequest(MessageTypes.TYPE_REGISTER, thisClientAddress, Address.UPSTREAM, null);
-    messagingSystemClient.client.send(registerMessage);
-    return messagingSystemClient;
+    final MessageSystemClient messageSystemClient = new MessageSystemClient(nonBlockingClient, thisClientAddress);
+    messageSystemClient.isActive.set(true);
+    final MessageV2 registerMessage = MessageV2.createRequest(MessageTopic.TYPE_REGISTER, thisClientAddress, Address.UPSTREAM, null);
+    messageSystemClient.client.send(registerMessage);
+    return messageSystemClient;
   }
 
-  private MessagingSystemClient(final NonBlockingClient<MessageV2> client, final Address address) {
+  private MessageSystemClient(final NonBlockingClient<MessageV2> client, final Address address) {
     this.client = client;
     this.address = address;
     client.setIncomingMessageListener(this);

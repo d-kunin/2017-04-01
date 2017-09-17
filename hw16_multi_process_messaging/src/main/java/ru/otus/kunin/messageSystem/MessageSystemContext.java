@@ -2,9 +2,8 @@ package ru.otus.kunin.messageSystem;
 
 import com.google.auto.value.AutoValue;
 
-/**
- * Created by tully.
- */
+import java.net.InetSocketAddress;
+
 @AutoValue
 public abstract class MessageSystemContext {
 
@@ -12,16 +11,20 @@ public abstract class MessageSystemContext {
     return new ru.otus.kunin.messageSystem.AutoValue_MessageSystemContext.Builder();
   }
 
-  public abstract MessageSystem messageSystem();
+  public abstract InetSocketAddress serverSocketAddress();
 
   public abstract Address cacheAddress();
+
+  public abstract Address frontendAddress();
 
   @AutoValue.Builder
   public interface Builder {
 
-    Builder messageSystem(MessageSystem messageSystem);
+    Builder serverSocketAddress(InetSocketAddress inetSocketAddress);
 
     Builder cacheAddress(Address address);
+
+    Builder frontendAddress(Address frontendAddress);
 
     MessageSystemContext build();
   }
