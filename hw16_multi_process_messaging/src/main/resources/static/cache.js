@@ -52,7 +52,7 @@ init = function () {
         var response = JSON.parse(event.data);
         if (response.id == pendingGetValueRequestId) {
             pendingGetValueRequestId = null;
-            var value = response.result;
+            var value = response.result.value;
             if (null != value) {
                 document.getElementById("inputReadValue").value = value;
             } else {
@@ -61,7 +61,7 @@ init = function () {
             requestStats();
         } else if (response.id == pendingStatsRequestId) {
             pendingStatsRequestId = null;
-            populateStats(response.result)
+            populateStats(response.result.stats)
         } else if (response.id == pendingPutRequestId) {
             pendingPutRequestId = null;
             requestStats();

@@ -40,6 +40,6 @@ public abstract class JsonRequest {
   public static JsonRequest create(@JsonProperty("id") String id,
                                    @JsonProperty("method") String method,
                                    @JsonProperty("params") ObjectNode params) {
-    return new AutoValue_JsonRequest(id, method, params);
+    return new ru.otus.kunin.front.jsonrpc.AutoValue_JsonRequest(id, method, params);
   }
 }

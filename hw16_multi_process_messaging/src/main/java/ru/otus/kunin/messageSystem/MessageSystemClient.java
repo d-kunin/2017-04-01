@@ -9,10 +9,12 @@ import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.message2.MessageV2Reader;
 import ru.otus.kunin.message2.MessageV2Writer;
 
+import javax.annotation.Nonnull;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,12 +24,18 @@ public class MessageSystemClient implements NonBlockingClient.IncomingMessageHan
     void onNewMessage(MessageSystemClient client, MessageV2 message);
   }
 
+  public interface ResponseCallback {
+    void onResponse(MessageV2 response);
+  }
+
   private static final Logger LOG = LoggerFactory.getLogger(MessageSystemContext.class);
 
   private final NonBlockingClient<MessageV2> client;
   private final AtomicBoolean isActive = new AtomicBoolean(false);
   private final Address address;
   private final AtomicReference<MessageListener> messageListenerRef = new AtomicReference<>();
+
+  private final ConcurrentHashMap<String, ResponseCallback> requestIdToCallback = new ConcurrentHashMap<>();
 
   public static MessageSystemClient connect(InetSocketAddress serverAddress, Address thisClientAddress) throws IOException {
     Objects.nonNull(thisClientAddress);
@@ -62,12 +70,30 @@ public class MessageSystemClient implements NonBlockingClient.IncomingMessageHan
     client.send(messageV2);
   }
 
+  public void send(MessageV2 messageV2, @Nonnull ResponseCallback responseCallback) {
+    Preconditions.checkArgument(messageV2.from().equals(address), messageV2.from() + "!=" + address);
+    Preconditions.checkNotNull(responseCallback);
+    requestIdToCallback.put(messageV2.id(), responseCallback);
+    client.send(messageV2);
+  }
+
   @Override
   public void handle(final NonBlockingClient client, final MessageV2 message) {
     if (!isActive.get()) {
-      LOG.info("Client ignore the message");
+      LOG.warn("Client ignore the message");
       return;
     }
+
+    final String inResponseTo = message.inResponseTo();
+    if (null != inResponseTo) {
+      final ResponseCallback callback = requestIdToCallback.remove(inResponseTo);
+      if (null != callback) {
+        callback.onResponse(message);
+      } else {
+        LOG.error("Response with no callback to deliver to {}", message);
+      }
+    }
+
     final MessageListener messageListener = messageListenerRef.get();
     if (null != messageListener) {
       messageListener.onNewMessage(this, message);

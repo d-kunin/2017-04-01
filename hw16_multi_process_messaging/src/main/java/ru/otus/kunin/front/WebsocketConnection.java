@@ -8,6 +8,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.kunin.front.jsonrpc.JsonRequest;
+import ru.otus.kunin.front.jsonrpc.JsonResponse;
 import ru.otus.kunin.message.AddToCacheMessage;
 import ru.otus.kunin.message.GetFromCacheMessage;
 import ru.otus.kunin.message.GetStatsMessage;
@@ -79,10 +80,14 @@ public class WebsocketConnection {
 
     if (messageV2 != null) {
       LOG.info("Routed request {}", jsonRequest);
-      messageSystemClient.send(messageV2); // TODO add callback
-//      messageSystemClient.messageSystem().addAddressee(
-//          new AddressableJsonRequest(jsonRequest, session, messageSystemClient));
-//      messageSystemClient.messageSystem().sendMessage(messageOld);
+      messageSystemClient.send(messageV2, response -> {
+        try {
+          final String json = JsonResponse.create(response.payload(), null, jsonRequest.id()).toJson();
+          session.getRemote().sendString(json);
+        } catch (IOException e) {
+          LOG.error("Failed to send json response", e);
+        }
+      });
     }
   }
 }
