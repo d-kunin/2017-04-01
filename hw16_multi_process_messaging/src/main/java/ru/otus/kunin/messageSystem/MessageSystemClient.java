@@ -69,7 +69,9 @@ public class MessageSystemClient implements NonBlockingClient.IncomingMessageHan
       return;
     }
     final MessageListener messageListener = messageListenerRef.get();
-    messageListener.onNewMessage(this, message);
+    if (null != messageListener) {
+      messageListener.onNewMessage(this, message);
+    }
   }
 
   @Override

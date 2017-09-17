@@ -8,6 +8,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.kunin.front.jsonrpc.JsonRequest;
+import ru.otus.kunin.message.AddToCacheMessage;
 import ru.otus.kunin.message.GetFromCacheMessage;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.messageSystem.MessageSystemClient;
@@ -57,11 +58,10 @@ public class WebsocketConnection {
     if ("add".equals(jsonRequest.method())) {
       final String key = jsonRequest.params().get("key").textValue();
       final String value = jsonRequest.params().get("value").textValue();
-//      messageV2 = new AddToCacheMessageOld(messageSystemContext,
-//                                            messageSystemContext.frontendAddress(),
-//                                            messageSystemContext.cacheAddress(),
-//                                            key,
-//                                            value);
+      messageV2 = AddToCacheMessage.createRequest(messageSystemContext.frontendAddress(),
+                                                  messageSystemContext.cacheAddress(),
+                                                  key,
+                                                  value);
     }
 
     if ("get".equals(jsonRequest.method())) {

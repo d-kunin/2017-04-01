@@ -17,16 +17,7 @@ import java.util.Optional;
 @AutoValue
 public abstract class MessageV2 implements LvMessage {
 
-  public static Optional<MessageV2> fromJsonBytes(byte[] data) {
-    final MessageV2 readValue;
-    try {
-      readValue = OBJECT_MAPPER.readValue(data, MessageV2.class);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return Optional.empty();
-    }
-    return Optional.of(readValue);
-  }
+  static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public static MessageV2 create(
       @Nullable String inResponseTo,
@@ -62,8 +53,6 @@ public abstract class MessageV2 implements LvMessage {
   ) {
     return new ru.otus.kunin.message2.AutoValue_MessageV2(id, inResponseTo, statusCode, topic, from, to, payload);
   }
-
-  static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @JsonProperty("id")
   public abstract String id();
@@ -105,6 +94,17 @@ public abstract class MessageV2 implements LvMessage {
     // This is not the most effective.
     // But since fields are not guaranteed to be immutable it is a safer option.
     return data().length;
+  }
+
+  public static Optional<MessageV2> fromJsonBytes(byte[] data) {
+    final MessageV2 readValue;
+    try {
+      readValue = OBJECT_MAPPER.readValue(data, MessageV2.class);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return Optional.empty();
+    }
+    return Optional.of(readValue);
   }
 
   public MessageV2 createResponseMessage(int statusCode, JsonNode payload) {

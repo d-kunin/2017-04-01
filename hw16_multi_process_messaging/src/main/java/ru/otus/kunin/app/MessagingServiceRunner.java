@@ -1,39 +1,62 @@
 package ru.otus.kunin.app;
 
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.resource.Resource;
+import ru.otus.kunin.dicache.AddressableCache;
+import ru.otus.kunin.front.WebsocketConnectorServlet;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.messageSystem.Address;
+import ru.otus.kunin.messageSystem.MessageSystemContext;
 import ru.otus.kunin.messageSystem.MessageSystemServer;
 import ru.otus.kunin.messageSystem.MessageSystemClient;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public class MessagingServiceRunner {
 
   public static void main(String[] args) throws Exception {
-//    final Server server = new Server(8090);
+    final Server server = new Server(8090);
 //    final AddressableCache addressableCache = new AddressableCache();
-//
-//    final ResourceHandler resourceHandler = new ResourceHandler();
-//    resourceHandler.setDirectoriesListed(true);
-//    resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
-//
+
     final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 9100);
+    final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
+        .serverSocketAddress(serverAddress)
+        .cacheAddress(Address.create("cache_1"))
+        .frontendAddress(Address.create("front_1"))
+        .build();
+
     final MessageSystemServer msgSystem = MessageSystemServer.create(serverAddress);
     msgSystem.start();
 
-//    final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
-//        .messageSystem(messageSystem)
-//        .cacheAddress(addressableCache.getAddress())
-//        .build();
-//    messageSystem.addAddressee(addressableCache);
+    // front
+    final ResourceHandler resourceHandler = new ResourceHandler();
+    resourceHandler.setDirectoriesListed(true);
+    resourceHandler.setBaseResource(Resource.newClassPathResource("./static/"));
 
-//    final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-//    final ServletHolder servletHolder = new ServletHolder(new WebsocketConnectorServlet(messageSystemContext));
-//    servletContextHandler.addServlet(servletHolder, "/cache/websocket");
-//    server.setHandler(new HandlerList(resourceHandler, servletContextHandler));
-//    server.start();
+    final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+    final ServletHolder servletHolder = new ServletHolder(WebsocketConnectorServlet.create(messageSystemContext));
+    servletContextHandler.addServlet(servletHolder, "/cache/websocket");
+
+    server.setHandler(new HandlerList(resourceHandler,
+                                      servletContextHandler));
+    server.start();
+    // !front
 
 
+    //experiment(serverAddress);
+
+    server.join();
+    msgSystem.join();
+
+    System.out.println("Done!");
+  }
+
+  private static void experiment(final InetSocketAddress serverAddress) throws IOException {
     final MessageSystemClient clientFoo = MessageSystemClient.connect(serverAddress, Address.create("foo"));
     final MessageSystemClient clientBar = MessageSystemClient.connect(serverAddress, Address.create("bar"));
 
@@ -47,15 +70,6 @@ public class MessagingServiceRunner {
       clientFoo.send(MessageV2.createRequest(i + " love message to [bar]", Address.create("foo"), Address.create("bar"), null));
       clientBar.send(MessageV2.createRequest(i + " love message to [foo]", Address.create("bar"), Address.create("foo"), null));
     }
-
-//    msgSystem.join();
-    clientFoo.close();
-    clientBar.close();
-    msgSystem.close();
-
-//    server.stop();
-//    server.join();
-    System.out.println("Done!");
   }
 
 }

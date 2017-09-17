@@ -6,20 +6,21 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.messageSystem.MessageSystemClient;
 import ru.otus.kunin.messageSystem.MessageSystemContext;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class WebsocketConnectorServlet extends WebSocketServlet {
+public class WebsocketConnectorServlet extends WebSocketServlet implements MessageSystemClient.MessageListener {
 
 
   private static final Logger LOG = LoggerFactory.getLogger(WebsocketConnectorServlet.class);
   private static final long IDLE_MS = TimeUnit.HOURS.toMillis(72);
   private final MessageSystemContext messageSystemContext;
 
-  public WebsocketConnectorServlet create(final MessageSystemContext messageSystemContext) throws IOException {
+  public static WebsocketConnectorServlet create(final MessageSystemContext messageSystemContext) throws IOException {
     final MessageSystemClient messageSystemClient =
         MessageSystemClient.connect(messageSystemContext.serverSocketAddress(),
                                     messageSystemContext.frontendAddress());
@@ -32,6 +33,7 @@ public class WebsocketConnectorServlet extends WebSocketServlet {
                                     final MessageSystemClient messageSystemClient) {
     this.messageSystemContext = messageSystemContext;
     this.messageSystemClient = messageSystemClient;
+    messageSystemClient.setMessageListener(this);
   }
 
   @Override
@@ -46,4 +48,8 @@ public class WebsocketConnectorServlet extends WebSocketServlet {
     return new WebsocketConnection(messageSystemContext, messageSystemClient);
   }
 
+  @Override
+  public void onNewMessage(final MessageSystemClient client, final MessageV2 message) {
+    LOG.info("Servlet got message: {}", message);
+  }
 }
