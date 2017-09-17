@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.kunin.message.AddToCacheMessage;
 import ru.otus.kunin.message.GetFromCacheMessage;
+import ru.otus.kunin.message.GetStatsMessage;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.messageSystem.MessageSystemClient;
 import ru.otus.kunin.messageSystem.MessageSystemContext;
@@ -44,9 +45,17 @@ public class BackendComponent implements MessageSystemClient.MessageListener {
       case GetFromCacheMessage.TOPIC_GET_FROM_CACHE:
         onGetFromCacheMessage(message);
         break;
+      case GetStatsMessage.TOPIC_GET_STATS:
+        onGetStatsMessage(message);
+        break;
       default:
         LOG.warn("Unhandled message {}", message);
     }
+  }
+
+  private void onGetStatsMessage(final MessageV2 message) {
+    final MessageV2 response = GetStatsMessage.createResponse(message, cache.getStats());
+    messageSystemClient.send(response);
   }
 
   private void onGetFromCacheMessage(final MessageV2 message) {

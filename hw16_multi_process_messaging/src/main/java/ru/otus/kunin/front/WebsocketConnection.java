@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import ru.otus.kunin.front.jsonrpc.JsonRequest;
 import ru.otus.kunin.message.AddToCacheMessage;
 import ru.otus.kunin.message.GetFromCacheMessage;
+import ru.otus.kunin.message.GetStatsMessage;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.messageSystem.MessageSystemClient;
 import ru.otus.kunin.messageSystem.MessageSystemContext;
@@ -72,9 +73,8 @@ public class WebsocketConnection {
     }
 
     if ("stats".equals(jsonRequest.method())) {
-//      messageV2 = new GetStatsMessageOld(messageSystemContext,
-//                                          messageSystemContext.frontendAddress(),
-//                                          messageSystemContext.cacheAddress());
+      messageV2 = GetStatsMessage.createRequest(messageSystemContext.frontendAddress(),
+                                                messageSystemContext.cacheAddress());
     }
 
     if (messageV2 != null) {
