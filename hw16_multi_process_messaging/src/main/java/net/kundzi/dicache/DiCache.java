@@ -1,19 +1,19 @@
-package ru.otus.kunin.dicache;
+package net.kundzi.dicache;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import ru.otus.kunin.dicache.entry.EntryUtil;
-import ru.otus.kunin.dicache.entry.MutableEntry;
-import ru.otus.kunin.dicache.entry.SoftEntry;
-import ru.otus.kunin.dicache.entry.StrongEntry;
-import ru.otus.kunin.dicache.event.CacheEntryEvent;
-import ru.otus.kunin.dicache.event.CacheListenerAdapter;
-import ru.otus.kunin.dicache.event.CompositeEventListener;
-import ru.otus.kunin.dicache.event.CompositeEventListenerImpl;
-import ru.otus.kunin.dicache.stats.CacheStatisticsMXBeanImpl;
+import net.kundzi.dicache.event.CacheListenerAdapter;
+import net.kundzi.dicache.entry.EntryUtil;
+import net.kundzi.dicache.entry.MutableEntry;
+import net.kundzi.dicache.entry.SoftEntry;
+import net.kundzi.dicache.entry.StrongEntry;
+import net.kundzi.dicache.event.CacheEntryEvent;
+import net.kundzi.dicache.event.CompositeEventListener;
+import net.kundzi.dicache.event.CompositeEventListenerImpl;
+import net.kundzi.dicache.stats.CacheStatisticsMXBeanImpl;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;

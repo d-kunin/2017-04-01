@@ -1,4 +1,4 @@
-package ru.otus.kunin.dicache.entry;
+package net.kundzi.dicache.entry;
 
 import javax.cache.Cache;
 

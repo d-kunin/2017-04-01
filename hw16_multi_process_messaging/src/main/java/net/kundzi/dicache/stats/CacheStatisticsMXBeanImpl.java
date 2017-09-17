@@ -1,4 +1,4 @@
-package ru.otus.kunin.dicache.stats;
+package net.kundzi.dicache.stats;
 
 import javax.cache.management.CacheStatisticsMXBean;
 import java.util.concurrent.atomic.AtomicLong;

@@ -2,7 +2,7 @@ package ru.otus.kunin.backend;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.kunin.dicache.DiCache;
+import net.kundzi.dicache.DiCache;
 import ru.otus.kunin.message.AddToCacheMessage;
 import ru.otus.kunin.message.GetFromCacheMessage;
 import ru.otus.kunin.message.GetStatsMessage;

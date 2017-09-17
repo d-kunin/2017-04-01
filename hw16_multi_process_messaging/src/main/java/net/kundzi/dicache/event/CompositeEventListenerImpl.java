@@ -1,4 +1,4 @@
-package ru.otus.kunin.dicache.event;
+package net.kundzi.dicache.event;
 
 import com.google.common.collect.Lists;
 
