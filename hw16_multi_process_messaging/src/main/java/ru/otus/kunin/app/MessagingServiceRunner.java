@@ -6,7 +6,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
-import ru.otus.kunin.dicache.AddressableCache;
+import ru.otus.kunin.dicache.BackendComponent;
 import ru.otus.kunin.front.WebsocketConnectorServlet;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.messageSystem.Address;
@@ -21,7 +21,6 @@ public class MessagingServiceRunner {
 
   public static void main(String[] args) throws Exception {
     final Server server = new Server(8090);
-//    final AddressableCache addressableCache = new AddressableCache();
 
     final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 9100);
     final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
@@ -46,6 +45,10 @@ public class MessagingServiceRunner {
                                       servletContextHandler));
     server.start();
     // !front
+
+    // backend
+    final BackendComponent backendComponent = BackendComponent.create(messageSystemContext);
+    // !backend
 
 
     //experiment(serverAddress);
