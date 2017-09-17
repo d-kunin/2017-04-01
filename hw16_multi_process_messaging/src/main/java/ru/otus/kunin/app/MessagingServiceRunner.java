@@ -10,9 +10,9 @@ import ru.otus.kunin.dicache.BackendComponent;
 import ru.otus.kunin.front.WebsocketConnectorServlet;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.messageSystem.Address;
+import ru.otus.kunin.messageSystem.MessageSystemClient;
 import ru.otus.kunin.messageSystem.MessageSystemContext;
 import ru.otus.kunin.messageSystem.MessageSystemServer;
-import ru.otus.kunin.messageSystem.MessageSystemClient;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

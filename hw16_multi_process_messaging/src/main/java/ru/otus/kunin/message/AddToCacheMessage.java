@@ -20,7 +20,8 @@ public class AddToCacheMessage {
     public abstract String value();
 
     @JsonCreator
-    public static PayloadRequest create(@JsonProperty("key") String key, @JsonProperty("value") String value) {
+    public static PayloadRequest create(@JsonProperty("key") String key,
+                                        @JsonProperty("value") String value) {
       return new ru.otus.kunin.message.AutoValue_AddToCacheMessage_PayloadRequest(key, value);
     }
   }

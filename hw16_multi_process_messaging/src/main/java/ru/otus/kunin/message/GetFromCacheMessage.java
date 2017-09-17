@@ -6,6 +6,8 @@ import com.google.auto.value.AutoValue;
 import ru.otus.kunin.message2.MessageV2;
 import ru.otus.kunin.messageSystem.Address;
 
+import javax.annotation.Nullable;
+
 public class GetFromCacheMessage {
 
   public static final String TOPIC_GET_FROM_CACHE = "get_from_cache";
@@ -17,7 +19,7 @@ public class GetFromCacheMessage {
     public abstract String key();
 
     @JsonCreator
-    public static PayloadRequest create(String key) {
+    public static PayloadRequest create(@JsonProperty("key") String key) {
       return new ru.otus.kunin.message.AutoValue_GetFromCacheMessage_PayloadRequest(key);
     }
   }
@@ -28,6 +30,7 @@ public class GetFromCacheMessage {
     @JsonProperty("key")
     public abstract String key();
 
+    @Nullable
     @JsonProperty("value")
     public abstract String value();
 

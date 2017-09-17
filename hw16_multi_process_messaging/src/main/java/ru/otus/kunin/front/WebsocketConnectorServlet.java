@@ -50,6 +50,6 @@ public class WebsocketConnectorServlet extends WebSocketServlet implements Messa
 
   @Override
   public void onNewMessage(final MessageSystemClient client, final MessageV2 message) {
-    LOG.info("Servlet got message: {}", message);
+    LOG.info("Frontend got message: {}", message);
   }
 }

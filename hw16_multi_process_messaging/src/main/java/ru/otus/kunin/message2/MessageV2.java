@@ -96,6 +96,13 @@ public abstract class MessageV2 implements LvMessage {
     return data().length;
   }
 
+  public <T> T typedPayload(Class<T> payloadClass) {
+    if (payload() == null) {
+      return null;
+    }
+    return fromPayload(payload(), payloadClass);
+  }
+
   public static Optional<MessageV2> fromJsonBytes(byte[] data) {
     final MessageV2 readValue;
     try {
