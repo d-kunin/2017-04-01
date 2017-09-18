@@ -1,16 +1,17 @@
 package ru.otus.kunin.front;
 
+import net.kundzi.messagesystem.MessageSystemClient;
+import net.kundzi.messagesystem.MessageSystemContext;
+import net.kundzi.messagesystem.protocol.MessageV2;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import net.kundzi.messagesystem.protocol.MessageV2;
-import net.kundzi.messagesystem.MessageSystemClient;
-import net.kundzi.messagesystem.MessageSystemContext;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 public class WebsocketConnectorServlet extends WebSocketServlet implements MessageSystemClient.MessageListener {
@@ -22,7 +23,9 @@ public class WebsocketConnectorServlet extends WebSocketServlet implements Messa
 
   public static WebsocketConnectorServlet create(final MessageSystemContext messageSystemContext) throws IOException {
     final MessageSystemClient messageSystemClient =
-        MessageSystemClient.connect(messageSystemContext.serverSocketAddress(),
+        MessageSystemClient.connect(new InetSocketAddress(
+                                        messageSystemContext.serverHostname(),
+                                        messageSystemContext.serverPort()),
                                     messageSystemContext.frontendAddress());
     return new WebsocketConnectorServlet(messageSystemContext, messageSystemClient);
   }

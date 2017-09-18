@@ -3,7 +3,6 @@ package net.kundzi.messagesystem;
 import com.google.auto.value.AutoValue;
 import net.kundzi.messagesystem.protocol.Address;
 
-import java.net.InetSocketAddress;
 
 @AutoValue
 public abstract class MessageSystemContext {
@@ -12,7 +11,9 @@ public abstract class MessageSystemContext {
     return new net.kundzi.messagesystem.AutoValue_MessageSystemContext.Builder();
   }
 
-  public abstract InetSocketAddress serverSocketAddress();
+  public abstract String serverHostname();
+
+  public abstract int serverPort();
 
   public abstract Address cacheAddress();
 
@@ -21,7 +22,9 @@ public abstract class MessageSystemContext {
   @AutoValue.Builder
   public interface Builder {
 
-    Builder serverSocketAddress(InetSocketAddress inetSocketAddress);
+    Builder serverHostname(String hostname);
+
+    Builder serverPort(int port);
 
     Builder cacheAddress(Address address);
 

@@ -11,6 +11,7 @@ import net.kundzi.messagesystem.MessageSystemClient;
 import net.kundzi.messagesystem.MessageSystemContext;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 public class BackendComponent implements MessageSystemClient.MessageListener {
 
@@ -22,7 +23,8 @@ public class BackendComponent implements MessageSystemClient.MessageListener {
 
   public static BackendComponent create(final MessageSystemContext messageSystemContext) throws IOException {
     final MessageSystemClient messageSystemClient = MessageSystemClient.connect(
-        messageSystemContext.serverSocketAddress(),
+        new InetSocketAddress(messageSystemContext.serverHostname(),
+                              messageSystemContext.serverPort()),
         messageSystemContext.cacheAddress());
     return new BackendComponent(new DiCache<>(), messageSystemContext, messageSystemClient);
   }

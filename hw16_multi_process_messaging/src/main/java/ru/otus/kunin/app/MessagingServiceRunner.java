@@ -23,7 +23,8 @@ public class MessagingServiceRunner {
 
     final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 9100);
     final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
-        .serverSocketAddress(serverAddress)
+        .serverHostname("localhost")
+        .serverPort(9100)
         .cacheAddress(Address.create("cache_1"))
         .frontendAddress(Address.create("front_1"))
         .build();
