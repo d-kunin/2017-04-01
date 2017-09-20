@@ -19,6 +19,14 @@
         <jetty.version>9.4.5.v20170502</jetty.version>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>1.72</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <finalName>core</finalName>
     </build>

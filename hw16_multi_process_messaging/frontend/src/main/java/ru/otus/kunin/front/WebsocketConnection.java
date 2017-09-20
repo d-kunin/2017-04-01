@@ -61,7 +61,7 @@ public class WebsocketConnection {
       final String key = jsonRequest.params().get("key").textValue();
       final String value = jsonRequest.params().get("value").textValue();
       messageV2 = AddToCacheMessage.createRequest(messageSystemContext.frontendAddress(),
-                                                  messageSystemContext.cacheAddress(),
+                                                  messageSystemContext.backendAddress(),
                                                   key,
                                                   value);
     }
@@ -69,13 +69,13 @@ public class WebsocketConnection {
     if ("get".equals(jsonRequest.method())) {
       final String key = jsonRequest.params().get("key").textValue();
       messageV2 = GetFromCacheMessage.createRequest(messageSystemContext.frontendAddress(),
-                                                    messageSystemContext.cacheAddress(),
+                                                    messageSystemContext.backendAddress(),
                                                     key);
     }
 
     if ("stats".equals(jsonRequest.method())) {
       messageV2 = GetStatsMessage.createRequest(messageSystemContext.frontendAddress(),
-                                                messageSystemContext.cacheAddress());
+                                                messageSystemContext.backendAddress());
     }
 
     if (messageV2 != null) {

@@ -25,7 +25,7 @@ public class BackendComponent implements MessageSystemClient.MessageListener {
     final MessageSystemClient messageSystemClient = MessageSystemClient.connect(
         new InetSocketAddress(messageSystemContext.serverHostname(),
                               messageSystemContext.serverPort()),
-        messageSystemContext.cacheAddress());
+        messageSystemContext.backendAddress());
     return new BackendComponent(new DiCache<>(), messageSystemContext, messageSystemClient);
   }
 

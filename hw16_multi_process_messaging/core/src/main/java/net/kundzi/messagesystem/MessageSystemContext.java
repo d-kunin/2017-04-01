@@ -15,7 +15,7 @@ public abstract class MessageSystemContext {
 
   public abstract int serverPort();
 
-  public abstract Address cacheAddress();
+  public abstract Address backendAddress();
 
   public abstract Address frontendAddress();
 
@@ -26,7 +26,7 @@ public abstract class MessageSystemContext {
 
     Builder serverPort(int port);
 
-    Builder cacheAddress(Address address);
+    Builder backendAddress(Address address);
 
     Builder frontendAddress(Address frontendAddress);
 

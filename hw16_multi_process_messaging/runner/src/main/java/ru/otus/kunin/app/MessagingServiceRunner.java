@@ -28,7 +28,7 @@ public class MessagingServiceRunner {
     final MessageSystemContext messageSystemContext = MessageSystemContext.builder()
         .serverHostname("localhost")
         .serverPort(9100)
-        .cacheAddress(Address.create("cache_1"))
+        .backendAddress(Address.create("cache_1"))
         .frontendAddress(Address.create("front_1"))
         .build();
 
