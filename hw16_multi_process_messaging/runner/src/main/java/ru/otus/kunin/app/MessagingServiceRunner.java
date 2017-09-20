@@ -6,6 +6,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
+import org.slf4j.LoggerFactory;
 import ru.otus.kunin.backend.BackendComponent;
 import ru.otus.kunin.front.WebsocketConnectorServlet;
 import net.kundzi.messagesystem.protocol.MessageV2;
@@ -20,7 +21,17 @@ import java.net.InetSocketAddress;
 public class MessagingServiceRunner {
 
   public static void main(String[] args) throws Exception {
-    demoRun();
+
+    final MessageSystemServer messageSystemServer = MessageSystemServer.create(new InetSocketAddress("localhost", 9100));
+    new ProcessRunner().start("FRONT_1", "java -jar ../frontend/target/frontend.jar -f front_1 -b backend_1");
+    new ProcessRunner().start("FRONT_1", "java -jar ../backend/target/backend.jar -f front_1 -b backend_1");
+
+    new ProcessRunner().start("FRONT_1", "java -jar ../frontend/target/frontend.jar -f front_2 -b backend_2");
+    new ProcessRunner().start("FRONT_1", "java -jar ../backend/target/backend.jar -f front_2 -b backend_2");
+    messageSystemServer.join();
+    LoggerFactory.getLogger(MessagingServiceRunner.class).info("Components have been started ...");
+
+    // demoRun();
   }
 
   private static void demoRun() throws Exception {
