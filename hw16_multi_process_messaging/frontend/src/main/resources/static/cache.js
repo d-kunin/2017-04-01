@@ -42,7 +42,8 @@ function populateStats(stats) {
 }
 
 init = function () {
-    ws = new WebSocket("ws://localhost:8090/cache/websocket");
+    var port = location.port;
+    ws = new WebSocket("ws://localhost:" + port + "/cache/websocket");
     ws.onopen = function (event) {
         console.log("Opened", event.data)
         requestStats();
