@@ -27,6 +27,7 @@ public class WebsocketConnectorServlet extends WebSocketServlet implements Messa
                                         messageSystemContext.serverHostname(),
                                         messageSystemContext.serverPort()),
                                     messageSystemContext.frontendAddress());
+    LOG.info("Created with context {}", messageSystemContext);
     return new WebsocketConnectorServlet(messageSystemContext, messageSystemClient);
   }
 

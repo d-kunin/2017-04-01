@@ -26,6 +26,7 @@ public class BackendComponent implements MessageSystemClient.MessageListener {
         new InetSocketAddress(messageSystemContext.serverHostname(),
                               messageSystemContext.serverPort()),
         messageSystemContext.backendAddress());
+    LOG.info("Created with context {}", messageSystemContext);
     return new BackendComponent(new DiCache<>(), messageSystemContext, messageSystemClient);
   }
 

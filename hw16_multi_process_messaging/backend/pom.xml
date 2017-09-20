@@ -41,21 +41,18 @@
                 <version>3.1.0</version>
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <!-- get all project dependencies -->
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <!-- MainClass in mainfest make a executable jar -->
-                            <mainClass></mainClass>
+                            <mainClass>ru.otus.kunin.backend.run.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
                 <executions>
                     <execution>
                         <id>make-assembly</id>
-                        <!-- bind to the packaging phase -->
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
