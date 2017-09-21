@@ -18,7 +18,7 @@ import net.kundzi.messagesystem.MessageSystemServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-public class MessagingServiceRunner {
+public class Main {
 
   public static void main(String[] args) throws Exception {
 
@@ -29,7 +29,7 @@ public class MessagingServiceRunner {
     new ProcessRunner().start("FRONT_1", "java -jar ../frontend/target/frontend.jar -f front_2 -b backend_2");
     new ProcessRunner().start("FRONT_1", "java -jar ../backend/target/backend.jar -f front_2 -b backend_2");
     messageSystemServer.join();
-    LoggerFactory.getLogger(MessagingServiceRunner.class).info("Components have been started ...");
+    LoggerFactory.getLogger(Main.class).info("Components have been started ...");
 
     // demoRun();
   }
